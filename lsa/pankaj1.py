@@ -5,7 +5,7 @@ from frappe.utils import today
 
 
 @frappe.whitelist()
-def fetch_sales_orders(cid):
+def fetch_sales_orders(cid=None):
     # Fetch sales orders based on the customer ID and docstatus
     sales_orders = frappe.get_list(
         'Sales Order',
@@ -568,7 +568,7 @@ def create_it_assessee_manual_record(yearly_report, current_form_name):
 
 
 @frappe.whitelist()
-def fetch_services(c_id):
+def fetch_services(c_id=None):
     all_services = frappe.get_all("Customer Chargeable Doctypes")
     c_services=[]
     for service in all_services:
@@ -662,7 +662,7 @@ def auto_gen_so_for_subscribers():
 
 
 @frappe.whitelist()
-def task_with_issue_creation(i_id):
+def task_with_issue_creation(i_id=None):
     issue = frappe.get_last_doc("Issue", filters={"name": i_id})
 
     if not issue:

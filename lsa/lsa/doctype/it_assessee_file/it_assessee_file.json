@@ -15,6 +15,7 @@
   "column_break_howw",
   "customer_status",
   "column_break_xanz",
+  "contact_person",
   "enabled",
   "section_break_uyye",
   "assessee_first_name",
@@ -379,11 +380,17 @@
    "fieldtype": "Data",
    "label": "Executive Name",
    "read_only": 1
+  },
+  {
+   "fetch_from": "customer_id.custom_contact_person",
+   "fieldname": "contact_person",
+   "fieldtype": "Data",
+   "label": "Contact Person"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-01-23 17:03:14.428708",
+ "modified": "2024-02-16 16:12:27.045100",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "IT Assessee File",
@@ -403,7 +410,7 @@
    "write": 1
   }
  ],
- "search_fields": "pan,assessee_name",
+ "search_fields": "pan,assessee_name, customer_id, customer_name",
  "show_title_field_in_link": 1,
  "sort_field": "modified",
  "sort_order": "DESC",

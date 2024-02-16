@@ -9,6 +9,8 @@
  "field_order": [
   "customer_id",
   "client_name",
+  "contact_person",
+  "mobile_number",
   "total_remaining_balance",
   "executive_name",
   "executive",
@@ -43,7 +45,7 @@
    "fieldtype": "Data",
    "in_filter": 1,
    "in_standard_filter": 1,
-   "label": "Client Name"
+   "label": "Company Name"
   },
   {
    "fieldname": "total_remaining_balance",
@@ -72,7 +74,8 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "Open\nClosed"
+   "options": "Open\nClosed",
+   "read_only": 1
   },
   {
    "default": "Today",
@@ -140,11 +143,26 @@
    "fieldname": "client_person",
    "fieldtype": "Data",
    "label": "Client Person"
+  },
+  {
+   "fetch_from": "customer_id.custom_contact_person",
+   "fieldname": "contact_person",
+   "fieldtype": "Data",
+   "label": "Contact Person",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "customer_id.custom_primary_mobile_no",
+   "fieldname": "mobile_number",
+   "fieldtype": "Data",
+   "label": "Mobile Number",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
+ "is_calendar_and_gantt": 1,
  "links": [],
- "modified": "2024-01-31 09:43:10.144216",
+ "modified": "2024-02-09 17:33:21.769037",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Customer Followup",

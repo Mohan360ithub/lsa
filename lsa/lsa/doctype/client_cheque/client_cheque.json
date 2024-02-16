@@ -175,7 +175,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-01-14 21:19:05.697133",
+ "modified": "2024-02-02 12:21:32.437430",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Client Cheque",
@@ -196,5 +196,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "track_changes": 1
 }

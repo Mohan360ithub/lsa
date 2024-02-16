@@ -11,6 +11,7 @@
   "customer_id",
   "customer_name",
   "customer_status",
+  "contact_person",
   "column_break_iiqt",
   "pf_status",
   "assessee_name",
@@ -408,11 +409,17 @@
    "fieldtype": "Data",
    "label": "Executive Name",
    "read_only": 1
+  },
+  {
+   "fetch_from": "customer_id.custom_contact_person",
+   "fieldname": "contact_person",
+   "fieldtype": "Data",
+   "label": "Contact Person"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-01-23 17:05:21.576669",
+ "modified": "2024-02-16 16:11:43.880288",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Provident Fund File",

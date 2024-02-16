@@ -15,6 +15,7 @@
   "notice_date_refdata",
   "cid",
   "customer_firm_name",
+  "contact_person",
   "customer_status",
   "registration_number",
   "assessee_name",
@@ -350,10 +351,16 @@
    "fieldname": "office_ph_no",
    "fieldtype": "Data",
    "label": "office Ph no."
+  },
+  {
+   "fetch_from": "cid.custom_contact_person",
+   "fieldname": "contact_person",
+   "fieldtype": "Data",
+   "label": "Contact Person"
   }
  ],
  "links": [],
- "modified": "2024-01-23 19:06:55.116185",
+ "modified": "2024-02-16 16:15:50.900611",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Client Notices",

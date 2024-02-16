@@ -1,0 +1,162 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:sale_order_id",
+ "creation": "2024-02-08 12:13:06.818057",
+ "default_view": "List",
+ "doctype": "DocType",
+ "document_type": "Setup",
+ "engine": "InnoDB",
+ "field_order": [
+  "description_and_status",
+  "sale_order_id",
+  "cid",
+  "client_name",
+  "total_remaining_balance",
+  "column_break_2",
+  "status",
+  "date",
+  "section_break_mlxw",
+  "column_break_wkob",
+  "sales_order",
+  "description_section",
+  "description",
+  "color"
+ ],
+ "fields": [
+  {
+   "fieldname": "description_and_status",
+   "fieldtype": "Section Break"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "sale_order_id",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Sale Order Id",
+   "options": "Sales Order",
+   "read_only": 1,
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fetch_from": "sale_order_id.customer",
+   "fieldname": "cid",
+   "fieldtype": "Data",
+   "label": "CID",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fetch_from": "sale_order_id.customer_name",
+   "fieldname": "client_name",
+   "fieldtype": "Data",
+   "label": "Client Name",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "total_remaining_balance",
+   "fieldtype": "Currency",
+   "label": "Total Remaining Balance",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Open",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_global_search": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Open\nClosed\nCancelled"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "in_standard_filter": 1,
+   "label": "Follow Up Date",
+   "oldfieldname": "date",
+   "oldfieldtype": "Date"
+  },
+  {
+   "fieldname": "section_break_mlxw",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_wkob",
+   "fieldtype": "Column Break",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sales_order",
+   "fieldtype": "Table",
+   "label": "Sales Order",
+   "options": "Sales Order Child Table",
+   "read_only": 1
+  },
+  {
+   "fieldname": "description_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Text Editor",
+   "in_global_search": 1,
+   "label": "Description",
+   "oldfieldname": "description",
+   "oldfieldtype": "Text",
+   "print_width": "300px",
+   "reqd": 1,
+   "width": "300px"
+  },
+  {
+   "fieldname": "color",
+   "fieldtype": "Color",
+   "label": "Color"
+  }
+ ],
+ "icon": "fa fa-check",
+ "is_calendar_and_gantt": 1,
+ "links": [],
+ "modified": "2024-02-08 12:13:06.818057",
+ "modified_by": "Administrator",
+ "module": "Lsa",
+ "name": "Sales order Followup",
+ "naming_rule": "By fieldname",
+ "nsm_parent_field": "parent_sales_order_followup",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sender_field": "sender",
+ "show_title_field_in_link": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "subject_field": "description",
+ "title_field": "client_name",
+ "track_changes": 1,
+ "track_seen": 1,
+ "track_views": 1
+}

@@ -6,7 +6,7 @@ from datetime import datetime
 
 
 @frappe.whitelist()
-def sync_customer(customer_id):
+def sync_customer(customer_id=None):
     try:
         followup_button,followup_values,values,open_followup,open_followup_i=sync_sales_orders_customer(customer_id)
         services_values=sync_services_customer(customer_id)
@@ -20,7 +20,7 @@ def sync_customer(customer_id):
         frappe.msgprint(f"Error: {e}")
         return False
 
-def sync_services_customer(customer_id):
+def sync_services_customer(customer_id=None):
 
     master_service_fields = {
         "Gstfile": ["gst_file", ["name", "company_name", "gst_number", "gst_user_name", "gst_password","current_recurring_fees","frequency","annual_fees","executive_name"]],
@@ -44,12 +44,12 @@ def sync_services_customer(customer_id):
         # print(chargeable_service_values)
         for chargeable_service_value in chargeable_service_values:
             chargeable_service_value=[chargeable_service_value[i] for i in master_service_fields[chargeable_service.name][1] ]
-            print(chargeable_service_value)
+            # print(chargeable_service_value)
             service_slug="-".join([i.lower() for i in ((chargeable_service.name).split(" "))])
             chargeable_service_value.append(service_slug)
             chargeable_service_value.append(chargeable_service.name)
             services_values.append(chargeable_service_value)
-    print(services_values)
+    # print(services_values)
 
     return services_values
 
@@ -74,12 +74,16 @@ def sync_sales_orders_customer(customer_id):
             payment_status="Unpaid"
             custom_so_balance=sales_order.rounded_total
             advance_paid=0
-            pes=frappe.get_all("Payment Entry Reference",filters={"reference_doctype":"Sales Order","reference_name":sales_order.name},fields=["name","parent","allocated_amount"])
+            pes=frappe.get_all("Payment Entry Reference",filters={"reference_doctype":"Sales Order","reference_name":sales_order.name,"docstatus": 1},fields=["name","parent","allocated_amount"])
             # doc.custom_pe_counts=len(pes)
             for pe in pes:
                 custom_so_balance-=pe.allocated_amount
                 advance_paid+=pe.allocated_amount
-
+            docstatus="Drafted"
+            if sales_order.docstatus==1:
+                docstatus="Submitted"
+            elif sales_order.docstatus==2:
+                docstatus="Cancelled"
             if custom_so_balance>0:
                 custom_count_of_so_due+=1
                 custom_total_amount_due_of_so+=(custom_so_balance)
@@ -87,8 +91,9 @@ def sync_sales_orders_customer(customer_id):
                 so_details[sales_order.name]=[sales_order.rounded_total,advance_paid,
                                                 custom_so_balance,
                                                 sales_order.custom_so_from_date,sales_order.custom_so_to_date,
-                                                sales_order.status,sales_order.custom_followup_count,
+                                                docstatus,sales_order.custom_followup_count,
                                                 sales_order.customer_name,sales_order.customer]
+                print(sales_order.docstatus,sales_order.status)
                 if custom_so_balance<sales_order.rounded_total:
                     payment_status="Partially Paid"
                 so_details[sales_order.name]+=[payment_status]
@@ -154,10 +159,10 @@ def sync_sales_orders_customer(customer_id):
                     open_followup_date=followup.followup_date
                     followup_values["Open"]=[open_followup,followup_nature,open_followup_date]
                 elif followup.status == "Closed" and not(followup_values["Open"]):
-                    print("next",next_followup_date,"this",followup.next_followup_date)
+                    # print("next",next_followup_date,"this",followup.next_followup_date)
                     if last_closed_followup_date=="Dummy" or \
                             last_closed_followup_date<followup.followup_date:
-                        print("next update")
+                        # print("next update")
                         last_followup=followup.name
                         followup_nature="Closed"
                         next_followup_date=followup.next_followup_date
@@ -175,7 +180,7 @@ def sync_sales_orders_customer(customer_id):
     
 
 @frappe.whitelist()
-def sync_sales_orders_followup(sales_order_summary,customer_id,followup_date):
+def sync_sales_orders_followup(sales_order_summary=None,customer_id=None,followup_date=None,followup_id=None):
     try:
         sales_order_summary=sales_order_summary.strip()
         existing_sales_orders=sales_order_summary.split(", ")
@@ -191,7 +196,7 @@ def sync_sales_orders_followup(sales_order_summary,customer_id,followup_date):
         #             so_details[sales_order.name]=[sales_order.rounded_total,sales_order.advance_paid,
         #                                           sales_order.rounded_total-sales_order.advance_paid,
         #                                           sales_order.custom_so_from_date,sales_order.custom_so_to_date,
-        #                                           sales_order.status,sales_order.custom_followup_count,
+        #                                           sales_order.docstatus,sales_order.custom_followup_count,
         #                                           sales_order.customer_name,sales_order.customer]
         
         if existing_sales_orders:
@@ -202,17 +207,23 @@ def sync_sales_orders_followup(sales_order_summary,customer_id,followup_date):
                 payment_status="Unpaid"
                 custom_so_balance=sales_order.rounded_total
                 advance_paid=0
-                pes=frappe.get_all("Payment Entry Reference",filters={"reference_doctype":"Sales Order","reference_name":sales_order.name},fields=["name","parent","allocated_amount"])
+                pes=frappe.get_all("Payment Entry Reference",filters={"reference_doctype":"Sales Order","reference_name":sales_order.name,"docstatus": 1},fields=["name","parent","allocated_amount"])
                 # doc.custom_pe_counts=len(pes)
                 for pe in pes:
                     custom_so_balance-=pe.allocated_amount
                     advance_paid+=pe.allocated_amount
 
+                docstatus="Drafted"
+                if sales_order.docstatus==1:
+                    docstatus="Submitted"
+                elif sales_order.docstatus==2:
+                    docstatus="Cancelled"
+                    
                 # custom_details_of_so_due.append(sales_order.name)
                 so_details[sales_order.name]=[sales_order.rounded_total,advance_paid,
                                                 custom_so_balance,
                                                 sales_order.custom_so_from_date,sales_order.custom_so_to_date,
-                                                sales_order.status,sales_order.custom_followup_count,
+                                                docstatus,sales_order.custom_followup_count,
                                                 sales_order.customer_name,sales_order.customer]
                 if custom_so_balance<sales_order.rounded_total:
                     payment_status="Partially Paid"
@@ -223,9 +234,9 @@ def sync_sales_orders_followup(sales_order_summary,customer_id,followup_date):
         followup_date=datetime.strptime(followup_date, date_format).date()
         if True:
             existing_followups=frappe.get_all("Customer Followup",
-                                    filters={"customer_id":customer_id,
-                                            # "status":['in', ["Draft","On Hold","To Deliver and Bill","To Bill","To Deliver"]]
-                                            })
+                                    filters={"customer_id":customer_id},
+                                    order_by="creation DESC",
+                                    limit=5)
             # print(existing_sales_orders)
             if existing_followups:
                 last_closed_followup_date="Dummy"
@@ -241,10 +252,10 @@ def sync_sales_orders_followup(sales_order_summary,customer_id,followup_date):
                         open_followup_date=followup.followup_date
                         followup_values["Open"]=[open_followup,followup_nature,open_followup_date]
                     elif followup.status == "Closed" and not(followup_values["Open"]):
-                        print("next",next_followup_date,"this",followup.next_followup_date)
+                        # print("next",next_followup_date,"this",followup.next_followup_date)
                         if last_closed_followup_date=="Dummy" or \
                                 last_closed_followup_date<followup.followup_date:
-                            print("next update")
+                            # print("next update")
                             last_followup=followup.name
                             followup_nature="Closed"
                             next_followup_date=followup.next_followup_date
@@ -252,7 +263,7 @@ def sync_sales_orders_followup(sales_order_summary,customer_id,followup_date):
                             last_followup_comment=followup.followup_note
                             followup_values["Closed"]=[last_followup,followup_nature,next_followup_date,last_followup_comment]
                     
-                    if followup.followup_date<followup_date:
+                    if followup.followup_date<=followup_date and followup_id!=followup.name:
                         followup_values["values"]+=[[followup.customer_id,followup.name,
                                                     followup.status,followup.total_remaining_balance,
                                                     followup.followup_date,followup.next_followup_date,
@@ -267,7 +278,7 @@ def sync_sales_orders_followup(sales_order_summary,customer_id,followup_date):
         return False
 
 @frappe.whitelist()
-def checking_user_authentication(user_email):
+def checking_user_authentication(user_email=None):
     try:
         status = False
         user_roles = frappe.get_all('Has Role', filters={'parent': user_email}, fields=['role'])
@@ -289,6 +300,9 @@ def checking_user_authentication(user_email):
     except Exception as e:
         print(e)
         return {"status": "Failed"}
+
+
+
 
 
 

@@ -1,9 +1,9 @@
 # Copyright (c) 2023, Mohan and contributors
 # For license information, please see license.txt
 
-# import frappe
 
-# Import necessary modules from frappe
+
+
 import frappe
 from frappe.utils import escape_html
 
@@ -75,71 +75,7 @@ def get_data(services, filters):
     # Get all customers
     customers = frappe.get_all("Customer", fields=["name", "customer_name", "mobile_no", "disabled","custom_customer_status_","custom_customer_tags","custom_customer_behaviour_","custom_customer_status_"])
     
-
-    unsettled_sales_orders = frappe.get_all(
-                "Sales Order",
-                fields=["name","customer", "rounded_total","advance_paid","status"], 
-                )
-    sos={}
-    for unsettled_sales_order in unsettled_sales_orders:
-        if unsettled_sales_order["customer"] in sos:
-            sos[unsettled_sales_order["customer"]]+=[{z:unsettled_sales_order[z] for z in unsettled_sales_order if z!= "customer"}]
-        else:
-            sos[unsettled_sales_order["customer"]]=[{z:unsettled_sales_order[z] for z in unsettled_sales_order if z!= "customer"}]
-    del unsettled_sales_orders
-    print(sos["20130648"])
-    customer_services={}
-    for service in services:
-            # Get services for the customer
-            if service.doctype_name=="Gstfile":
-                service_i = frappe.get_all(
-                                        service.doctype_name,
-                                        fields=["customer_id","description", "current_recurring_fees","annual_fees","frequency","gst_type"], 
-                                        filters={"enabled": 1}
-                                        )
-                for s in service_i:
-                    # print(s)
-                    # print(s.customer_id)
-                    # print(service)
-                    if s.customer_id not in customer_services:
-                        customer_services[s.customer_id]={}
-                        customer_services[s.customer_id][service["name"]]=[{s_i:s[s_i] for s_i in s if s_i!= "customer_id"}]
-                    elif service["name"] not in customer_services[s.customer_id]:
-                        customer_services[s.customer_id][service["name"]]=[{s_i:s[s_i] for s_i in s if s_i!= "customer_id"}]
-                    else:
-                        customer_services[s.customer_id][service["name"]]+=[{s_i:s[s_i] for s_i in s if s_i!= "customer_id"}]
-                    # break
-                del service_i
-            else:
-                service_i = frappe.get_all(
-                                        service.doctype_name,
-                                        fields=["customer_id","description", "current_recurring_fees","annual_fees","frequency"], 
-                                        filters={"enabled": 1}
-                                        )
-                for s in service_i:
-                    # print(s)
-                    if s.customer_id not in customer_services:
-                        customer_services[s.customer_id]={}
-                        customer_services[s.customer_id][service["name"]]=[{s_i:s[s_i] for s_i in s if s_i!= "customer_id"}]
-                        # if s.customer_id =="20130221":
-                        #     print(s)
-                        #     l=[{s_i:s[s_i] for s_i in s if s_i!= "customer_id"}]
-                        #     print(l)
-                    elif service["name"] not in customer_services[s.customer_id]:
-                        customer_services[s.customer_id][service["name"]]=[{s_i:s[s_i] for s_i in s if s_i!= "customer_id"}]
-                    else:
-                        customer_services[s.customer_id][service["name"]]+=[{s_i:s[s_i] for s_i in s if s_i!= "customer_id"}]
-                    # break
-                    
-                del service_i
-    # customer_services={}
-                
-
     # Iterate through each customer
-    # print(len(customers))
-
-    # print(len(customer_services))
-
     for i in customers:
         data_row = {
             "customer_id": i.name,
@@ -155,73 +91,71 @@ def get_data(services, filters):
         data_row["enable"] = "No" if i.disabled else "Yes"
 
         # Sales Order Details associated with Customer
-        # unsettled_sales_orders = frappe.get_all(
-        #         "Sales Order",
-        #         fields=["name", "rounded_total","advance_paid","status"], 
-        #         filters={"customer": i.name}
-        #         )
-
-
-        if i.name in sos:
-            unsettled_sales_orders_c=sos[i.name]
-
-            filtered_unsettled_sales_orders = []
-            net_unsettled_sales_order_amount = 0.00
-            net_sales_order_amount = 0.00
-            for unsettled_sales_order in unsettled_sales_orders_c:
-                if unsettled_sales_order["status"] != "Cancelled" and \
-                unsettled_sales_order["rounded_total"] > unsettled_sales_order["advance_paid"]:
-                    filtered_unsettled_sales_orders.append(unsettled_sales_order)
-                    net_sales_order_amount += unsettled_sales_order["rounded_total"]
-                    net_unsettled_sales_order_amount += unsettled_sales_order["rounded_total"] - unsettled_sales_order["advance_paid"]
-            data_row["so_count"] = len(filtered_unsettled_sales_orders)
-            data_row["pending_amount"] = net_unsettled_sales_order_amount
+        unsettled_sales_orders = frappe.get_all(
+                "Sales Order",
+                fields=["name", "rounded_total","advance_paid","status"], 
+                filters={"customer": i.name}
+                )
+        filtered_unsettled_sales_orders = []
+        net_unsettled_sales_order_amount = 0.00
+        net_sales_order_amount = 0.00
+        for unsettled_sales_order in unsettled_sales_orders:
+            if unsettled_sales_order.status != "Cancelled" and \
+               unsettled_sales_order.rounded_total > unsettled_sales_order.advance_paid:
+                filtered_unsettled_sales_orders.append(unsettled_sales_order)
+                net_sales_order_amount += unsettled_sales_order.rounded_total
+                net_unsettled_sales_order_amount += unsettled_sales_order.rounded_total - unsettled_sales_order.advance_paid
+        data_row["so_count"] = len(filtered_unsettled_sales_orders)
+        data_row["pending_amount"] = net_unsettled_sales_order_amount
 
         service_count = 0
         service_amount = 0.00
         # Iterate through each service doctype
-        # print(customer_services["20130221"])
-        if i.name in customer_services:
-            for service in customer_services[i.name]:
-                # Get services for the customer
+        for service in services:
+            # Get services for the customer
+            if service.doctype_name=="Gstfile":
+                c_service = frappe.get_all(
+                                        service.doctype_name,
+                                        fields=["description", "current_recurring_fees","annual_fees","frequency","gst_type"], 
+                                        filters={"customer_id": i.name, "enabled": 1}
+                                        )
+            else:
+                c_service = frappe.get_all(
+                                        service.doctype_name,
+                                        fields=["description", "current_recurring_fees","annual_fees","frequency"], 
+                                        filters={"customer_id": i.name, "enabled": 1}
+                                        )
 
-                description_value = ""
-                each_service_amount = 0.00
-                gst_type_gstfile = []
-                # Iterate through each service record
-                for j in customer_services[i.name][service]:
-                    if not(j["description"] is None):
-                        description_list = j["description"].split("-")
-                    else:
-                        description_list=["NA","NA"]
-                    if len(description_list) == 2:
-                        description_value += f"{description_list[0]}-({description_list[1]})-{j['frequency']}-(Rs {j['current_recurring_fees']}), "
-                    else:
-                        description_value += f"{description_list[0]}-{j['frequency']}-(Rs {j['current_recurring_fees']}), "
-                    if service=="Gstfile":
-                        gst_type_gstfile.append(j["gst_type"])
-                    service_count += 1
-                    if j["annual_fees"]:
-                        each_service_amount += j["annual_fees"]
+            description_value = ""
+            each_service_amount = 0.00
+            gst_type_gstfile = []
+            # Iterate through each service record
+            for j in c_service:
+                description_list = j.description.split("-")
+                if len(description_list) == 2:
+                    description_value += f"{description_list[0]}-({description_list[1]})-{j.frequency}-(Rs {j.current_recurring_fees}), "
+                else:
+                    description_value += f"{description_list[0]}-{j.frequency}-(Rs {j.current_recurring_fees}), "
+                if service.doctype_name=="Gstfile":
+                    gst_type_gstfile.append(j.gst_type)
+                service_count += 1
+                each_service_amount += j.annual_fees
+                service_amount += j.annual_fees
+            
+            
+            if service.doctype_name=="Gstfile":
+                    gst_type_gstfile=", ".join(gst_type_gstfile)
+                    data_row["gst_type"] = gst_type_gstfile
 
-                    if j["annual_fees"]:
-                        service_amount += j["annual_fees"]
-                
-                
-                if service=="Gstfile":
-                        gst_type_gstfile=[l for l in gst_type_gstfile if not(l is None)]
-                        gst_type_gstfile=", ".join(gst_type_gstfile)
-                        data_row["gst_type"] = gst_type_gstfile
-
-                # Set description value for service customer        
-                data_row[service + " customer"] = description_value
-                data_row[service + " count"] = len(customer_services[i.name][service])
-                data_row[service + " amount"] = each_service_amount
+            # Set description value for service customer        
+            data_row[service.name + " customer"] = description_value
+            data_row[service.name + " count"] = len(c_service)
+            data_row[service.name + " amount"] = each_service_amount
         
-            # Set total service count and amount for the customer
-            data_row["service_count"] = service_count
-            data_row["service_amount"] = service_amount
-            data += [data_row]
+        # Set total service count and amount for the customer
+        data_row["service_count"] = service_count
+        data_row["service_amount"] = service_amount
+        data += [data_row]
     
     # Filter data based on service_user
     if service_filter == "Customers without Services":
@@ -244,7 +178,6 @@ def get_data(services, filters):
             data = [d1 for d1 in data if d1["status"] == status_filter]
 
     return data
-
 
 
 
