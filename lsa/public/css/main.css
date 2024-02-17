@@ -1178,7 +1178,7 @@ body {
 
 .audit-hero-section {
   position: relative;
-  background: url('assets/lsa/images/Audit-Assurance-hero.png') center/cover no-repeat; 
+  background: url('/assets/lsa/images/Audit-Assurance-hero.png') center/cover no-repeat; 
 }
 
 .audit-hero-section::before {
@@ -1284,7 +1284,7 @@ body {
 
 .indirect-hero-section {
   position: relative;
-  background: url('assets/lsa/images/Indirect-taxation-bg.jpg') center/cover no-repeat; 
+  background: url('/assets/lsa/images/Indirect-taxation-bg.jpg') center/cover no-repeat; 
 }
 
 .indirect-hero-section::before {
@@ -1376,7 +1376,7 @@ body {
 
 .direct-hero-section {
   position: relative;
-  background: url('assets/lsa/images/Direct-tax-bg.jpg') center/cover no-repeat; 
+  background: url('/assets/lsa/images/Direct-tax-bg.jpg') center/cover no-repeat; 
 }
 
 .direct-hero-section::before {
@@ -1398,7 +1398,7 @@ body {
 
 .itr-hero-section {
   position: relative;
-  background: url('assets/lsa/images/ITR-bg.png') center/cover no-repeat; 
+  background: url('/assets/lsa/images/ITR-bg.png') center/cover no-repeat; 
 }
 
 .itr-hero-section::before {
