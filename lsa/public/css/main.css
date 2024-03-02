@@ -1,0 +1,1576 @@
+body {
+    background: #fff;
+    color: #666666;
+    font-family: "Open Sans", sans-serif;
+  }
+  
+  a {
+    color: #21409b;
+    transition: 0.5s;
+    text-decoration: none;
+  }
+  
+  a:hover,
+  a:active,
+  a:focus {
+    color: #21409b;
+    outline: none;
+    text-decoration: none;
+  }
+  
+  p {
+    padding: 0;
+    margin: 0 0 30px 0;
+  }
+  
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: "Montserrat", sans-serif;
+    font-weight: 400;
+    margin: 0 0 20px 0;
+    padding: 0;
+  }
+  
+  
+ 
+/*--------------------------------------------------------------
+# Top Bar
+--------------------------------------------------------------*/
+#topbar {
+  background: #21409b;
+  height: 40px;
+  font-size: 14px;
+  transition: all 0.5s;
+  color: #fff;
+  padding: 0;
+}
+
+#topbar .contact-info i {
+  font-style: normal;
+  color: #fff;
+}
+
+#topbar .contact-info i a,
+#topbar .contact-info i span {
+  padding-left: 5px;
+  color: #fff;
+}
+
+#topbar .contact-info i a {
+  line-height: 0;
+  transition: 0.3s;
+  transition: 0.3s;
+}
+
+#topbar .contact-info i a:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+
+#topbar .social-links a {
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 0;
+  transition: 0.3s;
+  margin-left: 20px;
+}
+
+#topbar .social-links a:hover {
+  color: white;
+}
+
+/*--------------------------------------------------------------
+# Header
+--------------------------------------------------------------*/
+#header {
+  background: #fff;
+  transition: all 0.5s;
+  z-index: 997;
+  height: 86px;
+  box-shadow: 0px 2px 15px rgba(0, 0, 0, 0.1);
+}
+
+#header.fixed-top {
+  height: 70px;
+}
+
+#header .logo {
+  font-size: 30px;
+  margin: 0;
+  padding: 0;
+  line-height: 1;
+  font-weight: 600;
+  letter-spacing: 0.8px;
+  font-family: "Poppins", sans-serif;
+}
+
+#header .logo a {
+  color: #222222;
+}
+
+#header .logo a span {
+  color: #106eea;
+}
+
+#header .logo img {
+  max-height: 50px;
+}
+
+.scrolled-offset {
+  margin-top: 70px;
+}
+
+/*--------------------------------------------------------------
+# Navigation Menu
+--------------------------------------------------------------*/
+/**
+* Desktop Navigation 
+*/
+.navbar {
+  padding: 0;
+}
+
+.navbar ul {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  list-style: none;
+  align-items: center;
+}
+
+.navbar li {
+  position: relative;
+}
+
+.navbar>ul>li {
+  white-space: nowrap;
+  padding: 10px 0 10px 28px;
+}
+
+.navbar a,
+.navbar a:focus {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 3px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #222222;
+  white-space: nowrap;
+  transition: 0.3s;
+  position: relative;
+}
+
+.navbar a i,
+.navbar a:focus i {
+  font-size: 12px;
+  line-height: 0;
+  margin-left: 5px;
+}
+
+.navbar>ul>li>a:before {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 2px;
+  bottom: -6px;
+  left: 0;
+  background-color: #21409b;
+  visibility: hidden;
+  width: 0px;
+  transition: all 0.3s ease-in-out 0s;
+}
+
+.navbar a:hover:before,
+.navbar li:hover>a:before,
+.navbar .active:before {
+  visibility: visible;
+  width: 100%;
+}
+
+.navbar a:hover,
+.navbar .active,
+.navbar .active:focus,
+.navbar li:hover>a {
+  color: #21409b;
+}
+
+.navbar .dropdown:hover > a:before,
+.navbar .dropdown.active > a:before {
+  visibility: visible;
+  width: 100%;
+}
+
+.navbar .dropdown:hover > a,
+.navbar .dropdown.active > a,
+.navbar .dropdown.active > a:focus,
+.navbar .dropdown:hover > a {
+  color: #21409b;
+}
+
+.navbar .dropdown ul {
+  display: block;
+  position: absolute;
+  left: 28px;
+  top: calc(100% + 30px);
+  margin: 0;
+  padding: 10px 0;
+  z-index: 99;
+  opacity: 0;
+  visibility: hidden;
+  background: #fff;
+  box-shadow: 0px 0px 30px rgba(127, 137, 161, 0.25);
+  transition: 0.3s;
+}
+
+.navbar .dropdown ul li {
+  min-width: 200px;
+}
+
+.navbar .dropdown ul a {
+  padding: 10px 20px;
+  font-weight: 400;
+}
+
+.navbar .dropdown ul a i {
+  font-size: 12px;
+}
+
+.navbar .dropdown ul a:hover,
+.navbar .dropdown ul .active:hover,
+.navbar .dropdown ul li:hover>a {
+  color: #21409b;
+}
+
+.navbar .dropdown:hover>ul {
+  opacity: 1;
+  top: 100%;
+  visibility: visible;
+}
+
+.navbar .dropdown .dropdown ul {
+  top: 0;
+  left: calc(100% - 30px);
+  visibility: hidden;
+}
+
+.navbar .dropdown .dropdown:hover>ul {
+  opacity: 1;
+  top: 0;
+  left: 100%;
+  visibility: visible;
+}
+
+@media (max-width: 1366px) {
+  .navbar .dropdown .dropdown ul {
+    left: -90%;
+  }
+
+  .navbar .dropdown .dropdown:hover>ul {
+    left: -100%;
+  }
+}
+
+/**
+* Mobile Navigation 
+*/
+.mobile-nav-toggle {
+  color: #222222;
+  font-size: 28px;
+  cursor: pointer;
+  display: none;
+  line-height: 0;
+  transition: 0.5s;
+}
+
+.mobile-nav-toggle.bi-x {
+  color: #fff;
+}
+
+@media (max-width: 991px) {
+  .mobile-nav-toggle {
+    display: block;
+  }
+
+  .navbar ul {
+    display: none;
+  }
+}
+
+.navbar-mobile {
+  position: fixed;
+  overflow: hidden;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  background: rgba(9, 9, 9, 0.9);
+  transition: 0.3s;
+  z-index: 999;
+}
+
+.navbar-mobile .mobile-nav-toggle {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+}
+
+.navbar-mobile ul {
+  display: block;
+  position: absolute;
+  top: 55px;
+  right: 15px;
+  bottom: 15px;
+  left: 15px;
+  padding: 10px 0;
+  background-color: #fff;
+  overflow-y: auto;
+  transition: 0.3s;
+}
+
+.navbar-mobile a,
+.navbar-mobile a:focus {
+  padding: 10px 20px;
+  font-size: 15px;
+  color: #222222;
+}
+
+.navbar-mobile>ul>li {
+  padding: 0;
+}
+
+.navbar-mobile a:hover:before,
+.navbar-mobile li:hover>a:before,
+.navbar-mobile .active:before {
+  visibility: hidden;
+}
+
+.navbar-mobile a:hover,
+.navbar-mobile .active,
+.navbar-mobile li:hover>a {
+  color: #21409b;
+}
+
+.navbar-mobile .getstarted,
+.navbar-mobile .getstarted:focus {
+  margin: 15px;
+}
+
+.navbar-mobile .dropdown ul {
+  position: static;
+  display: none;
+  margin: 10px 20px;
+  padding: 10px 0;
+  z-index: 99;
+  opacity: 1;
+  visibility: visible;
+  background: #fff;
+  box-shadow: 0px 0px 30px rgba(127, 137, 161, 0.25);
+}
+
+.navbar-mobile .dropdown ul li {
+  min-width: 200px;
+}
+
+.navbar-mobile .dropdown ul a {
+  padding: 10px 20px;
+}
+
+.navbar-mobile .dropdown ul a i {
+  font-size: 12px;
+}
+
+.navbar-mobile .dropdown ul a:hover,
+.navbar-mobile .dropdown ul .active:hover,
+.navbar-mobile .dropdown ul li:hover>a {
+  color: #21409b;
+}
+
+.navbar-mobile .dropdown>.dropdown-active {
+  display: block;
+}
+  
+  /*--------------------------------------------------------------
+  # Hero Section
+  --------------------------------------------------------------*/
+  #hero {
+    width: 100%;
+    height: 80vh;
+    background: #000;
+    overflow: hidden;
+    position: relative;
+  }
+  
+  @media (max-height: 500px) {
+    #hero {
+      height: 150vh;
+    }
+  }
+  
+  #hero .carousel,
+  #hero .carousel-inner,
+  #hero .carousel-item,
+  #hero .carousel-item::before {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    bottom: 0;
+  }
+  
+  #hero .carousel-item {
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    
+  }
+  
+  #hero .carousel-item::before {
+    content: "";
+    background-color: rgba(0, 0, 0, 0.7);
+  }
+  
+  #hero .carousel-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    bottom: 0;
+    top: 10px;
+    left: 50px;
+    right: 50px;
+  }
+  
+  #hero .container {
+    text-align: center;
+  }
+  
+  #hero h2 {
+    color: #fff;
+    margin-bottom: 30px;
+    font-size: 48px;
+    font-weight: 700;
+  }
+  
+  @media (max-width: 768px) {
+    #hero h2 {
+      font-size: 28px;
+    }
+  }
+  
+  #hero p {
+    width: 80%;
+    margin: 0 auto 30px auto;
+    color: #fff;
+  }
+  
+  @media (min-width: 1024px) {
+    #hero p {
+      width: 60%;
+    }
+  }
+  
+  #hero .carousel-fade {
+    overflow: hidden;
+  }
+  
+  #hero .carousel-fade .carousel-inner .carousel-item {
+    transition-property: opacity;
+  }
+  
+  #hero .carousel-fade .carousel-inner .carousel-item,
+  #hero .carousel-fade .carousel-inner .active.carousel-item-start,
+  #hero .carousel-fade .carousel-inner .active.carousel-item-end {
+    opacity: 0;
+  }
+  
+  #hero .carousel-fade .carousel-inner .active,
+  #hero .carousel-fade .carousel-inner .carousel-item-next.carousel-item-start,
+  #hero .carousel-fade .carousel-inner .carousel-item-prev.carousel-item-end {
+    opacity: 1;
+    transition: 0.5s;
+  }
+  
+  #hero .carousel-fade .carousel-inner .carousel-item-next,
+  #hero .carousel-fade .carousel-inner .carousel-item-prev,
+  #hero .carousel-fade .carousel-inner .active.carousel-item-start,
+  #hero .carousel-fade .carousel-inner .active.carousel-item-end {
+    left: 0;
+    transform: translate3d(0, 0, 0);
+  }
+  
+  #hero .carousel-control-prev,
+  #hero .carousel-control-next {
+    width: 10%;
+  }
+  
+  @media (min-width: 1024px) {
+  
+    #hero .carousel-control-prev,
+    #hero .carousel-control-next {
+      width: 5%;
+    }
+  }
+  
+  #hero .carousel-control-next-icon,
+  #hero .carousel-control-prev-icon {
+    background: none;
+    font-size: 32px;
+    line-height: 1;
+  }
+  
+  #hero .carousel-indicators li {
+    cursor: pointer;
+    list-style-type: none;
+  }
+  
+  #hero .btn-get-started {
+    font-family: "Montserrat", sans-serif;
+    font-weight: 500;
+    font-size: 16px;
+    letter-spacing: 1px;
+    display: inline-block;
+    padding: 8px 32px;
+    border-radius: 50px;
+    transition: 0.5s;
+    margin: 10px;
+    color: #fff;
+    background: #21409b;
+  }
+  
+  #hero .btn-get-started:hover {
+    background: #fff;
+    color: #21409b;
+  }
+
+  
+  /*--------------------------------------------------------------
+  # Sections
+  --------------------------------------------------------------*/
+  section {
+    overflow: hidden;
+  }
+  
+  /* Sections Header
+  --------------------------------*/
+  .section-header h3 {
+    font-size: 26px;
+    color: #111;
+    text-transform: uppercase;
+    text-align: center;
+    font-weight: 700;
+    position: relative;
+    padding-bottom: 25px !important;
+    padding-top: 30px;
+  }
+  
+  .section-header h3::before {
+    content: "";
+    position: absolute;
+    display: block;
+    width: 120px;
+    height: 1px;
+    background: #ddd;
+    bottom: 1px;
+    left: calc(50% - 60px);
+  }
+  
+  .section-header h3::after {
+    content: "";
+    position: absolute;
+    display: block;
+    width: 40px;
+    height: 3px;
+    background: #21409b;
+    bottom: 0;
+    left: calc(50% - 20px);
+  }
+  
+  .section-header p {
+    text-align: center;
+    padding-bottom: 30px;
+    color: #333;
+  }
+  
+  /* Section with background
+  --------------------------------*/
+  .section-bg {
+    background: #f7f7f7;
+  }
+  
+
+  /* About Us Section
+  --------------------------------*/
+  #about {
+    background-color: #f6f6f6;
+    background-size: cover;
+    padding: 60px 0 40px 0;
+    position: relative;
+  }
+  .text h3{
+    font-size: 35px;
+    font-weight: 600;
+    color: #21409b;
+  }
+
+  .btn-primary {
+    font-family: "Montserrat", sans-serif;
+    font-weight: 500;
+    font-size: 16px;
+    letter-spacing: 1px;
+    display: inline-block;
+    padding: 8px 32px;
+    border-radius: 50px;
+    transition: 0.5s;
+    margin: 10px;
+    color: #fff;
+    background: #21409b;
+  }
+  
+  .btn-primary:hover {
+    background: #fff;
+    color: #21409b;
+  }
+
+  .col-lg-6.order-lg-2 .img-fluid {
+    max-width: 100%;
+    height: auto;  
+  }
+
+  
+
+  /* Services Section
+  --------------------------------*/
+  #services {
+    background: #fff;
+    background-size: cover;
+    padding: 60px 0 40px 0;
+  }
+  
+/*--------------------------------------------------------------
+# Services
+--------------------------------------------------------------*/
+.services .icon-box {
+    text-align: center;
+    border: 1px solid #ebebeb;
+    padding: 40px 20px;
+    transition: all ease-in-out 0.3s;
+    background: #fff;
+  }
+  
+  .services .icon-box .icon {
+    margin: 0 auto;
+    width: 64px;
+    height: 64px;
+    background: #21409b ;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    transition: 0.3s;
+  }
+  
+  .services .icon-box .icon i {
+    color: #151515;
+    font-size: 28px;
+    transition: ease-in-out 0.3s;
+  }
+  
+  .services .icon-box h4 {
+    font-weight: 700;
+    margin-bottom: 15px;
+    font-size: 24px;
+  }
+  
+  .services .icon-box h4 a {
+    color: #151515;
+    transition: ease-in-out 0.3s;
+  }
+  
+  .services .icon-box h4 a:hover {
+    color: #21409b;
+  }
+  
+  .services .icon-box p {
+    line-height: 24px;
+    font-size: 14px;
+    margin-bottom: 0;
+  }
+  
+  .services .icon-box:hover {
+    border-color: #fff;
+    box-shadow: 0px 0 25px 0 rgba(0, 0, 0, 0.1);
+    transform: translateY(-10px);
+  }
+
+  .btn-secondary {
+    font-family: "Montserrat", sans-serif;
+    font-weight: 500;
+    font-size: 16px;
+    letter-spacing: 1px;
+    display: inline-block;
+    padding: 8px 32px;
+    border-radius: 50px;
+    transition: 0.5s;
+    margin: 10px;
+    color: #21409b;
+    background: #fff;
+  }
+  
+  .btn-secondary:hover {
+    background: #21409b;
+    color: #fff;
+  }
+
+
+
+
+  /* Why us section
+------------------------------*/
+
+  .col-12 h2{
+    color: #21409b !important;
+    font-weight: 600;
+    font-size: 35px;
+  }
+
+
+  /* Tesimonial
+  -------------------- */
+  .client-img img {
+    width: 100%;
+    border-radius: 50%; 
+    border: 3px solid #21409b; 
+}
+
+.carousel-content {
+    padding: 50px 0px;
+}
+
+.carousel-item .carousel-content h3 {
+    color: #21409b;
+}
+.carousel-content h3 span {
+    font-size: 17px;
+    font-weight: normal;
+    color: #000;
+    text-transform: uppercase;
+}
+.client-img img {
+    width: 8%;
+}
+#testimonial {
+    text-align: center;
+    padding: 40px 0px;
+    color: #000000;
+    background-color: #21409b;
+}
+
+
+#testimonial h2 {
+    font-size: 40px;
+    font-style: italic;
+    border-bottom: 1px solid #21409b;
+    padding-bottom: 20px;
+    display: inline-block;
+}
+.carousel-indicators li {
+    background-color: #21409b;
+}
+
+.carousel-control-prev,
+.carousel-control-next {
+    color: blue !important; /* Change this to the desired color */
+}
+
+/*--------------------------------------------------------------
+# Footer
+--------------------------------------------------------------*/
+#footer {
+  background: #000924 !important;
+  padding: 0 0 30px 0;
+  color: #444444;
+  font-size: 14px;
+  background: #f1f6fe;
+}
+
+#footer .footer-top {
+  padding: 60px 0 30px 0;
+  background: #001246;
+}
+
+#footer .footer-top .footer-contact {
+  margin-bottom: 30px;
+}
+
+#footer .footer-top .footer-contact h3 {
+  font-size: 24px;
+  margin: 0 0 15px 0;
+  padding: 2px 0 2px 0;
+  line-height: 1;
+  font-weight: 700;
+}
+
+#footer .footer-top .footer-contact h3 span {
+  color: #5174dc !important;
+}
+
+#footer .footer-top .footer-contact p {
+  font-size: 14px;
+  line-height: 24px;
+  margin-bottom: 0;
+  color: #fff;
+}
+
+#footer .footer-top h4 {
+  font-size: 16px;
+  font-weight: bold;
+  color: #fff;
+  position: relative;
+  padding-bottom: 12px;
+}
+
+#footer .footer-top .footer-links {
+  margin-bottom: 30px;
+}
+
+#footer .footer-top .footer-links ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+#footer .footer-top .footer-links ul i {
+  padding-right: 2px;
+  color: #106eea;
+  font-size: 18px;
+  line-height: 1;
+}
+
+#footer .footer-top .footer-links ul li {
+  padding: 10px 0;
+  display: flex;
+  align-items: center;
+}
+
+#footer .footer-top .footer-links ul li:first-child {
+  padding-top: 0;
+}
+
+#footer .footer-top .footer-links ul a {
+  color: #fff;
+  transition: 0.3s;
+  display: inline-block;
+  line-height: 1;
+}
+
+#footer .footer-top .footer-links ul a:hover {
+  text-decoration: none;
+  color: #106eea;
+}
+
+#footer .footer-top .social-links a {
+  font-size: 18px;
+  display: inline-block;
+  background: #106eea;
+  color: #fff;
+  line-height: 1;
+  padding: 8px 0;
+  margin-right: 4px;
+  border-radius: 4px;
+  text-align: center;
+  width: 36px;
+  height: 36px;
+  transition: 0.3s;
+}
+
+#footer .footer-top .social-links a:hover {
+  background: #3b8af2;
+  color: #fff;
+  text-decoration: none;
+}
+
+#footer .copyright {
+  text-align: center;
+  float: left;
+  color: #fff;
+}
+
+#footer .credits {
+  float: right;
+  text-align: center;
+  font-size: 13px;
+  color: #fff
+}
+
+@media (max-width: 768px) {
+
+  #footer .copyright,
+  #footer .credits {
+    float: none;
+    text-align: center;
+    padding: 2px 0;
+  }
+}
+  
+
+/* -----------------------------------About Us Page--------------------- */
+#aboutpage {
+  margin-top: 40px; 
+}
+  
+#aboutpage h3 {
+  font-size: 28px; 
+  color: #21409b;
+  margin-bottom: 20px;
+  font-weight: 700;
+  line-height: 38px;
+}
+
+.container .row .col-md-3 .ceo-image {
+  width: 110%;
+  height: auto;
+  border-radius: 20px;
+  margin-bottom: 70px;
+}
+
+.container .row .col-md-7 h3 {
+  color: #21409b;
+  font-size: 30px; 
+  font-weight: 600;
+}
+
+.container .row .col-md-7 p {
+  color: #000000; 
+  font-size: 16px;
+  justify-content: start;
+}
+
+.container .row .col-md-7 h4 {
+  color: #21409b; 
+  font-size: 24px; 
+  font-weight: 600;
+  padding-bottom: 20px;
+}
+
+
+
+#ceo{
+  background-color: #ecf1ff !important;
+}
+
+#ceo2{
+  background-color: #21409b !important;
+}
+
+.ceo2 h3 {
+  color: #fff;
+  font-size: 30px; 
+  font-weight: 600;
+}
+
+/* Style for p */
+.ceo2 p {
+  color: #fff; 
+  font-size: 16px;
+  justify-content: start;
+}
+
+/* Style for h4 */
+.ceo2 h4 {
+  color: #fff; 
+  font-size: 24px; 
+  font-weight: 600;
+  padding-bottom: 20px;
+}
+
+/* --------------life @ LSA Slider------------ */
+
+/* .carousel-inner {
+  width: 100%;
+  overflow: hidden;
+} */
+
+/* .team-slider {
+  display: flex;
+  width: 200%; /* Set width to accommodate both images side by side */
+  /* animation: scroll 20s linear infinite; /* Adjust the duration as needed */
+/* } */
+/* 
+.team-slider img {
+  width: 50%;
+  height: auto;
+}
+@media only screen and (max-width: 600px) {
+  .team-slider img {
+      height: 300px; 
+      width: auto;
+  }
+} */
+
+/* Keyframes for scrolling animation */
+/* @keyframes scroll {
+  0% {
+      transform: translateX(0);
+  }
+  100% {
+      transform: translateX(-50%);
+  }
+} */ 
+
+.team-slider {
+  display: flex;
+  width: 500%; /* Set width to accommodate all five images side by side */
+  animation: scroll 50s linear infinite; /* Adjust the duration as needed */
+}
+
+.team-slider img {
+  width: 20%; /* Adjust the width based on the number of images */
+  height: auto;
+}
+
+@media only screen and (max-width: 600px) {
+  .team-slider img {
+      height: 250px; 
+      width: auto;
+  }
+}
+
+/* Keyframes for scrolling animation */
+@keyframes scroll {
+  0% {
+      transform: translateX(0);
+  }
+  100% {
+      transform: translateX(-80%); /* Adjust the translateX value based on the number of images */
+  }
+}
+
+  /*--------------------------------------------------------------
+# benefits
+--------------------------------------------------------------*/
+.benefits .icon-box {
+  box-shadow: 0px 0 25px 0 rgba(0, 0, 0, 0.1);
+  padding: 50px 30px;
+  transition: all ease-in-out 0.4s;
+  background: #fff;
+  margin-bottom: 20px;
+}
+
+.benefits .icon-box .icon {
+  margin-bottom: 10px;
+}
+
+.benefits .icon-box .icon i {
+  color: #21409b;
+  font-size: 36px;
+  transition: 0.3s;
+}
+
+.benefits .icon-box h4 {
+  font-weight: 500;
+  margin-bottom: 15px;
+  font-size: 24px;
+}
+
+.benefits .icon-box h4 {
+  color: #21409b;
+  transition: ease-in-out 0.3s;
+}
+
+.benefits .icon-box p {
+  line-height: 24px;
+  font-size: 14px;
+  margin-bottom: 0;
+}
+
+.benefits .icon-box:hover {
+  transform: translateY(-10px);
+}
+
+.benefits .icon-box:hover h4{
+  color: #21409b;
+}
+
+
+#benefits{
+  background-color: #f4f8ff;
+}
+
+/*--------------------------------------------------------------
+# Frequently Asked Questions
+--------------------------------------------------------------*/
+.faq {
+  padding: 60px 0;
+}
+
+.faq .faq-list {
+  padding: 0;
+  list-style: none;
+}
+
+.faq .faq-list li {
+  border-bottom: 1px solid #d4e5fc;
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+}
+
+.faq .faq-list .question {
+  display: block;
+  position: relative;
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 400;
+  padding-left: 25px;
+  cursor: pointer;
+  color: #21409b;
+  transition: 0.3s;
+}
+
+.faq .faq-list i {
+  font-size: 16px;
+  position: absolute;
+  left: 0;
+  top: -2px;
+}
+
+.faq .faq-list p {
+  margin-bottom: 0;
+  padding: 10px 0 0 25px;
+}
+
+.faq .faq-list .icon-show {
+  display: none;
+}
+
+.faq .faq-list .collapsed {
+  color: black;
+}
+
+.faq .faq-list .collapsed:hover {
+  color: #21409b;
+}
+
+.faq .faq-list .collapsed .icon-show {
+  display: inline-block;
+  transition: 0.6s;
+}
+
+.faq .faq-list .collapsed .icon-close {
+  display: none;
+  transition: 0.6s;
+}
+
+#cta{
+  background-color: #fff;
+}
+
+/* =========================Audit & Assurance page=============== */
+.audit-hero-section{
+  padding-top: 20px;
+  padding-left: 50px;
+  padding-right: 50px;
+}
+
+.audit-hero-section {
+  position: relative;
+  background: url('/assets/lsa/images/Audit-Assurance-hero.png') center/cover no-repeat; 
+}
+
+.audit-hero-section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(234, 226, 226, 0.9); 
+}
+
+
+/*--------------------------------------------------------------
+# Why Choose Us Section
+--------------------------------------------------------------*/
+.why-us {
+  padding-bottom: 0;
+  margin-bottom: 30px;
+}
+
+.why-us .img-bg {
+  min-height: 500px;
+  background-size: cover;
+}
+
+.why-us .slides {
+  background-color: #f7f9fc;
+}
+
+.why-us h3 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #21409b;
+}
+
+.why-us h4 {
+  font-size: 18px;
+  font-weight: 400;
+  color: #29486a;
+
+}
+
+.why-us .swiper {
+  margin: 140px 140px 120px 140px;
+  overflow: hidden;
+}
+
+.why-us .swiper-button-prev:after,
+.why-us .swiper-button-next:after {
+  font-size: 24px;
+  color: #001246;
+}
+
+.why-us .swiper-button-prev {
+  left: 80px;
+}
+
+.why-us .swiper-button-next {
+  right: 80px;
+}
+
+.why-us .swiper-pagination {
+  margin-top: 30px;
+  position: relative;
+}
+
+.why-us .swiper-pagination .swiper-pagination-bullet {
+  background-color: #21409b;
+}
+
+.why-us .swiper-pagination .swiper-pagination-bullet-active {
+  background-color: #21409b;
+}
+
+@media (max-width: 1200px) {
+  .why-us .swiper {
+    margin: 60px 60px 40px 60px;
+  }
+
+  .why-us .swiper-button-prev,
+  .why-us .swiper-button-next {
+    display: none;
+  }
+}
+
+@media (max-width: 575px) {
+  .why-us .swiper {
+    margin: 40px 40px 20px 40px;
+  }
+}
+
+.page-about .why-us {
+  padding: 0 0 80px 0;
+}
+
+/* ======================Indirect Taxation================= */
+.indirect-hero-section{
+  padding-top: 20px;
+  padding-left: 50px;
+  padding-right: 50px;
+}
+
+.indirect-hero-section {
+  position: relative;
+  background: url('/assets/lsa/images/Indirect-taxation-bg.jpg') center/cover no-repeat; 
+}
+
+.indirect-hero-section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(234, 226, 226, 0.8); 
+}
+
+
+/*--------------------------------------------------------------
+# Departments
+--------------------------------------------------------------*/
+.departments {
+  overflow: hidden;
+}
+
+.departments .nav-tabs {
+  border: 0;
+}
+
+.departments .nav-link {
+  border: 0;
+  padding: 12px 15px 12px 0;
+  transition: 0.3s;
+  color: #2c4964;
+  border-radius: 0;
+  border-right: 2px solid #ebf1f6;
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.departments .nav-link:hover {
+  color: #21409b;
+}
+
+.departments .nav-link.active {
+  color: #21409b;
+  border-color: #21409b;
+}
+
+.departments .tab-pane.active {
+  animation: fadeIn 0.5s ease-out;
+}
+
+.departments .details h3 {
+  font-size: 26px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #21409b;
+}
+
+.departments .details p {
+  color: #777777;
+}
+
+.departments .details p:last-child {
+  margin-bottom: 0;
+}
+
+@media (max-width: 992px) {
+  .departments .nav-link {
+    border: 0;
+    padding: 15px;
+  }
+
+  .departments .nav-link.active {
+    color: #fff;
+    background: #1977cc;
+  }
+}
+
+
+.indirect-department{
+  padding-top: 40px;
+  margin-bottom: 50px;
+}
+
+
+/* ======================Direct Taxation================= */
+.direct-hero-section{
+  padding-top: 20px;
+  padding-left: 50px;
+  padding-right: 50px;
+}
+
+.direct-hero-section {
+  position: relative;
+  background: url('/assets/lsa/images/Direct-tax-bg.jpg') center/cover no-repeat; 
+}
+
+.direct-hero-section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(234, 226, 226, 0.8); 
+}
+
+/* ======================ITR Filing================= */
+.itr-hero-section{
+  padding-top: 20px;
+  padding-left: 50px;
+  padding-right: 50px;
+}
+
+.itr-hero-section {
+  position: relative;
+  background: url('/assets/lsa/images/ITR-bg.png') center/cover no-repeat; 
+}
+
+.itr-hero-section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(234, 226, 226, 0.8); 
+}
+
+/* ---------------------------Pop up form------------- */
+.modal-title{
+  color: #21409b;
+  font-size: 24px;
+  font-weight: 500;
+}
+
+.btn-close:focus {
+  outline: 0;
+  box-shadow: 0 0 0 0.25rem rgba(13,110,253,.25);
+  opacity: 1;
+  color: #fff;
+}
+
+.btn-warning {
+  color: #ffffff;
+  background-color: #21409b;
+  border-color: #21409b;
+}
+
+.btn-warning:hover {
+  color: #ffffff;
+  background-color: #0e2b84;
+  border-color: #0e2b84;
+}
+
+
+/*--------------------------------------------------------------
+# Contact
+--------------------------------------------------------------*/
+.contact .info {
+  width: 100%;
+  background: #fff;
+  padding-bottom: 140px;
+}
+
+.contact .info i {
+  font-size: 20px;
+  background: #21409b;
+  color: #ffffff;
+  float: left;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 4px;
+  transition: all 0.3s ease-in-out;
+}
+
+.contact .info h4 {
+  padding: 0 0 0 60px;
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 5px;
+  color: #151515;
+}
+
+.contact .info p {
+  padding: 0 0 0 60px;
+  margin-bottom: 0;
+  font-size: 14px;
+  color: #484848;
+}
+
+.contact .info .email,
+.contact .info .phone {
+  margin-top: 40px;
+}
+
+.contact .php-email-form {
+  width: 100%;
+  background: #fff;
+}
+
+.contact .php-email-form .form-group {
+  padding-bottom: 8px;
+}
+
+.contact .php-email-form .error-message {
+  display: none;
+  color: #fff;
+  background: #ed3c0d;
+  text-align: left;
+  padding: 15px;
+  font-weight: 600;
+}
+
+.contact .php-email-form .error-message br+br {
+  margin-top: 25px;
+}
+
+.contact .php-email-form .sent-message {
+  display: none;
+  color: #fff;
+  background: #18d26e;
+  text-align: center;
+  padding: 15px;
+  font-weight: 600;
+}
+
+.contact .php-email-form .loading {
+  display: none;
+  background: #fff;
+  text-align: center;
+  padding: 15px;
+}
+
+.contact .php-email-form .loading:before {
+  content: "";
+  display: inline-block;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  margin: 0 10px -6px 0;
+  border: 3px solid #18d26e;
+  border-top-color: #eee;
+  animation: animate-loading 1s linear infinite;
+}
+
+.contact .php-email-form input,
+.contact .php-email-form textarea {
+  border-radius: 0;
+  box-shadow: none;
+  font-size: 14px;
+  border-radius: 4px;
+}
+
+.contact .php-email-form input:focus,
+.contact .php-email-form textarea:focus {
+  border-color: #21409b;
+}
+
+.contact .php-email-form input {
+  height: 44px;
+}
+
+.contact .php-email-form textarea {
+  padding: 10px 12px;
+}
+
+.contact .php-email-form button[type=submit] {
+  background: #21409b;
+  border: 0;
+  padding: 10px 24px;
+  color: #ffffff;
+  transition: 0.4s;
+  border-radius: 4px;
+}
+
+.contact .php-email-form button[type=submit]:hover {
+  background: #21409b;
+}
+
+@keyframes animate-loading {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
