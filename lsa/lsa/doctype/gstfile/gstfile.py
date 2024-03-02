@@ -20,8 +20,7 @@ class Gstfile(Document):
                                     filters={"gstfile":self.name})
 		print(gst_filling_data_s)
 		for gst_filling_data in gst_filling_data_s:
-			gst_filling_data_doc=frappe.get_doc("Gst Filling Data",gst_filling_data.name)
-			gst_filling_data_doc.save()
+			frappe.set_value("Gst Filling Data", gst_filling_data.name, "gst_password", self.gst_password)
 
 	def before_save(self):
 		freq_type_map={"M":["Regular","QRMP"],"Q":["Composition"]}
@@ -47,6 +46,7 @@ class Gstfile(Document):
 		frequency_dict={"M":12,"Q":4,"H":2,"Y":1}
 		self.annual_fees=self.current_recurring_fees*frequency_dict[self.frequency]
 			
+
 
 
 

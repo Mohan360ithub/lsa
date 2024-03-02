@@ -83,3 +83,23 @@ def update_todo(todo_name, updated_values):
     todo.save()
     return True
 
+
+@frappe.whitelist()
+def get_open_fu(lead_id):
+    followup=frappe.get_all("Lead Followup", 
+                            filters={"status":"Open",
+                                     "lead_id":lead_id})
+    if followup:
+         return followup[0].name
+         
+         
+@frappe.whitelist()
+def lost_lead(lead_id,lost_reason):
+    lead_doc=frappe.get_doc("Lead", lead_id)
+    if lead_doc:
+         lead_doc.custom_lead_lost_reason=lost_reason
+         lead_doc.status="Lost"
+         lead_doc.save()
+         return True
+    return False
+

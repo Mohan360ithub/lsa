@@ -43,13 +43,12 @@ def sync_sales_orders_followup(so_id=None):
                 mode_of_payment=''
                 existing_payment_entry=frappe.get_all("Payment Entry",
                                               filters={"name":existing_payment.parent},
-                                                fields=["name","reference_date","mode_of_payment"])
+                                                fields=["name","reference_date","paid_to"])
                 reference_date=existing_payment_entry[0].reference_date
-                mode_of_payment=existing_payment_entry[0].mode_of_payment
+                mode_of_payment=existing_payment_entry[0].paid_to
 
-                existing_payment_list=[existing_payment.parent,existing_payment.total_amount,
-                                       existing_payment.outstanding_amount,existing_payment.allocated_amount,
-                                       existing_payment.creation,reference_date,mode_of_payment]
+                existing_payment_list=[existing_payment.parent,
+                                       existing_payment.allocated_amount,reference_date,mode_of_payment]
                 so_balance-=existing_payment.allocated_amount
                 existing_payments_list.append(existing_payment_list)
 
@@ -88,8 +87,31 @@ def whatsapp_button(user_email=None):
         return {"status": status, "value": [roles]}
 
     except Exception as e:
-        print(e)
+        #print(e)
         return {"status": "Failed"}
+
+
+@frappe.whitelist()
+def gst_tax_type(customer_id=None):
+    if customer_id:
+        try:
+            # gst_tax_type=""
+            comp_gst_state=frappe.get_all("Company",fields=["custom_state"])
+            
+            cust_gst_state=frappe.get_all("Customer",fields=["custom_state"],filters={"name":customer_id})
+
+            if comp_gst_state and cust_gst_state:
+
+                comp_gst_state=comp_gst_state[0].custom_state
+                cust_gst_state=cust_gst_state[0].custom_state
+                if comp_gst_state==cust_gst_state:
+                    gst_tax_type="Output GST In-state - IND"
+                else:
+                    gst_tax_type="Output GST In-state - IND"
+        
+                return {"status":True,"gst_tax_type":gst_tax_type}
+        except Exception as er:
+            return {"status":True,"error":er}
 
 
 

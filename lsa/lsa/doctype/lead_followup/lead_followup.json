@@ -19,6 +19,7 @@
   "description_section",
   "lead_id",
   "lead_name",
+  "organization_name",
   "mobile_no",
   "assigned_by_full_name",
   "assigned_by",
@@ -121,10 +122,11 @@
    "fieldtype": "Link",
    "label": "Lead ID",
    "options": "Lead",
-   "read_only": 1
+   "read_only": 1,
+   "reqd": 1
   },
   {
-   "fetch_from": "lead_id.last_name",
+   "fetch_from": "lead_id.lead_name",
    "fieldname": "lead_name",
    "fieldtype": "Data",
    "label": "Lead Name",
@@ -169,11 +171,18 @@
    "fieldtype": "Date",
    "label": "Next Followup Date",
    "reqd": 1
+  },
+  {
+   "fetch_from": "lead_id.company_name",
+   "fieldname": "organization_name",
+   "fieldtype": "Data",
+   "label": "Organization Name",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-check",
  "links": [],
- "modified": "2024-02-14 12:17:35.284402",
+ "modified": "2024-02-20 13:09:07.338079",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Lead Followup",

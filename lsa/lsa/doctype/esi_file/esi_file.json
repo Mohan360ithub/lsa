@@ -29,6 +29,7 @@
   "registratred_mob_no",
   "registratred_email_id",
   "gst_assessee",
+  "last_filed",
   "column_break_nklw",
   "reg_add",
   "executive",
@@ -413,11 +414,17 @@
    "fieldname": "contact_person",
    "fieldtype": "Data",
    "label": "Contact Person"
+  },
+  {
+   "fieldname": "last_filed",
+   "fieldtype": "Data",
+   "label": "Last Filed",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-02-16 16:11:10.828354",
+ "modified": "2024-02-27 12:13:19.948829",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "ESI File",

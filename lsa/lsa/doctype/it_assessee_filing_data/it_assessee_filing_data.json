@@ -19,6 +19,7 @@
   "column_break_prnj",
   "customer_id",
   "customer_name",
+  "contact_person",
   "customer_status",
   "created_manually",
   "filing_notes"
@@ -113,12 +114,19 @@
    "fieldname": "filing_notes",
    "fieldtype": "Small Text",
    "label": "Filing Notes"
+  },
+  {
+   "fetch_from": "customer_id.custom_contact_person",
+   "fieldname": "contact_person",
+   "fieldtype": "Data",
+   "label": "Contact Person",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-01-23 09:47:13.007214",
+ "modified": "2024-02-17 19:25:44.123895",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "IT Assessee Filing Data",

@@ -67,7 +67,145 @@ def checking_user_authentication(user_email):
 		return {"status":"Failed"}
 
 
-	
+
+@frappe.whitelist()
+def sync_step_2_with_step_4(yearly_summery):
+    response = {}
+    try:
+        step_2_doc = frappe.get_doc("Gst Yearly Filing Summery", yearly_summery)
+        step_4_list = frappe.get_all("Gst Filling Data",
+                                    filters={'gst_yearly_filling_summery_id': yearly_summery,
+                                            'submitted': 1},
+                                    fields=["sales_total_taxable", "purchase_total_taxable", "tax_paid_amount",
+                                            "interest_paid_amount", "penalty_paid_amount", "name",
+                                            "fy", "month", "modified"])
+
+        latest_file_mon = ""
+        first_file_mon = ""
+        month_num = {"apr": 1, "may": 2, "jun": 3, "jul": 4, "aug": 5, "sep": 6, "oct": 7, "nov": 8, "dec": 9, "jan": 10, "feb": 11, "mar": 12}
+
+        # Initialize variables
+        sales_total_taxable = 0.00
+        purchase_total_taxable = 0.00
+        tax_paid_amount = 0.00
+        interest_paid_amount = 0.00
+        penalty_paid_amount = 0.00
+
+        for step_4 in step_4_list:
+            sales_total_taxable += step_4.sales_total_taxable
+            purchase_total_taxable += step_4.purchase_total_taxable
+            tax_paid_amount += step_4.tax_paid_amount
+            interest_paid_amount += step_4.interest_paid_amount
+            penalty_paid_amount += step_4.penalty_paid_amount
+
+            if not latest_file_mon:
+                latest_file_mon = step_4.month
+            else:
+                mon = step_4.month.split("-")[0].lower()
+                mon_o = latest_file_mon.split("-")[0].lower()
+                if month_num[mon_o] < month_num[mon]:
+                    latest_file_mon = step_4.month
+
+            if not first_file_mon:
+                first_file_mon = step_4.month
+            else:
+                mon = step_4.month.split("-")[0].lower()
+                mon_o = first_file_mon.split("-")[0].lower()
+                if month_num[mon_o] > month_num[mon]:
+                    first_file_mon = step_4.month
+
+        # Update fields in step 2 document
+        step_2_doc.sales_total_taxable = sales_total_taxable
+        step_2_doc.purchase_total_taxable = purchase_total_taxable
+        step_2_doc.tax_paid_amount = tax_paid_amount
+        step_2_doc.interest_paid_amount = interest_paid_amount
+        step_2_doc.penalty_paid_amount = penalty_paid_amount
+        step_2_doc.fy_first_month_of_filling = first_file_mon
+        step_2_doc.fy_last_month_of_filling = latest_file_mon
+
+        # Save the changes
+        step_2_doc.save()
+
+        response["message"] = "Gst Yearly Filing Summary Synced successfully"
+
+    except frappe.DoesNotExistError:
+        response["error"] = "Error: Gst Yearly Filing Summary not found."
+
+    except Exception as e:
+        response["error"] = f"An error occurred: {str(e)}"
+
+    return response
 
 
+
+@frappe.whitelist()
+def sync_all_step_2_with_step_4():
+    response = {}
+
+    try:
+        step_2_list = frappe.get_all("Gst Yearly Filing Summery")
+        for step_2 in step_2_list:
+            if True:
+                step_2_doc = frappe.get_doc("Gst Yearly Filing Summery", step_2.name)
+                step_4_list = frappe.get_all("Gst Filling Data",
+                                            filters={'gst_yearly_filling_summery_id': step_2.name,
+                                                    'submitted': 1},
+                                            fields=["sales_total_taxable","purchase_total_taxable","tax_paid_amount",
+													"interest_paid_amount","penalty_paid_amount", "name",
+                                            		"fy", "month", "modified"])
+                latest_file_mon = ""
+                first_file_mon = ""
+                month_num = {"apr": 1, "may": 2, "jun": 3, "jul": 4, "aug": 5, "sep": 6, "oct": 7, "nov": 8, "dec": 9, "jan": 10, "feb": 11, "mar": 12}
+
+                # Initialize variables
+                sales_total_taxable = 0.00
+                purchase_total_taxable = 0.00
+                tax_paid_amount = 0.00
+                interest_paid_amount = 0.00
+                penalty_paid_amount = 0.00
+                for step_4 in step_4_list:
+                    sales_total_taxable += step_4.sales_total_taxable
+                    purchase_total_taxable += step_4.purchase_total_taxable
+                    tax_paid_amount += step_4.tax_paid_amount
+                    interest_paid_amount += step_4.interest_paid_amount
+                    penalty_paid_amount += step_4.penalty_paid_amount
+
+                    if not latest_file_mon:
+                        latest_file_mon = step_4.month
+                    else:
+                        mon = step_4.month.split("-")[0].lower()
+                        mon_o = latest_file_mon.split("-")[0].lower()
+                        if month_num[mon_o] < month_num[mon]:
+                            latest_file_mon = step_4.month
+
+                    if not first_file_mon:
+                        first_file_mon = step_4.month
+                    else:
+                        mon = step_4.month.split("-")[0].lower()
+                        mon_o = first_file_mon.split("-")[0].lower()
+                        if month_num[mon_o] > month_num[mon]:
+                            first_file_mon = step_4.month
+                    
+
+                # Update fields in step 2 document
+                step_2_doc.sales_total_taxable = sales_total_taxable
+                step_2_doc.purchase_total_taxable = purchase_total_taxable
+                step_2_doc.tax_paid_amount = tax_paid_amount
+                step_2_doc.interest_paid_amount = interest_paid_amount
+                step_2_doc.penalty_paid_amount = penalty_paid_amount
+                step_2_doc.fy_first_month_of_filling = first_file_mon
+                step_2_doc.fy_last_month_of_filling = latest_file_mon
+
+                # Save the changes
+                step_2_doc.save()
+
+        response["message"] = "Gst Yearly Filing Summary Synced successfully"
+
+    except frappe.DoesNotExistError:
+        response["error"] = "Error: Gst Yearly Filing Summary not found."
+
+    except Exception as e:
+        response["error"] = f"An error occurred: {str(e)}"
+
+    return response
 

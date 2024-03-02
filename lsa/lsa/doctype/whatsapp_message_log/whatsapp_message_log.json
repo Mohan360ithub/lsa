@@ -7,8 +7,11 @@
  "field_order": [
   "sales_order",
   "customer",
+  "customer_name",
+  "contact_person",
   "total_amount",
   "razorpay_payment_link",
+  "sales_invoice",
   "column_break_iksv",
   "sender",
   "send_date",
@@ -59,11 +62,31 @@
   {
    "fieldname": "column_break_iksv",
    "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "customer.customer_name",
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "label": "Customer Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "customer.custom_contact_person",
+   "fieldname": "contact_person",
+   "fieldtype": "Data",
+   "label": "Contact Person",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sales_invoice",
+   "fieldtype": "Link",
+   "label": "Sales invoice",
+   "options": "Sales Invoice"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-01-02 13:00:28.150264",
+ "modified": "2024-02-22 10:17:05.732975",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "WhatsApp Message Log",

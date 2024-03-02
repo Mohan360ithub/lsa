@@ -10,7 +10,9 @@
   "total_amount",
   "enabled",
   "column_break_yucj",
-  "date_of_generation"
+  "date_of_generation",
+  "link_short_url",
+  "link_id"
  ],
  "fields": [
   {
@@ -49,11 +51,23 @@
    "fieldtype": "Date",
    "label": "Date of Generation",
    "read_only": 1
+  },
+  {
+   "fieldname": "link_short_url",
+   "fieldtype": "Data",
+   "label": "Link Short URL",
+   "read_only": 1
+  },
+  {
+   "fieldname": "link_id",
+   "fieldtype": "Data",
+   "label": "Link ID",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-02-02 12:18:21.666462",
+ "modified": "2024-02-21 15:31:01.008503",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Payment Link Log",

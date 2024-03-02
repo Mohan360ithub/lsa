@@ -22,7 +22,9 @@
   "executive_name",
   "executive",
   "column_break_enhn",
+  "status",
   "notices_status",
+  "partner",
   "priority",
   "notices_type",
   "financial_year",
@@ -32,6 +34,9 @@
   "section_break_iklo",
   "notice_description_column",
   "text_editor_cerg",
+  "notice_followup_tab",
+  "create_followup",
+  "notice_followups",
   "other_details_tab",
   "associate_consultants_section",
   "associate_partner",
@@ -57,7 +62,9 @@
   "officer_name",
   "officer_ph",
   "officer_email_id_copy",
-  "officer_email_id"
+  "officer_email_id",
+  "associate_partner_tab",
+  "prof_partner"
  ],
  "fields": [
   {
@@ -116,12 +123,11 @@
    "label": "ASSESSEE NAME"
   },
   {
-   "fetch_from": ".customer_name",
+   "fetch_from": "executive.full_name",
    "fieldname": "executive_name",
-   "fieldtype": "Link",
+   "fieldtype": "Data",
    "hidden": 1,
-   "label": "Executive Name",
-   "options": "User"
+   "label": "Executive Name"
   },
   {
    "fieldname": "column_break_enhn",
@@ -132,7 +138,7 @@
    "fieldname": "notices_status",
    "fieldtype": "Select",
    "in_list_view": 1,
-   "label": "Status",
+   "label": "Notices Status",
    "options": "Received\nUnder Review\nAwaiting Client Information\nAwaiting Consultant Review\nResponse Drafted\nResponse Submitted\nAmended Notice Received\nAppeal Filed\nOn Hold\nResolved\nClosed\nEscalated\nDisputed",
    "reqd": 1
   },
@@ -319,7 +325,7 @@
    "options": "Customer"
   },
   {
-   "fetch_from": ".email",
+   "fetch_from": "null.",
    "fieldname": "executive",
    "fieldtype": "Link",
    "label": "Executive",
@@ -357,10 +363,56 @@
    "fieldname": "contact_person",
    "fieldtype": "Data",
    "label": "Contact Person"
+  },
+  {
+   "default": "Open",
+   "fetch_from": ".customer_name",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Open\nClose",
+   "reqd": 1
+  },
+  {
+   "depends_on": "partner",
+   "fieldname": "associate_partner_tab",
+   "fieldtype": "Tab Break",
+   "label": "Associate Partner"
+  },
+  {
+   "fieldname": "prof_partner",
+   "fieldtype": "Link",
+   "label": "Prof. Partner",
+   "options": "Supplier"
+  },
+  {
+   "default": "0",
+   "fieldname": "partner",
+   "fieldtype": "Check",
+   "label": "Prof. Partner"
+  },
+  {
+   "fieldname": "notice_followup_tab",
+   "fieldtype": "Tab Break",
+   "label": "Notice Followup"
+  },
+  {
+   "fieldname": "create_followup",
+   "fieldtype": "Button",
+   "label": "Create Followup"
+  },
+  {
+   "fieldname": "notice_followups",
+   "fieldtype": "HTML",
+   "label": "Notice Followups"
   }
  ],
  "links": [],
- "modified": "2024-02-16 16:15:50.900611",
+ "modified": "2024-02-22 14:40:40.691826",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Client Notices",

@@ -24,5 +24,12 @@ frappe.query_reports["Sales Order Custom Report (Total row)"] = {
 			options: ["Unpaid","Cleared","Partially Paid"],
 			default: "Unpaid,Partially Paid",
 		},
+		{
+			fieldname: "sales_invoice",
+			label: __("Sales Invoice"),
+			fieldtype: "Select",
+			options:["Yes","No",""],
+			default: "No",
+		},
 	]
 };

@@ -10,7 +10,7 @@
  "is_standard": "Yes",
  "letter_head": "LSA",
  "letterhead": null,
- "modified": "2024-01-16 16:52:35.953302",
+ "modified": "2024-02-19 16:37:47.762660",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Missing IT Assessee File",
@@ -24,10 +24,13 @@
    "role": "System Manager"
   },
   {
-   "role": "LSA OPS MANAGER"
+   "role": "LSA OPS SENIOR MANAGER"
   },
   {
    "role": "LSA CEO Admin"
+  },
+  {
+   "role": "LSA GST Ops Manager"
   }
  ]
 }

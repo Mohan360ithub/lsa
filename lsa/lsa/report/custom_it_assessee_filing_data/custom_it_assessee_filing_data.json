@@ -6,11 +6,11 @@
  "docstatus": 0,
  "doctype": "Report",
  "filters": [],
- "idx": 0,
+ "idx": 3,
  "is_standard": "Yes",
  "letter_head": "LSA",
  "letterhead": null,
- "modified": "2024-01-23 09:41:17.770108",
+ "modified": "2024-02-19 16:37:06.307006",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Custom IT Assessee Filing Data",
@@ -24,13 +24,22 @@
    "role": "System Manager"
   },
   {
-   "role": "LSA OPS MANAGER"
+   "role": "LSA OPS SENIOR MANAGER"
   },
   {
    "role": "Lsa IT Ops Manager"
   },
   {
    "role": "Lsa Ops Export"
+  },
+  {
+   "role": "LSA Ops Executive(B,C)"
+  },
+  {
+   "role": "LSA GST Executive(B)"
+  },
+  {
+   "role": "LSA GST Ops Manager"
   }
  ]
 }
