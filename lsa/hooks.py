@@ -138,8 +138,16 @@ scheduler_events = {
     "cron":{
         "* * * * *":
             [
-            "lsa.pankaj1.cron"
+            #"lsa.pankaj1.cron",
+            #"lsa.notice_reminder_mail.mail_remainder_for_client_notice",
+            #"lsa.timesheet_reminder.mail_remainder_for_timesheet",
             ],
+        "0 9 * * *":
+            [
+            "lsa.notice_reminder_mail.mail_remainder_for_client_notice",
+            "lsa.timesheet_reminder.mail_remainder_for_timesheet",
+            ],
+            
     },
     # "all": [
     #   "lsa.tasks.all"
@@ -226,3 +234,5 @@ scheduler_events = {
 # auth_hooks = [
 #	"lsa.auth.validate"
 # ]
+
+

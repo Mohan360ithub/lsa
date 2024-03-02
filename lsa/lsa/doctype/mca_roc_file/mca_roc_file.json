@@ -12,10 +12,12 @@
   "customer_id",
   "customer_name",
   "customer_status",
+  "contact_person",
   "column_break_iiqt",
   "company_status",
   "company_name",
   "company_pan",
+  "last_filed",
   "column_break_mjhd",
   "enabled",
   "cin",
@@ -398,11 +400,23 @@
    "fieldtype": "Data",
    "label": "Executive Name",
    "read_only": 1
+  },
+  {
+   "fetch_from": "customer_id.custom_contact_person",
+   "fieldname": "contact_person",
+   "fieldtype": "Data",
+   "label": "Contact Person"
+  },
+  {
+   "fieldname": "last_filed",
+   "fieldtype": "Data",
+   "label": "Last Filed",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-01-23 17:02:40.498429",
+ "modified": "2024-02-27 12:14:06.362169",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "MCA ROC File",
@@ -422,6 +436,7 @@
    "write": 1
   }
  ],
+ "search_fields": "registratred_mob_no, cin, company_name, customer_id, customer_name",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],

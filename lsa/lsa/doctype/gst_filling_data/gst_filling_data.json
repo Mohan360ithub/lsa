@@ -12,6 +12,7 @@
   "gstfile",
   "company",
   "customer_status",
+  "contact_person",
   "mobile_no_gst",
   "email_gst",
   "column_break_fdja",
@@ -330,12 +331,18 @@
    "fieldtype": "Check",
    "label": "Submitted",
    "read_only": 1
+  },
+  {
+   "fetch_from": "cid.custom_contact_person",
+   "fieldname": "contact_person",
+   "fieldtype": "Data",
+   "label": "Contact Person"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-01-19 18:15:32.453733",
+ "modified": "2024-02-29 17:58:11.020193",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Gst Filling Data",
@@ -360,8 +367,10 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "LSA GST Ops Manager",
+   "role": "LSA GST Ops Manager(A,Sernior)",
+   "select": 1,
    "share": 1,
+   "submit": 1,
    "write": 1
   }
  ],

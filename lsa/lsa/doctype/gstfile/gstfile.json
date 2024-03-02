@@ -13,9 +13,11 @@
   "customer_id",
   "customer_name",
   "customer_status",
+  "contact_person",
   "gst_executive",
   "executive",
   "executive_name",
+  "last_filed",
   "column_break_ccyw",
   "gst_details",
   "enabled",
@@ -482,11 +484,23 @@
    "fieldname": "pt_password",
    "fieldtype": "Data",
    "label": "PT Password"
+  },
+  {
+   "fetch_from": "customer_id.custom_contact_person",
+   "fieldname": "contact_person",
+   "fieldtype": "Data",
+   "label": "Contact Person"
+  },
+  {
+   "fieldname": "last_filed",
+   "fieldtype": "Data",
+   "label": "Last Filed",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-01-17 12:04:04.098820",
+ "modified": "2024-02-27 12:09:30.076037",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Gstfile",
@@ -506,6 +520,7 @@
    "write": 1
   }
  ],
+ "search_fields": "customer_id, gst_number, customer_name, mobile, proprietor_name",
  "show_title_field_in_link": 1,
  "sort_field": "modified",
  "sort_order": "DESC",

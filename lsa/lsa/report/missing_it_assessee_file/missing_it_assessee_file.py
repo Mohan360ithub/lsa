@@ -10,6 +10,9 @@ def execute(filters=None):
         # Customer details columns
         {"label": "CID", "fieldname": "customer_id", "fieldtype": "Link", "options": "Customer", "width": 120},
         {"label": "IT Assessee File", "fieldname": "it_assessee_file", "fieldtype": "Link", "options": "IT Assessee File", "width": 150},
+		{"label": "Customer Name", "fieldname": "customer_name", "fieldtype": "Data", "width": 100, "color": "blue"},
+		{"label": "Contact Person", "fieldname": "contact_person", "fieldtype": "Data", "width": 100, "color": "blue"},
+		{"label": "Assessee Name", "fieldname": "assessee_name", "fieldtype": "Data", "width": 100, "color": "blue"},
 		{"label": "FY", "fieldname": "fy", "fieldtype": "Link", "options": "IT Assessee File Yearly Report", "width": 150},
         {"label": "IT Assessee Filing Data Status", "fieldname": "it_assessee_filing_data_status", "fieldtype": "Data", "width": 100, "color": "blue"},
         {"label": "IT Assessee Filing Data", "fieldname": "it_assessee_filing_data", "fieldtype": "Link", "options": "IT Assessee Filing Data", "width": 300},
@@ -31,7 +34,7 @@ def get_data(filters):
 	it_assessee_files_records = frappe.get_all(
 		"IT Assessee File",
 		filters=it_assessee_files_filter,
-		fields=["customer_id", "name"]
+		fields=["customer_id", "name","assessee_name","customer_name","contact_person"]
 	)
 
 	fy_s = frappe.get_all("IT Assessee File Yearly Report", fields=["name"])
@@ -50,8 +53,11 @@ def get_data(filters):
 				data_row = {
 					"customer_id": it_assessee_files_record.customer_id,
 					"it_assessee_file": it_assessee_files_record.name,
+					"customer_name":it_assessee_files_record.customer_name,
+					"assessee_name":it_assessee_files_record.assessee_name,
+					"contact_person":it_assessee_files_record.contact_person,
 					"fy": fy.name,
-					"it_assessee_filing_data_status": True,
+					"it_assessee_filing_data_status": "Available",
 					"it_assessee_filing_data": it_assessee_filing_data[0].name,
 				}
 				
@@ -68,8 +74,11 @@ def get_data(filters):
 				data_row = {
 					"customer_id": it_assessee_files_record.customer_id,
 					"it_assessee_file": it_assessee_files_record.name,
+					"customer_name":it_assessee_files_record.customer_name,
+					"assessee_name":it_assessee_files_record.assessee_name,
+					"contact_person":it_assessee_files_record.contact_person,
 					"fy": fy.name,
-					"it_assessee_filing_data_status": False,
+					"it_assessee_filing_data_status": "Unavailable",
 					"it_assessee_filing_data": None,
 				}
 				if filters.get("file_availability"):
@@ -83,6 +92,7 @@ def get_data(filters):
 					data.append(data_row)
 
 	return data
+
 
 
 

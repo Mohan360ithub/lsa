@@ -6,7 +6,7 @@ from frappe.model.document import Document
 
 class GstFilingDataReport(Document):
 
-    def on_submit(self):
+    def before_submit(self):
         try:
             # Get the values of gst_yearly_summery_report and gst_type fields
             gst_yearly_summery_report = self.gst_yearly_summery_report
@@ -28,7 +28,8 @@ class GstFilingDataReport(Document):
             }
 
             # Fetch records based on filter conditions
-            matching_records = frappe.get_all("Gst Yearly Filing Summery", filters=filter_conditions, fields="gst_yearly_summery_report_id,gst_file_id,gst_type,name")
+            matching_records = frappe.get_all("Gst Yearly Filing Summery", filters=filter_conditions, 
+                                              fields=["gst_yearly_summery_report_id","gst_file_id","gst_type","name"])
 
             # Process matching records as needed
             for record in matching_records:
@@ -40,11 +41,12 @@ class GstFilingDataReport(Document):
                 gst_filling_data.gst_type = record.gst_type
 
                 gst_filling_data.insert()
-
+            self.step_4_count=len(matching_records)
             frappe.msgprint("New Records Created in Gst Filling Data!")
 
         except Exception as e:
-            frappe.msgprint(f"An error occurred: {e}")
+            frappe.throw(f"Error: {e}")
+            # frappe.msgprint(f"An error occurred: {e}")
 
 @frappe.whitelist()
 def get_gst_filing_data_report(gst_type,fy):
@@ -53,3 +55,5 @@ def get_gst_filing_data_report(gst_type,fy):
                                            fields=["name"])
     gst_filing_data_reports=[i.name for i in gst_filing_data_reports]
     return gst_filing_data_reports
+
+

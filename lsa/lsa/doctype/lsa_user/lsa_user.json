@@ -142,7 +142,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2024-01-09 17:14:58.541486",
+ "modified": "2024-02-02 12:22:53.416202",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "LSA User",
@@ -167,6 +167,5 @@
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],
- "track_changes": 1,
- "track_seen": 1
+ "track_changes": 1
 }

@@ -10,6 +10,7 @@
   "gst_yearly_summery_report_id",
   "fy",
   "cid",
+  "contact_person",
   "customer_status",
   "created_manually",
   "column_break_cibz",
@@ -72,7 +73,9 @@
   {
    "fieldname": "gst_file_id",
    "fieldtype": "Link",
+   "in_filter": 1,
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Gstfile",
    "options": "Gstfile",
    "reqd": 1
@@ -246,11 +249,18 @@
    "fieldname": "pt_important_notes",
    "fieldtype": "Small Text",
    "label": "PT Important Notes"
+  },
+  {
+   "fetch_from": "cid.custom_contact_person",
+   "fieldname": "contact_person",
+   "fieldtype": "Data",
+   "label": "Contact Person",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-01-19 18:19:34.457323",
+ "modified": "2024-03-01 15:17:28.336945",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Gst Yearly Filing Summery",
@@ -276,7 +286,7 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "LSA GST Ops Manager",
+   "role": "LSA GST Ops Manager(A,Sernior)",
    "share": 1,
    "write": 1
   }
