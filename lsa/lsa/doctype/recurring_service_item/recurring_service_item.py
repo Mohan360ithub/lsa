@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class AssociatePartnerChild(Document):
+class RecurringServiceItem(Document):
 	pass

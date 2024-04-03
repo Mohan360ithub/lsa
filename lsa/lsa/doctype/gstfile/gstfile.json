@@ -18,6 +18,8 @@
   "executive",
   "executive_name",
   "last_filed",
+  "gstfile_search",
+  "filing_started_from",
   "column_break_ccyw",
   "gst_details",
   "enabled",
@@ -171,7 +173,6 @@
   {
    "fieldname": "company_name",
    "fieldtype": "Data",
-   "in_standard_filter": 1,
    "label": "Company Name",
    "permlevel": 1,
    "reqd": 1
@@ -191,8 +192,6 @@
   {
    "fieldname": "mobile",
    "fieldtype": "Data",
-   "in_filter": 1,
-   "in_standard_filter": 1,
    "label": "Mobile",
    "permlevel": 1,
    "reqd": 1
@@ -441,6 +440,7 @@
    "fetch_from": ".company_email",
    "fieldname": "executive",
    "fieldtype": "Link",
+   "in_filter": 1,
    "in_standard_filter": 1,
    "label": "Executive",
    "options": "User",
@@ -496,11 +496,23 @@
    "fieldtype": "Data",
    "label": "Last Filed",
    "read_only": 1
+  },
+  {
+   "fieldname": "gstfile_search",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Gstfile Search",
+   "options": "Gstfile"
+  },
+  {
+   "fieldname": "filing_started_from",
+   "fieldtype": "Date",
+   "label": "Filing Started From"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-02-27 12:09:30.076037",
+ "modified": "2024-03-27 15:46:36.843028",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Gstfile",
@@ -520,7 +532,7 @@
    "write": 1
   }
  ],
- "search_fields": "customer_id, gst_number, customer_name, mobile, proprietor_name",
+ "search_fields": "customer_id, gst_number, customer_name, mobile, proprietor_name, company_name",
  "show_title_field_in_link": 1,
  "sort_field": "modified",
  "sort_order": "DESC",

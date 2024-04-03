@@ -5,10 +5,10 @@ import frappe
 import json
 
 def execute(filters=None):
-	columns, data = [], []
+    columns, data = [], []
      
-	columns=[
-		{"label": "CID", "fieldname": "customer_id", "fieldtype": "Link", "options": "Customer", "width": 100, },
+    columns=[
+        {"label": "CID", "fieldname": "customer_id", "fieldtype": "Link", "options": "Customer", "width": 100, },
         {"label": "Customer Name", "fieldname": "customer_name", "fieldtype": "Data", "width": 200, },
         {"label": "Contact Person", "fieldname": "custom_contact_person", "fieldtype": "Data", "width": 150, },
         {"label": "Mobile No.", "fieldname": "mobile number", "fieldtype": "Data", "width": 120, },
@@ -18,10 +18,9 @@ def execute(filters=None):
         {"label": "Customer Payment Agree", "fieldname": "custom_customer_tags", "fieldtype": "Data", "width": 100, },
         {"label": "Customer Behaviour", "fieldname": "custom_customer_behaviour_", "fieldtype": "Data", "width": 100, },
         {"label": "Behaviour Note", "fieldname": "custom_behaviour_note", "fieldtype": "Data", "width": 100},
-		{"label": "Customer Status", "fieldname": "custom_customer_status_", "fieldtype": "Data", "width": 100, },
+        {"label": "Customer Status", "fieldname": "custom_customer_status_", "fieldtype": "Data", "width": 100, },
         
-        
-		{"label": "Service Name", "fieldname": "service_name", "fieldtype": "Data", "width": 100, },
+        {"label": "Service Name", "fieldname": "service_name", "fieldtype": "Data", "width": 100, },
         {"label": "File ID", "fieldname": "file_id", "fieldtype": "Data", "width": 100, },
         
         {"label": "Go To file", "fieldname": "go_to_file", "fieldtype": "HTML", "width": 90, },
@@ -31,14 +30,44 @@ def execute(filters=None):
         {"label": "Password", "fieldname": "password", "fieldtype": "Data", "width": 100, },
         {"label": "Current Recurring Fees", "fieldname": "current_recurring_fees", "fieldtype": "Currency", "width": 100, },
         {"label": "Frequency", "fieldname": "frequency", "fieldtype": "Data", "width": 100, },
-		{"label": "Annual Fees", "fieldname": "annual_fees", "fieldtype": "Currency", "width": 100, },
-		{"label": "Executive", "fieldname": "executive_name", "fieldtype": "Data", "width": 100, },
+        {"label": "Annual Fees", "fieldname": "annual_fees", "fieldtype": "Currency", "width": 100, },
+        {"label": "Executive", "fieldname": "executive_name", "fieldtype": "Data", "width": 100, },
         
-	]
+    ]
      
-	data=customer_services(filters)
+    data = customer_services(filters)
+    html_card = """
+    <script>
+        document.addEventListener('click', function(event) {
+            // Check if the clicked element is a cell
+            var clickedCell = event.target.closest('.dt-cell__content');
+            if (clickedCell) {
+                // Remove highlight from previously highlighted cells
+                var previouslyHighlightedCells = document.querySelectorAll('.highlighted-cell');
+                previouslyHighlightedCells.forEach(function(cell) {
+                    cell.classList.remove('highlighted-cell');
+                    cell.style.backgroundColor = ''; // Remove background color
+                    cell.style.border = ''; // Remove border
+                    cell.style.fontWeight = '';
+                });
+                
+                // Highlight the clicked row's cells
+                var clickedRow = event.target.closest('.dt-row');
+                var cellsInClickedRow = clickedRow.querySelectorAll('.dt-cell__content');
+                cellsInClickedRow.forEach(function(cell) {
+                    cell.classList.add('highlighted-cell');
+                    cell.style.backgroundColor = '#d7eaf9'; // Light blue background color
+                    cell.style.border = '2px solid #90c9e3'; // Border color
+                    cell.style.fontWeight = 'bold';
+                });
+            }
+        });
+    </script>
+    """
+
+    return columns, data, html_card
+
 	 
-	return columns, data
 
 def customer_services(filters):
 
@@ -131,3 +160,4 @@ def get_services():
     services = frappe.get_all("Customer Chargeable Doctypes", fields=["name"])
     services = [ser.name for ser in services]
     return json.dumps(services)
+

@@ -31,6 +31,7 @@
   "registratred_mob_no",
   "registratred_email_id",
   "gst_assessee",
+  "mca_roc_file_search",
   "column_break_nklw",
   "company_reg_add",
   "executive",
@@ -412,11 +413,18 @@
    "fieldtype": "Data",
    "label": "Last Filed",
    "read_only": 1
+  },
+  {
+   "fieldname": "mca_roc_file_search",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "MCA ROC File Search",
+   "options": "MCA ROC File"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-02-27 12:14:06.362169",
+ "modified": "2024-03-27 15:48:23.942575",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "MCA ROC File",

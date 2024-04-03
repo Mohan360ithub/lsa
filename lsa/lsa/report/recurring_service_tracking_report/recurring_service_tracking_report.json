@@ -10,7 +10,7 @@
  "is_standard": "Yes",
  "letter_head": "LSA",
  "letterhead": null,
- "modified": "2024-01-04 18:17:15.172268",
+ "modified": "2024-03-26 11:35:29.548740",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Recurring Service Tracking Report",
@@ -48,7 +48,7 @@
    "role": "LSA Account Executive"
   },
   {
-   "role": "LSA Employee"
+   "role": "LSA Employee (A,B,C)"
   },
   {
    "role": "LSA CEO Admin"

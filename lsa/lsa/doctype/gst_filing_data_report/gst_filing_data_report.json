@@ -90,7 +90,7 @@
    "link_fieldname": "gst_filling_report_id"
   }
  ],
- "modified": "2024-01-17 13:03:24.853533",
+ "modified": "2024-03-13 18:53:34.133843",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Gst Filing Data Report",
@@ -107,6 +107,14 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "report": 1,
+   "role": "LSA GST Ops Manager(A,Sernior)",
    "submit": 1,
    "write": 1
   }

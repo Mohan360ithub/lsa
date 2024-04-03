@@ -34,6 +34,9 @@ def execute(filters=None):
         additional_filters["gst_type"] = filters["gst_type"]
         additional_filters["fy"] = filters["fy"]
         additional_filters["month"] = filters["month"]
+        if filters.get("customer_id"):
+            additional_filters["cid"] = filters["customer_id"]
+        
     else:
         # If mandatory filters are not provided, return empty data
         return columns, [], ""
@@ -45,9 +48,34 @@ def execute(filters=None):
         fields=["cid", "customer_status", "name", "filing_status", "gstfile", "gstfile_enabled", "company",
                 "mobile_no_gst", "gst_user_name", "gst_password", "proprietor_name", "executive",
                 "gst_type", "month", "fy", "gst_yearly_filling_summery_id", "filing_notes"],
-        as_list=True
     )
 
+    if filters.get("customer_status"):
+        customer_list = frappe.get_all("Customer",filters={},fields=["name", "disabled"],)
+        customer_list={cus.name:cus.disabled for cus in customer_list}
+        customer_status = filters["customer_status"]
+        data_new=[]
+        if customer_status=="Enabled":
+            for gst_file in data:
+                if (not customer_list[gst_file.cid]) :
+                    data_new.append(gst_file)
+        elif customer_status=="Disabled":
+            for gst_file in data:
+                if ( customer_list[gst_file.cid]) :
+                    data_new.append(gst_file)
+        data=data_new
+
+    if "cid" in additional_filters:                             
+        del additional_filters["cid"]
+
+    data_old = frappe.get_all(
+        "Gst Filling Data",
+        filters=additional_filters,
+        fields=["cid", "customer_status", "name", "filing_status", "gstfile", "gstfile_enabled", "company",
+                "mobile_no_gst", "gst_user_name", "gst_password", "proprietor_name", "executive",
+                "gst_type", "month", "fy", "gst_yearly_filling_summery_id", "filing_notes"],
+                as_list=True
+    )
     # Fetch counts for different filing statuses using custom SQL queries
     statuses = ["Pending", "Filed Summery Shared With Client", "GSTR-1 or IFF Prepared and Filed",
                 "GSTR-2A/2B or 4A/4B Reco done", "Data Collected", "Data Finalized", "Tax Calculation Done",
@@ -78,7 +106,7 @@ def execute(filters=None):
 
     executive_counts = {}
 
-    for executive in set([row[11] for row in data]):
+    for executive in set([row[11] for row in data_old]):
         # Count for all filing statuses
         count_query = f"""
             SELECT COUNT(name) as count
@@ -238,6 +266,37 @@ def execute(filters=None):
     
 </div>
 
+<script>
+        document.addEventListener('click', function(event) {{
+            // Check if the clicked element is a cell
+            var clickedCell = event.target.closest('.dt-cell__content');
+            if (clickedCell) {{
+                // Remove highlight from previously highlighted cells
+                var previouslyHighlightedCells = document.querySelectorAll('.highlighted-cell');
+                previouslyHighlightedCells.forEach(function(cell) {{
+                    cell.classList.remove('highlighted-cell');
+                    cell.style.backgroundColor = ''; // Remove background color
+                    cell.style.border = ''; // Remove border
+                    cell.style.fontWeight = '';
+                }});
+                
+                // Highlight the clicked row's cells
+                var clickedRow = event.target.closest('.dt-row');
+                var cellsInClickedRow = clickedRow.querySelectorAll('.dt-cell__content');
+                cellsInClickedRow.forEach(function(cell) {{
+                    cell.classList.add('highlighted-cell');
+                    cell.style.backgroundColor = '#d7eaf9'; // Light blue background color
+                    cell.style.border = '2px solid #90c9e3'; // Border color
+                    cell.style.fontWeight = 'bold';
+                }});
+            }}
+        }});
+
+
+
+    
+    </script>
+
     """
     """
     <script>
@@ -252,4 +311,6 @@ def execute(filters=None):
     """
 
     return columns, data, html_card
+
+
 

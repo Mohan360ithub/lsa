@@ -35,11 +35,15 @@ frappe.query_reports["Monthly Attendance Report"] = {
 			"label": __("Employee"),
 			"fieldtype": "Link",
 			"options": "Employee",
+			
+			
 			// "default":cur_emp(frappe.session.user),
 			// "read_only":1,
 			get_query: () => {
 				var company = frappe.query_report.get_filter_value('company');
 				var emp_user=frappe.session.user	
+
+				
 
 				var filters_custom= {
 					'company': company,
@@ -164,3 +168,4 @@ function cur_emp(emp_user){
 	}
 	return emp[0]
 }
+

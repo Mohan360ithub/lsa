@@ -37,6 +37,7 @@
   "it_password",
   "aadhaar_number",
   "assessee_type",
+  "it_assessee_file_search",
   "bank_details_tab",
   "bank_name",
   "bank_branch",
@@ -167,9 +168,7 @@
   {
    "fieldname": "pan",
    "fieldtype": "Data",
-   "in_filter": 1,
    "in_list_view": 1,
-   "in_standard_filter": 1,
    "label": "PAN",
    "length": 10,
    "reqd": 1,
@@ -313,6 +312,7 @@
   {
    "fieldname": "customer_id",
    "fieldtype": "Link",
+   "in_filter": 1,
    "in_standard_filter": 1,
    "label": "Customer ID",
    "options": "Customer",
@@ -393,11 +393,18 @@
    "fieldtype": "Data",
    "label": "Last Filed",
    "read_only": 1
+  },
+  {
+   "fieldname": "it_assessee_file_search",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "IT Assessee File Search",
+   "options": "IT Assessee File"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-02-26 18:45:09.019863",
+ "modified": "2024-03-27 15:47:24.947978",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "IT Assessee File",
@@ -417,7 +424,7 @@
    "write": 1
   }
  ],
- "search_fields": "pan,assessee_name, customer_id, customer_name",
+ "search_fields": "pan,assessee_name, customer_id, customer_name, registered_mob",
  "show_title_field_in_link": 1,
  "sort_field": "modified",
  "sort_order": "DESC",

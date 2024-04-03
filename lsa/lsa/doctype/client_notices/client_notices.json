@@ -31,6 +31,7 @@
   "demand_amount_rs",
   "other_charges",
   "total_value",
+  "lost_reason",
   "section_break_iklo",
   "notice_description_column",
   "text_editor_cerg",
@@ -38,14 +39,6 @@
   "create_followup",
   "notice_followups",
   "other_details_tab",
-  "associate_consultants_section",
-  "associate_partner",
-  "column_break_bqkk",
-  "part_name",
-  "column_break_ieqn",
-  "mobile",
-  "column_break_kufy",
-  "alt_mobile",
   "section_break_clho",
   "office_ph_no",
   "data_dioo",
@@ -64,7 +57,9 @@
   "officer_email_id_copy",
   "officer_email_id",
   "associate_partner_tab",
-  "prof_partner"
+  "prof_partner",
+  "column_break_lhbr",
+  "partner_mobile_no"
  ],
  "fields": [
   {
@@ -139,13 +134,15 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Notices Status",
-   "options": "Received\nUnder Review\nAwaiting Client Information\nAwaiting Consultant Review\nResponse Drafted\nResponse Submitted\nAmended Notice Received\nAppeal Filed\nOn Hold\nResolved\nClosed\nEscalated\nDisputed",
+   "options": "Received\nUnder Review\nAwaiting Client Information\nAwaiting Consultant Review\nResponse Drafted\nResponse Submitted\nAmended Notice Received\nAppeal Filed\nOn Hold\nResolved\nClosed\nEscalated\nDisputed\nClient went to other Auditor",
    "reqd": 1
   },
   {
    "fieldname": "priority",
    "fieldtype": "Select",
+   "in_filter": 1,
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Priority",
    "options": "\nHigh\nMedium\nLow",
    "reqd": 1
@@ -212,31 +209,6 @@
    "fieldname": "other_details_tab",
    "fieldtype": "Tab Break",
    "label": "Other Details"
-  },
-  {
-   "fieldname": "associate_consultants_section",
-   "fieldtype": "Section Break",
-   "label": "Associate Consultants"
-  },
-  {
-   "fieldname": "associate_partner",
-   "fieldtype": "Link",
-   "label": "Associate Partner",
-   "options": "Associate Partner"
-  },
-  {
-   "fieldname": "column_break_ieqn",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fetch_from": "associate_partner.mobile_number",
-   "fieldname": "mobile",
-   "fieldtype": "Data",
-   "label": "Mobile"
-  },
-  {
-   "fieldname": "column_break_kufy",
-   "fieldtype": "Column Break"
   },
   {
    "fetch_from": "associate_partner.email",
@@ -333,22 +305,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "column_break_bqkk",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fetch_from": "associate_partner.name1",
-   "fieldname": "part_name",
-   "fieldtype": "Data",
-   "label": "Part Name"
-  },
-  {
-   "fetch_from": "associate_partner.mobile_number",
-   "fieldname": "alt_mobile",
-   "fieldtype": "Data",
-   "label": "Alt Mobile"
-  },
-  {
    "fieldname": "section_break_clho",
    "fieldtype": "Section Break"
   },
@@ -409,10 +365,26 @@
    "fieldname": "notice_followups",
    "fieldtype": "HTML",
    "label": "Notice Followups"
+  },
+  {
+   "fieldname": "column_break_lhbr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "prof_partner.custom_asspartner_mobile_no",
+   "fieldname": "partner_mobile_no",
+   "fieldtype": "Data",
+   "label": "Partner Mobile No"
+  },
+  {
+   "fieldname": "lost_reason",
+   "fieldtype": "Data",
+   "label": "Lost Reason",
+   "read_only": 1
   }
  ],
  "links": [],
- "modified": "2024-02-22 14:40:40.691826",
+ "modified": "2024-03-29 17:20:37.008842",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Client Notices",

@@ -1,0 +1,113 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-03-20 16:41:04.472544",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "service_type",
+  "service_id",
+  "company_name",
+  "effective_from",
+  "effective_to",
+  "current_charges",
+  "revised_charges",
+  "enabled",
+  "price_revised",
+  "service_enabled",
+  "frequency"
+ ],
+ "fields": [
+  {
+   "fieldname": "service_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Service Type",
+   "options": "DocType",
+   "reqd": 1
+  },
+  {
+   "fieldname": "service_id",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Service ID",
+   "options": "service_type",
+   "reqd": 1
+  },
+  {
+   "fieldname": "company_name",
+   "fieldtype": "Data",
+   "label": "Name"
+  },
+  {
+   "fieldname": "effective_from",
+   "fieldtype": "Date",
+   "label": "Effective From",
+   "read_only": 1
+  },
+  {
+   "fieldname": "effective_to",
+   "fieldtype": "Date",
+   "label": "Effective To",
+   "read_only": 1
+  },
+  {
+   "fieldname": "current_charges",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Current Charges",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "revised_charges",
+   "fieldtype": "Currency",
+   "label": "Revised Charges"
+  },
+  {
+   "default": "0",
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "label": "Enabled",
+   "read_only": 1
+  },
+  {
+   "default": "No",
+   "depends_on": "if (revised_charges==current_charges){\n    price_revised=\"No\"\n}else{\n    price_revised=\"Yes\"\n}",
+   "fieldname": "price_revised",
+   "fieldtype": "Select",
+   "label": "Price Revised",
+   "options": "Yes\nNo",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "service_enabled",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Service Enabled",
+   "read_only": 1
+  },
+  {
+   "fieldname": "frequency",
+   "fieldtype": "Select",
+   "label": "Frequency",
+   "options": "Monthly\nQuarterly\nHalf-yearly\nYearly",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2024-03-25 10:19:05.235523",
+ "modified_by": "Administrator",
+ "module": "Lsa",
+ "name": "Recurring Service Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

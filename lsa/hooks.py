@@ -147,6 +147,10 @@ scheduler_events = {
             "lsa.notice_reminder_mail.mail_remainder_for_client_notice",
             "lsa.timesheet_reminder.mail_remainder_for_timesheet",
             ],
+        "0,30 * * * *":
+            [
+            #"lsa.unofficial_whatsapp_scheduler.send_scheduled_whatsapp_message",
+            ],
             
     },
     # "all": [
@@ -234,5 +238,6 @@ scheduler_events = {
 # auth_hooks = [
 #	"lsa.auth.validate"
 # ]
+
 
 

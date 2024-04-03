@@ -10,15 +10,27 @@ def sync_customer(customer_id=None):
     try:
         followup_button,followup_values,values,open_followup,open_followup_i=sync_sales_orders_customer(customer_id)
         services_values=sync_services_customer(customer_id)
-        if [followup_button,followup_values,values,open_followup,open_followup_i] or services_values:
+        pricing_value=sync_services_pricing(customer_id)
+        if [followup_button,followup_values,values,open_followup,open_followup_i] or services_values or pricing_value:
 
             return {"status":"Synced successfully.","followup_button":followup_button,"values":values,
-                        "followup_values":followup_values,"services_values":services_values,"open_followup":open_followup,"open_followup_i":open_followup_i}
+                        "followup_values":followup_values,"services_values":services_values,"open_followup":open_followup,
+                        "open_followup_i":open_followup_i,"pricing_value":pricing_value}
         else:
             return {"status":"Sync Failed."}
     except Exception as e:
         frappe.msgprint(f"Error: {e}")
         return False
+
+def sync_services_pricing(customer_id=None):
+    pricings=[]
+    if customer_id:
+        
+        pricings=frappe.get_all("Recurring Service Pricing",
+                                filters={"customer_id":customer_id,},
+                                fields=["customer_id","name","effective_from","effective_to","status","fy"])
+
+    return pricings
 
 def sync_services_customer(customer_id=None):
 
@@ -328,6 +340,7 @@ def checking_user_authentication(user_email=None):
     except Exception as e:
         #print(e)
         return {"status": "Failed"}
+
 
 
 

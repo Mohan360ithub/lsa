@@ -32,6 +32,8 @@
   "interest_paid_amount",
   "column_break_xukb",
   "penalty_paid_amount",
+  "section_break_neih",
+  "step_4_summary",
   "pt_tax_payment_tab",
   "pt_amount",
   "pt_payment_status",
@@ -84,6 +86,7 @@
    "fetch_from": "gst_file_id.customer_id",
    "fieldname": "cid",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "CID",
    "options": "Customer"
   },
@@ -256,11 +259,20 @@
    "fieldtype": "Data",
    "label": "Contact Person",
    "read_only": 1
+  },
+  {
+   "fieldname": "section_break_neih",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "step_4_summary",
+   "fieldtype": "HTML",
+   "label": "Step 4 Summary"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-03-01 15:17:28.336945",
+ "modified": "2024-03-14 15:41:47.209833",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Gst Yearly Filing Summery",

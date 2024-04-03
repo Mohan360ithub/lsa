@@ -1,0 +1,216 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "PR-.fy.-.customer_id.-.##",
+ "creation": "2024-03-20 16:41:27.603941",
+ "default_view": "List",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "customer_id",
+  "customer_name",
+  "contact_person",
+  "mobile_no",
+  "service_active",
+  "customer_disabled",
+  "customer_status",
+  "column_break_jewh",
+  "fy",
+  "status",
+  "effective_from",
+  "effective_to",
+  "mode_of_approval",
+  "approval_doc",
+  "previous_pricing",
+  "next_pricing",
+  "section_break_nall",
+  "recurring_services",
+  "section_break_nvah",
+  "next_price_revision",
+  "previous_price_revision"
+ ],
+ "fields": [
+  {
+   "fieldname": "customer_id",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Customer ID",
+   "options": "Customer",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "customer_id.customer_name",
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "label": "Customer Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "customer_id.custom_contact_person",
+   "fieldname": "contact_person",
+   "fieldtype": "Data",
+   "label": "Contact Person",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "customer_id.custom_primary_mobile_no",
+   "fieldname": "mobile_no",
+   "fieldtype": "Data",
+   "label": "Mobile No",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "service_active",
+   "fieldtype": "Check",
+   "label": "Active",
+   "read_only": 1
+  },
+  {
+   "fieldname": "previous_pricing",
+   "fieldtype": "Link",
+   "label": "Previous Pricing",
+   "options": "Recurring Service Pricing"
+  },
+  {
+   "fieldname": "next_pricing",
+   "fieldtype": "Link",
+   "label": "Next Pricing",
+   "options": "Recurring Service Pricing"
+  },
+  {
+   "fieldname": "column_break_jewh",
+   "fieldtype": "Column Break",
+   "read_only": 1
+  },
+  {
+   "fieldname": "fy",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "FY",
+   "options": "FY",
+   "reqd": 1
+  },
+  {
+   "default": "Need to Revise",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_filter": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Need to Revise\nRevised\nInformed to Client\nApproved\nNot Approved\nRevise Again\nDiscontinued\nCancelled",
+   "read_only": 1
+  },
+  {
+   "fieldname": "effective_from",
+   "fieldtype": "Date",
+   "label": "Effective From",
+   "reqd": 1
+  },
+  {
+   "fieldname": "effective_to",
+   "fieldtype": "Date",
+   "label": "Effective To"
+  },
+  {
+   "fieldname": "mode_of_approval",
+   "fieldtype": "Select",
+   "label": "Mode of Approval",
+   "options": "\nSigned Copy\nEmail\nMeeting\nWhatsApp\nCall"
+  },
+  {
+   "depends_on": "mode_of_approval",
+   "fieldname": "approval_doc",
+   "fieldtype": "Attach",
+   "label": "Approval Doc"
+  },
+  {
+   "fieldname": "section_break_nall",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "recurring_services",
+   "fieldtype": "Table",
+   "label": "Recurring Services",
+   "options": "Recurring Service Item",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_nvah",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "next_price_revision",
+   "fieldtype": "HTML",
+   "label": "Next Price Revision"
+  },
+  {
+   "fieldname": "previous_price_revision",
+   "fieldtype": "HTML",
+   "label": "Previous Price Revision"
+  },
+  {
+   "default": "0",
+   "fetch_from": "customer_id.disabled",
+   "fieldname": "customer_disabled",
+   "fieldtype": "Check",
+   "in_filter": 1,
+   "in_standard_filter": 1,
+   "label": "Customer Disabled",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "customer_id.custom_customer_status_",
+   "fieldname": "customer_status",
+   "fieldtype": "Select",
+   "in_filter": 1,
+   "in_standard_filter": 1,
+   "label": "Customer Status",
+   "options": "ACTIVE\nHOLD",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-03-25 11:21:58.186025",
+ "modified_by": "Administrator",
+ "module": "Lsa",
+ "name": "Recurring Service Pricing",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "LSA Account Executive",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "report": 1,
+   "role": "LSA Accounts Manager",
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1,
+ "track_seen": 1
+}

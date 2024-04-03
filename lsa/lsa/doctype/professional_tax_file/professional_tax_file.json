@@ -26,6 +26,7 @@
   "pt_allotment_date",
   "filling_starting_date",
   "it_assessee",
+  "professional_tax_file_search",
   "column_break_mvvm",
   "registratred_mob_no",
   "registratred_email_id",
@@ -426,11 +427,20 @@
    "fieldtype": "Data",
    "label": "Last Filed",
    "read_only": 1
+  },
+  {
+   "fieldname": "professional_tax_file_search",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "in_filter": 1,
+   "in_standard_filter": 1,
+   "label": "Professional Tax File Search",
+   "options": "Professional Tax File"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-02-27 12:13:08.599517",
+ "modified": "2024-03-08 17:51:05.667876",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Professional Tax File",

@@ -267,6 +267,8 @@ def aisensy_sales_order(docname,customer_id, customer,from_date,to_date,total,ne
             whatsapp_message_log.mobile_no = new_mobile
             whatsapp_message_log.razorpay_payment_link = razorpay_payment_link
             whatsapp_message_log.insert(ignore_permissions=True)
+
+            return {"status":"WhatsApp Message Sent successfully","attached_file_url":sales_order_url}
         else:
             # Log the error and provide feedback to the user
             frappe.logger().error(f"Sensy API Error: {response.text}")
@@ -621,7 +623,7 @@ def fetch_services(c_id=None):
         c_services+=list(c_services_n)
             # for c_service in c_services_n:
             #   pass
-    print(c_services)
+    #print(c_services)
     
     if c_services:
         # For demonstration purposes, let's just send back a response.
@@ -725,7 +727,7 @@ def task_with_issue_creation(i_id=None):
 
     task.insert()
 
-    print(issue.subject)
+    #print(issue.subject)
 
     return f"New Task created for Issue {i_id}"
     
@@ -818,13 +820,13 @@ def aisensy_sales_order_wo_link(docname,customer_id, customer,from_date,to_date,
 
     except requests.exceptions.RequestException as e:
         # Log the exception and provide feedback to the user
-        print(e)
+        #print(e)
         frappe.logger().error(f"Network error: {e}")
         frappe.msgprint(_("An error occurred while WhatsApp Message. Please try again Later.",e))
 
     except Exception as e:
         # Log the exception and provide feedback to the user
-        print(e)
+        #print(e)
         frappe.logger().error(f"Custom Button Script Error: {e}")
         frappe.msgprint(_("An error occurred while WhatsApp Message. Please try again Later.",e))
     
@@ -913,6 +915,7 @@ accounts@lsaoffice.com'''
         frappe.logger().error(f"Error: {e}")
         frappe.msgprint("An unexpected error occurred while sending the WhatsApp message. Please contact the system administrator.")
     
+
 
 
 

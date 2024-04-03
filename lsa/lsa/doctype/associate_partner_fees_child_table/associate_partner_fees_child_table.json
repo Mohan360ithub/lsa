@@ -7,7 +7,10 @@
  "engine": "InnoDB",
  "field_order": [
   "service",
-  "fees"
+  "fees",
+  "description",
+  "effective_from",
+  "effective_to"
  ],
  "fields": [
   {
@@ -21,20 +24,35 @@
   },
   {
    "fieldname": "fees",
-   "fieldtype": "Data",
+   "fieldtype": "Currency",
    "in_list_view": 1,
    "in_preview": 1,
    "in_standard_filter": 1,
    "label": "Fees"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description"
+  },
+  {
+   "fieldname": "effective_from",
+   "fieldtype": "Date",
+   "label": "Effective From"
+  },
+  {
+   "fieldname": "effective_to",
+   "fieldtype": "Date",
+   "label": "Effective To"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-02-20 18:10:30.178644",
+ "modified": "2024-03-21 11:09:34.385143",
  "modified_by": "Administrator",
  "module": "Lsa",
- "name": "Associate Partner Child",
+ "name": "Associate Partner Fees Child Table",
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",

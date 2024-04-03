@@ -29,6 +29,7 @@
   "registratred_mob_no",
   "registratred_email_id",
   "gst_assessee",
+  "tds_file_search",
   "column_break_nklw",
   "reg_add",
   "executive",
@@ -95,6 +96,8 @@
   {
    "fieldname": "deductor_name",
    "fieldtype": "Data",
+   "in_filter": 1,
+   "in_standard_filter": 1,
    "label": "Deductor Name",
    "reqd": 1
   },
@@ -334,6 +337,7 @@
   {
    "fieldname": "customer_id",
    "fieldtype": "Link",
+   "in_filter": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Customer ID",
@@ -427,11 +431,17 @@
    "fieldtype": "Data",
    "label": "Last Filed",
    "read_only": 1
+  },
+  {
+   "fieldname": "tds_file_search",
+   "fieldtype": "Link",
+   "label": "TDS File Search",
+   "options": "TDS File"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-02-27 12:13:56.020182",
+ "modified": "2024-03-27 15:47:56.993374",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "TDS File",

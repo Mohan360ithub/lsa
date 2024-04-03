@@ -66,7 +66,42 @@ def execute(filters=None):
     # Get data for the report
     data = get_data(services, filters)
 
-    return columns, data
+
+    html_card = f"""
+
+    <script>
+        document.addEventListener('click', function(event) {{
+            // Check if the clicked element is a cell
+            var clickedCell = event.target.closest('.dt-cell__content');
+            if (clickedCell) {{
+                // Remove highlight from previously highlighted cells
+                var previouslyHighlightedCells = document.querySelectorAll('.highlighted-cell');
+                previouslyHighlightedCells.forEach(function(cell) {{
+                    cell.classList.remove('highlighted-cell');
+                    cell.style.backgroundColor = ''; // Remove background color
+                    cell.style.border = ''; // Remove border
+                    cell.style.fontWeight = '';
+                }});
+                
+                // Highlight the clicked row's cells
+                var clickedRow = event.target.closest('.dt-row');
+                var cellsInClickedRow = clickedRow.querySelectorAll('.dt-cell__content');
+                cellsInClickedRow.forEach(function(cell) {{
+                    cell.classList.add('highlighted-cell');
+                    cell.style.backgroundColor = '#d7eaf9'; // Light blue background color
+                    cell.style.border = '2px solid #90c9e3'; // Border color
+                    cell.style.fontWeight = 'bold';
+                }});
+            }}
+        }});
+
+
+
+    
+    </script>
+    """
+
+    return columns, data, html_card
 
 # Function to retrieve data based on filters
 def get_data(services, filters):
@@ -200,7 +235,7 @@ def get_data(services, filters):
             for service in customer_services[i.name]:
                 # Get services for the customer
 
-                description_value = ""
+                description_value = []
                 each_service_amount = 0.00
                 gst_type_gstfile = []
                 # Iterate through each service record
@@ -209,10 +244,12 @@ def get_data(services, filters):
                         description_list = j["description"].split("-")
                     else:
                         description_list=["NA","NA"]
+
                     if len(description_list) == 2:
-                        description_value += f"{description_list[0]}-({description_list[1]})-{j['frequency']}-(Rs {j['current_recurring_fees']}), "
+                        description_value += [f"{description_list[0]}-({description_list[1]})-{j['frequency']}-(Rs {j['current_recurring_fees']})"]
                     else:
-                        description_value += f"{description_list[0]}-{j['frequency']}-(Rs {j['current_recurring_fees']}), "
+                        description_value += [f"{description_list[0]}-{j['frequency']}-(Rs {j['current_recurring_fees']})"]
+                    
                     if service=="Gstfile":
                         gst_type_gstfile.append(j["gst_type"])
                     service_count += 1
@@ -230,7 +267,7 @@ def get_data(services, filters):
 
                 # Set description value for service customer
 
-                data_row[service + " customer"] = description_value
+                data_row[service + " customer"] = ", \n".join(description_value)
                 data_row[service + " count"] = len(customer_services[i.name][service])
                 data_row[service + " amount"] = each_service_amount
 
@@ -270,6 +307,8 @@ def get_data(services, filters):
             data = [d1 for d1 in data if d1["status"] == status_filter]
 
     return data
+
+
 
 
 

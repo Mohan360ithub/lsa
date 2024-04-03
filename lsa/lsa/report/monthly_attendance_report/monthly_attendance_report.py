@@ -11,6 +11,11 @@ from frappe import _
 from frappe.query_builder.functions import Count, Extract, Sum
 from frappe.utils import cint, cstr, getdate
 
+
+
+
+
+
 Filters = frappe._dict
 
 status_map = {
@@ -38,6 +43,8 @@ def execute(filters: Optional[Filters] = None) -> Tuple:
 		return [], [], None, None
 
 	columns = get_columns(filters)
+
+	
 	data = get_data(filters, attendance_map)
 
 	if not data:
@@ -289,10 +296,16 @@ def get_employee_related_details(filters: Filters) -> Tuple[Dict, List]:
 		)
 		.where(Employee.company == filters.company)
 	)
-
+	user_emp=filters.employee
+	user_login_id = frappe.session.user
+	user_roles = set(frappe.get_roles())
+	if user_roles.isdisjoint(["LSA CEO ADMIN TEAM","LSA CEO Admin","LSA Attendance Co-ordinator","HR User","HR Manager"]):
+		employee_doc = frappe.get_doc("Employee", {"user_id": user_login_id})
+		user_emp=employee_doc.name
+	# print(user_emp)
 	if filters.employee:
-		query = query.where(Employee.name == filters.employee)
-
+		query = query.where(Employee.name == user_emp)
+	# print()
 	group_by = filters.group_by
 	if group_by:
 		group_by = group_by.lower()
@@ -660,20 +673,15 @@ def get_current_employee(user_id):
 	return emp_list
 
 @frappe.whitelist()
-def get_emp_filter(emp_user_id):
-	emp_filter = True
-	user_roles = frappe.get_all('Has Role', filters={'parent': emp_user_id}, fields=['role'])
+def check_hr_roles():
+	user_login_id = frappe.session.user
+	user_roles = (frappe.get_roles())
+	doc_perm_roles = set(["LSA CEO ADMIN TEAM","LSA CEO Admin","LSA Attendance Co-ordinator","HR User","HR Manager"])
 
-	if emp_user_id=="pankajsankhla90@gmail.com":
-		user_roles = frappe.get_all('Has Role', filters={'parent': "Administrator"}, fields=['role'])
 
-	# Extract roles from the result
-	roles = [role.get('role') for role in user_roles]
-	doc_perm_roles = ["LSA CEO ADMIN TEAM","LSA CEO Admin","LSA Attendance Co-ordinator","HR User","HR Manager"]
+	if doc_perm_roles.isdisjoint(user_roles):
+			print(False)
+			return False
+	return True
 
-	for role in roles:
-		if role in doc_perm_roles:
-			emp_filter = False
-			return emp_filter
-	return emp_filter
 

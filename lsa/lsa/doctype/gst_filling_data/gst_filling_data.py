@@ -227,7 +227,7 @@ def checking_user_authentication(user_email):
 
 
 @frappe.whitelist()
-def submit_gst_data(gst_yearly_filling_summary_id, sales_total_taxable, purchase_total_taxable, tax_paid_amount, interest_paid_amount, penalty_paid_amount,gst_filling_data):
+def submit_gst_data(gst_yearly_filling_summary_id, sales_total_taxable, purchase_total_taxable, tax_paid_amount, interest_paid_amount, penalty_paid_amount,gst_filling_data,month):
     response = {}
 
     try:
@@ -241,13 +241,55 @@ def submit_gst_data(gst_yearly_filling_summary_id, sales_total_taxable, purchase
         interest_paid_amount = float(interest_paid_amount)
         penalty_paid_amount = float(penalty_paid_amount)
 
+        gst_yearly_filing_summary = frappe.get_doc("Gst Yearly Filing Summery", gst_yearly_filling_summary_id)
+        # Get the Gst Yearly Filing Summary document
+        existing_gst_file = frappe.get_all("Gst Filling Data",
+                                                filters={'gst_yearly_filling_summery_id': gst_yearly_filling_summary_id,
+                                                            "submitted": 1,
+                                                            "name": ("not in", [gst_filling_data])},
+                                                fields=["month"])
+        mon_dict={"apr": 1, "may": 2, "jun": 3, "jul": 4, "aug": 5, "sep": 6, "oct": 7, "nov": 8, "dec": 9,
+                            "jan": 10, "feb": 11, "mar": 12}
+        first_filed_month=month
+        last_filed_month=month
+        
+        for gst_file_4 in existing_gst_file:
+            if first_filed_month=="":
+                first_filed_month=gst_file_4.month
+            else:
+                cur_mon = (gst_file_4.month.split("-")[0].lower())
+                first_filed_month_mon = (first_filed_month.split("-")[0].lower())
+                if mon_dict[cur_mon] < mon_dict[first_filed_month_mon]:
+                    first_filed_month=gst_file_4.month
+
+            if last_filed_month=="":
+                last_filed_month=gst_file_4.month
+            else:
+                cur_mon = (gst_file_4.month.split("-")[0].lower())
+                last_filed_month_mon = (last_filed_month.split("-")[0].lower())
+                if mon_dict[cur_mon] > mon_dict[last_filed_month_mon]:
+                    last_filed_month=gst_file_4.month
+
+        if first_filed_month:
+            if mon_dict[first_filed_month.split("-")[0].lower()]<10:
+                first_filed_month+=("-"+gst_yearly_filing_summary.fy.split("-")[0])
+            else:
+                first_filed_month+=("-"+gst_yearly_filing_summary.fy.split("-")[1])
+
+        if last_filed_month:
+            if mon_dict[last_filed_month.split("-")[0].lower()]<10:
+                last_filed_month+=("-"+gst_yearly_filing_summary.fy.split("-")[0])
+            else:
+                last_filed_month+=("-"+gst_yearly_filing_summary.fy.split("-")[1])
+
         # Add values to the existing fields
         gst_yearly_filing_summary.sales_total_taxable += sales_total_taxable
         gst_yearly_filing_summary.purchase_total_taxable += purchase_total_taxable
         gst_yearly_filing_summary.tax_paid_amount += tax_paid_amount
         gst_yearly_filing_summary.interest_paid_amount += interest_paid_amount
         gst_yearly_filing_summary.penalty_paid_amount += penalty_paid_amount
-
+        gst_yearly_filing_summary.fy_first_month_of_filling=first_filed_month
+        gst_yearly_filing_summary.fy_last_month_of_filling=last_filed_month
         # Save the changes
         gst_yearly_filing_summary.save()
 
@@ -259,10 +301,10 @@ def submit_gst_data(gst_yearly_filling_summary_id, sales_total_taxable, purchase
 
     except frappe.DoesNotExistError:
         response["error"] = "Error: Gst Yearly Filing Summary not found."
-
+        # print("DoesNotExistErro")
     except Exception as e:
         response["error"] = f"An error occurred: {str(e)}"
-
+        # print("Error",e)
     return response
 
 
@@ -272,8 +314,45 @@ def custom_save_as_draft(gst_yearly_filling_summary_id, sales_total_taxable, pur
     response = {}
 
     try:
-        # Get the Gst Yearly Filing Summary document
         gst_yearly_filing_summary = frappe.get_doc("Gst Yearly Filing Summery", gst_yearly_filling_summary_id)
+        # Get the Gst Yearly Filing Summary document
+        existing_gst_file = frappe.get_all("Gst Filling Data",
+                                                filters={'gst_yearly_filling_summery_id': gst_yearly_filling_summary_id,
+                                                            "submitted": 1,
+                                                            "name": ("not in", [gst_filling_data])},
+                                                fields=["month"])
+        mon_dict={"apr": 1, "may": 2, "jun": 3, "jul": 4, "aug": 5, "sep": 6, "oct": 7, "nov": 8, "dec": 9,
+                            "jan": 10, "feb": 11, "mar": 12}
+        first_filed_month=""
+        last_filed_month=""
+        
+        for gst_file_4 in existing_gst_file:
+            if first_filed_month=="":
+                first_filed_month=gst_file_4.month
+            else:
+                cur_mon = (gst_file_4.month.split("-")[0].lower())
+                first_filed_month_mon = (first_filed_month.split("-")[0].lower())
+                if mon_dict[cur_mon] < mon_dict[first_filed_month_mon]:
+                    first_filed_month=gst_file_4.month
+
+            if last_filed_month=="":
+                last_filed_month=gst_file_4.month
+            else:
+                cur_mon = (gst_file_4.month.split("-")[0].lower())
+                last_filed_month_mon = (last_filed_month.split("-")[0].lower())
+                if mon_dict[cur_mon] > mon_dict[last_filed_month_mon]:
+                    last_filed_month=gst_file_4.month
+        if first_filed_month:
+            if mon_dict[first_filed_month.split("-")[0].lower()]<10:
+                first_filed_month+=("-"+gst_yearly_filing_summary.fy.split("-")[0])
+            else:
+                first_filed_month+=("-"+gst_yearly_filing_summary.fy.split("-")[1])
+
+        if last_filed_month:
+            if mon_dict[last_filed_month.split("-")[0].lower()]<10:
+                last_filed_month+=("-"+gst_yearly_filing_summary.fy.split("-")[0])
+            else:
+                last_filed_month+=("-"+gst_yearly_filing_summary.fy.split("-")[1])
 
         # Convert input values to float before adding
         sales_total_taxable = float(sales_total_taxable)
@@ -288,7 +367,8 @@ def custom_save_as_draft(gst_yearly_filling_summary_id, sales_total_taxable, pur
         gst_yearly_filing_summary.tax_paid_amount -= tax_paid_amount
         gst_yearly_filing_summary.interest_paid_amount -= interest_paid_amount
         gst_yearly_filing_summary.penalty_paid_amount -= penalty_paid_amount
-
+        gst_yearly_filing_summary.fy_first_month_of_filling=first_filed_month
+        gst_yearly_filing_summary.fy_last_month_of_filling=last_filed_month
         # Save the changes
         gst_yearly_filing_summary.save()
 
@@ -300,11 +380,14 @@ def custom_save_as_draft(gst_yearly_filling_summary_id, sales_total_taxable, pur
 
     except frappe.DoesNotExistError:
         response["error"] = "Error: Gst Yearly Filing Summary not found."
-
+        # print(e)
     except Exception as e:
         response["error"] = f"An error occurred: {str(e)}"
+        # print(e)
 
     return response
+
+
 
 
 
