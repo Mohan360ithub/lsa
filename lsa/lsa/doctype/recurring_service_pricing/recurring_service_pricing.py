@@ -514,11 +514,13 @@ def get_file_from_link(link):
 @frappe.whitelist()
 def store_rsp_in_s3(rsp_id=None):
     # Configure boto3 client
+    s3_doc=frappe.get_doc("S3 360 Dev Test")
+    # Configure boto3 client
     s3_client = boto3.client(
         's3',
-        aws_access_key_id='AKIASGPYRY7ZOL67N7O4',
-        aws_secret_access_key='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',
-        region_name='ap-south-1'
+        aws_access_key_id=s3_doc.access_key,
+        aws_secret_access_key=s3_doc.secret_key,
+        region_name=s3_doc.region_name,
     )
 
     file_link = f"https://online.lsaoffice.com/api/method/frappe.utils.print_format.download_pdf?doctype=Recurring%20Service%20Pricing&name={rsp_id}&format=Recurring%20Service%20Pricing%20default&no_letterhead=0&letterhead=LSA&settings=%7B%7D&_lang=en/{rsp_id}.pdf"
@@ -632,6 +634,7 @@ def get_pdf_for_record(rsp_id):
 #     else:
 #         return "Invalid parameters passed."
     
+
 
 
 
