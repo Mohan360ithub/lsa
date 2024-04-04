@@ -513,6 +513,7 @@ def get_file_from_link(link):
 
 @frappe.whitelist()
 def store_rsp_in_s3(rsp_id=None):
+    rsp_doc = frappe.get_doc("Recurring Service Pricing", rsp_id)
     # Configure boto3 client
     s3_doc=frappe.get_doc("S3 360 Dev Test")
     # Configure boto3 client
@@ -531,7 +532,7 @@ def store_rsp_in_s3(rsp_id=None):
     if file_content:
         # Bucket name and file name
         bucket_name = 'devbucketindia'
-        folder_name = 'vatsal_test'
+        folder_name = f'vatsal_test/CID/{rsp_doc.customer_id}'
         file_name = f'{rsp_id}.pdf'
         # print(file_content)
         # Upload file to S3
@@ -634,6 +635,7 @@ def get_pdf_for_record(rsp_id):
 #     else:
 #         return "Invalid parameters passed."
     
+
 
 
 
