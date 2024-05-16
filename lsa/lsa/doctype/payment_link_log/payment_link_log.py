@@ -1,7 +1,7 @@
 # Copyright (c) 2024, Mohan and contributors
 # For license information, please see license.txt
 
-import frappe
+import frappe,json
 import requests,re,razorpay
 from frappe.model.document import Document
 
@@ -41,13 +41,15 @@ def cancel_link(p_id=None):
 
             # print(self.link_id)
             # response=client.payment.fetch(self.link_id)
-            
+            response_dict = response.json() 
             if response.status_code == 200:
                 payment_link.enabled=0
                 payment_link.save()
                 return "Payment link canceled successfully:"
             else:
-                return f"Error canceling payment link. Status code: {response.status_code}"
+                return f"Error canceling payment link. Status code: {response.status_code},{response_dict['error']['description']}"
 
         except requests.exceptions.RequestException as e:
             return "Error in Payment Link Log"
+
+

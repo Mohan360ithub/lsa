@@ -5,17 +5,21 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "sender",
+  "send_date",
+  "message_type",
+  "column_break_iksv",
+  "message",
   "sales_order",
   "customer",
   "customer_name",
   "contact_person",
+  "mobile_no",
   "total_amount",
   "razorpay_payment_link",
   "sales_invoice",
-  "column_break_iksv",
-  "sender",
-  "send_date",
-  "mobile_no"
+  "section_break_fhjh",
+  "details"
  ],
  "fields": [
   {
@@ -23,14 +27,16 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Sales Order",
-   "options": "Sales Order"
+   "options": "Sales Order",
+   "read_only": 1
   },
   {
    "fieldname": "customer",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Customer",
-   "options": "Customer"
+   "options": "Customer",
+   "read_only": 1
   },
   {
    "fieldname": "send_date",
@@ -40,18 +46,21 @@
   },
   {
    "fieldname": "total_amount",
-   "fieldtype": "Currency",
-   "label": "Total Amount"
+   "fieldtype": "Data",
+   "label": "Total Amount",
+   "read_only": 1
   },
   {
    "fieldname": "mobile_no",
    "fieldtype": "Data",
-   "label": "Mobile No"
+   "label": "Mobile No",
+   "read_only": 1
   },
   {
    "fieldname": "razorpay_payment_link",
    "fieldtype": "Data",
-   "label": "Razorpay Payment Link"
+   "label": "Razorpay Payment Link",
+   "read_only": 1
   },
   {
    "fieldname": "sender",
@@ -81,12 +90,35 @@
    "fieldname": "sales_invoice",
    "fieldtype": "Link",
    "label": "Sales invoice",
-   "options": "Sales Invoice"
+   "options": "Sales Invoice",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_fhjh",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "details",
+   "fieldtype": "Table",
+   "label": "Details",
+   "options": "Message Detail",
+   "read_only": 1
+  },
+  {
+   "fieldname": "message",
+   "fieldtype": "Small Text",
+   "label": "Message"
+  },
+  {
+   "fieldname": "message_type",
+   "fieldtype": "Select",
+   "label": "Message Type",
+   "options": "Template\nCustom"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-02-22 10:17:05.732975",
+ "modified": "2024-04-30 15:52:37.772748",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "WhatsApp Message Log",

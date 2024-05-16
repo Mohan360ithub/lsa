@@ -8,7 +8,8 @@ frappe.query_reports["Gst Yearly Filing Summery custom report"] = {
 		"fieldname": "gst_yearly_summery_report_id",
 		"label": __("Fiscal Year"),
 		"fieldtype": "Link",
-		"options": "Gst Yearly Summery Report"
+		"options": "Gst Yearly Summery Report",
+		"reqd":1,
 	},
 	{
 		"fieldname": "gst_type",

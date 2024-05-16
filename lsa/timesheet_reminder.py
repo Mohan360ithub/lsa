@@ -80,7 +80,8 @@ def send_reminder_email_timesheet(mail_emp_date):
     if mail_emp_date:
         emp_ls=frappe.get_all("Employee",
                                     filters={
-                                        "name":("in",list(mail_emp_date))
+                                        "name":("in",list(mail_emp_date)),
+                                        "status":"Active",
                                     },
                                     fields=["name","employee_name","personal_email","company_email","reports_to"]
                                 )
@@ -191,6 +192,7 @@ def send_reminder_email_timesheet(mail_emp_date):
                     print (f"Failed to send email. Error: {e}")
         return ("Email sent successfully!")
     return "Invalid Input"
+
 
 
 

@@ -31,163 +31,6 @@ def fetch_sales_orders(cid=None):
 #############################################################################################################################
 
 
-# # Aisensy integration for Sales Invoice
-
-# @frappe.whitelist(allow_guest=True)
-# def aisensy(docname, customer,from_date,to_date,total,new_mobile,razorpay_payment_link):
-#     try:
-#         ai_sensy_api = frappe.get_doc('Ai Sensy Api')
-
-#         application_url = ai_sensy_api.application_url
-#         ai_sensy_url = ai_sensy_api.ai_sensy_url
-#         ai_sensy_api1 = ai_sensy_api.ai_sensy_api
-#         # Check if Sales Invoice exists
-#         if not frappe.get_value('Sales Invoice', docname):
-#             frappe.msgprint(_("Sales Invoice {0} not found.").format(docname))
-#             return
-
-#         # Fetch the Sales Invoice document
-#         sales_invoice = frappe.get_doc('Sales Invoice', docname)
-#         erpnext_url = application_url
-#         # Replace the following URL with the actual AI Sensy API endpoint
-#         sensy_api_url = ai_sensy_url
-
-#         sales_invoice_url = frappe.utils.get_url(
-#             f"/api/method/frappe.utils.print_format.download_pdf?doctype=Sales%20Invoice&name={docname}&format=Sales%20Invoice%20Format&no_letterhead=0&letterhead=LSA&settings=%7B%7D&_lang=en"
-#         )
-#         pdf_url = f"{erpnext_url}/api/method/frappe.utils.print_format.download_pdf?doctype=Sales%20Invoice&name={docname}&format=Standard"
-
-#         # pdf_url1 = frappe.utils.get_url(
-#         #     f"/api/method/frappe.utils.print_format.download_pdf?doctype=Sales%20Invoice&name={docname}&format=Standard"
-#         # )
-
-#         # Example payload to send to the AI Sensy API
-#         payload = {
-#             "apiKey": ai_sensy_api1,  # Replace with your actual API key
-#             "campaignName": "lsa_saleorder_invoice_with_payment_link",
-#             "destination": new_mobile,
-#             "userName": customer,
-#             "templateParams": [
-#                 customer,
-#                 from_date,
-#                 to_date,
-#                 total,
-#                 razorpay_payment_link
-#             ],
-#             "media": {
-#                 "url": sales_invoice_url,
-#                 "filename": docname
-#             }
-#         }
-
-#         # Make a POST request to the AI Sensy API
-#         response = requests.post(sensy_api_url, json=payload)
-
-#         # Check if the request was successful (status code 200)
-#         if response.status_code == 200:
-#             # Log the API response for reference
-#             frappe.logger().info(f"AI Sensy response: {response.text}")
-
-#             # You can update the Sales Invoice or perform other actions based on the API response
-#             # sales_invoice.custom_field = response.json().get('result')
-#             # sales_invoice.save()
-
-#             frappe.msgprint(_("WhatsApp Message Sent successfully : {0}").format(response.text))
-#         else:
-#             # Log the error and provide feedback to the user
-#             frappe.logger().error(f"Sensy API Error: {response.text}")
-#             frappe.msgprint(_("WhatsApp message failed to send!. Please try again Later."))
-
-#     except requests.exceptions.RequestException as e:
-#         # Log the exception and provide feedback to the user
-#         frappe.logger().error(f"Network error: {e}")
-#         frappe.msgprint(_("An error occurred while WhatsApp Message. Please try again Later."))
-
-#     except Exception as e:
-#         # Log the exception and provide feedback to the user
-#         frappe.logger().error(f"Custom Button Script Error: {e}")
-#         frappe.msgprint(_("An error occurred while WhatsApp Message. Please try again Later."))
-
-
-
-# ##########################################################################################
-# #Razorpay Payment Link For Sales Invoice
-# import razorpay
-
-
-# @frappe.whitelist()
-# def create_razorpay_order(amount, invoice_name,customer,customer_name):
-#     # Your Razorpay API key and secret
-#     razorpay_api = frappe.get_doc('Razorpay Api')
-
-#     razorpay_api_url = razorpay_api.razorpay_api_url
-#     razorpay_api_key = razorpay_api.razorpay_api_key
-#     razorpay_api_secret = razorpay_api.razorpay_secret
-    
-    
-#     razorpay_key_id = razorpay_api_key
-#     razorpay_key_secret = razorpay_api_secret
-
-#     # Specify the custom Razorpay API URL
-#     custom_razorpay_api_url = razorpay_api_url
-
-#     # Convert the amount to an integer (representing paise)
-#     amount_in_paise = int(float(amount) * 100)
-
-#     # Create a Razorpay order
-#     order_params = {
-#         "amount": amount_in_paise,
-#         "currency": "INR",
-#         "accept_partial": True,
-#         "first_min_partial_amount": 100,
-#         "description": invoice_name,
-#         "notes": {
-#             "invoice_name": invoice_name
-#         },
-#         # "accept_partial": True,
-#         # "expire_by": 1691097057,
-#         "reference_id": invoice_name
-#     }
- 
-#     try:
-#         # Use the requests library to send a POST request
-#         order = requests.post(
-#             custom_razorpay_api_url,
-#             json=order_params,
-#             auth=(razorpay_key_id, razorpay_key_secret)  # Add authentication here
-#         )
-
-#         # Check if the request was successful (status code 2xx)
-#         order.raise_for_status()
-
-#         # Get the JSON response
-#         response_json = order.json()
-
-#         # Extract short_url from the response
-#         short_url = response_json.get('short_url')
-
-#         # Optionally, you can store custom_payment_link in a database or use it as needed
-
-#         # Update the Sales Invoice document with the short_url
-#         doc = frappe.get_doc('Sales Invoice', invoice_name)
-#         doc.razorpay_payment_url = short_url
-#         doc.save()
-
-#         frappe.msgprint(f'Successfully created Razorpay order. Short URL: {short_url}')
-
-#     except requests.exceptions.HTTPError as errh:
-#         frappe.msgprint(f'HTTP Error: {errh}')
-#     except requests.exceptions.ConnectionError as errc:
-#         frappe.msgprint(f'Error Connecting: {errc}')
-#     except requests.exceptions.Timeout as errt:
-#         frappe.msgprint(f'Timeout Error: {errt}')
-#     except requests.exceptions.RequestException as err:
-#         frappe.msgprint(f'Request Exception: {err}')
-
-
-
-####################################################################################################################
-
 # Aisensy integration for Sales Order
 
 
@@ -288,7 +131,7 @@ def aisensy_sales_order(docname,customer_id, customer,from_date,to_date,total,ne
 ###########################################################################################################################
 
 
-    #Razorpay Payment Link For Sales Order
+#     #Razorpay Payment Link For Sales Order
 import razorpay
 
 
@@ -329,7 +172,7 @@ def create_razorpay_payment_link_sales_order(amount, invoice_name,customer,custo
         # "accept_partial": False,
         # "expire_by": 1691097057,
         "reference_id": invoice_name,
-        "callback_url": f"https://online.lsaoffice.com/api/method/lsa.pankaj1.get_razorpay_payment_details?customer={customer}&actual_amount={actual_amount}",
+        "callback_url": f"https://online.lsaoffice.com/api/method/lsa.pankaj1.get_razorpay_payment_details?razorpay_payment_link_reference_id={invoice_name}&customer={customer}&actual_amount={actual_amount}",
         "callback_method": "get"
     }
  
@@ -344,7 +187,7 @@ def create_razorpay_payment_link_sales_order(amount, invoice_name,customer,custo
         # # Check if the request was successful (status code 2xx)
         # order.raise_for_status()
 
-        def generate_pl(custom_razorpay_api_url,order_params,auth,reference_id,link_js=None,status=400):
+        def generate_pl(custom_razorpay_api_url,customer,actual_amount,order_params,auth,reference_id,link_js=None,status=400):
             if status!=200:
 
                 random_number = random.randint(100, 999)
@@ -352,6 +195,7 @@ def create_razorpay_payment_link_sales_order(amount, invoice_name,customer,custo
                 reference_id_with_rn=reference_id+'-'+str(random_number)
 
                 order_params["reference_id"]=reference_id_with_rn
+                order_params["callback_url"]=f"https://online.lsaoffice.com/api/method/lsa.pankaj1.get_razorpay_payment_details?razorpay_payment_link_reference_id={reference_id_with_rn}&customer={customer}&actual_amount={actual_amount}"
 
                 link_json = requests.post(
                     custom_razorpay_api_url,
@@ -360,12 +204,12 @@ def create_razorpay_payment_link_sales_order(amount, invoice_name,customer,custo
                 )
                 status=link_json.status_code
 
-                return generate_pl(custom_razorpay_api_url,order_params,auth,reference_id,link_json,status)
+                return generate_pl(custom_razorpay_api_url,customer,actual_amount,order_params,auth,reference_id,link_json,status)
             else:
                 return link_js
             
         auth=(razorpay_key_id, razorpay_key_secret)
-        order=generate_pl(custom_razorpay_api_url,order_params,auth,invoice_name)
+        order=generate_pl(custom_razorpay_api_url,customer,actual_amount,order_params,auth,invoice_name)
 
         # Get the JSON response
         response_json = order.json()
@@ -392,28 +236,37 @@ def create_razorpay_payment_link_sales_order(amount, invoice_name,customer,custo
         })
         new_payment_link.insert()
 
-        frappe.msgprint(f'Successfully created Razorpay order. Short URL: {short_url}')
+        return {"status":True,"msg":(f'Successfully created Razorpay order. Short URL: {short_url}')}
        
 
     except requests.exceptions.HTTPError as errh:
         #frappe.msgprint(f'HTTP Error: {errh}')
-        frappe.msgprint(f'Failed to generate the Razorpay payment link:{errh}')
+        return {"status":False,"msg":(f'Failed to generate the Razorpay payment link:{errh}')}
     except requests.exceptions.ConnectionError as errc:
         #frappe.msgprint(f'Error Connecting: {errc}')
-        frappe.msgprint(f'Failed to generate the Razorpay payment link:{errc}')
+        return {"status":False,"msg":(f'Failed to generate the Razorpay payment link:{errc}')}
     except requests.exceptions.Timeout as errt:
         #frappe.msgprint(f'Timeout Error: {errt}')
-        frappe.msgprint(f'Failed to generate the Razorpay payment link:{errt}')
+        return {"status":False,"msg":(f'Failed to generate the Razorpay payment link:{errt}')}
     except requests.exceptions.RequestException as err:
         #frappe.msgprint(f'Request Exception: {err}')
-        frappe.msgprint(f'Failed to generate the Razorpay payment link:{err}')
+        return {"status":False,"msg":(f'Failed to generate the Razorpay payment link:{err}')}
 
-
+#####           Executing Succesful upto here...........
 
 
 @frappe.whitelist(allow_guest=True)
-def get_razorpay_payment_details(razorpay_payment_link_id,razorpay_payment_link_reference_id,customer,actual_amount):
+def get_razorpay_payment_details(razorpay_payment_link_reference_id,customer,actual_amount):
     try:
+        frappe.msgprint("Payment Details Function Called")
+        payment_link = frappe.get_all("Payment Link Log",filters={
+                                                                    "customer_id": customer,
+                                                                    "sales_order":razorpay_payment_link_reference_id[:18],
+                                                                    "total_amount":actual_amount,
+                                                                    "enabled":1},
+                                                        fields=["link_id"])
+        razorpay_payment_link_id=payment_link[0].link_id
+
         razorpay_api = frappe.get_doc('Razorpay Api')
 
         # razorpay_api_url = razorpay_api.razorpay_api_url
@@ -448,17 +301,22 @@ def get_razorpay_payment_details(razorpay_payment_link_id,razorpay_payment_link_
                 final_amount = int(float(payment_amount) / 100)
                 # print(final_amount)
                 # frappe.msgprint(final_amount)
-                create_payment_entry(final_amount,razorpay_payment_link_reference_id,customer,razorpay_payment_link_id,actual_amount)
+                create_payment_entry(final_amount,razorpay_payment_link_reference_id[:18],customer,razorpay_payment_link_id,actual_amount)
+                
+                    
                 return render_payment_success_page(final_amount,razorpay_payment_link_id)
                 # You can now use this information as needed, such as updating your database, notifying users, etc.
             else:
                 frappe.msgprint('Amount Paid not found in the response.')
+                frappe.log_error(f"Amount Paid not found in the response.")
                 
         else:
             frappe.msgprint(f'Request failed with status code: {response.status_code}')
             frappe.msgprint(f'Response text: {response.text}')
+            frappe.log_error(f'Request failed with status code: {response.status_code}; Response text: {response.text}' )
     except Exception as e:
         frappe.msgprint(f'Error: {e}')
+        frappe.log_error(f'Error: {e}')
 
 
 def render_payment_success_page(final_amount,razorpay_payment_link_id):
@@ -478,6 +336,7 @@ def render_payment_success_page(final_amount,razorpay_payment_link_id):
             <h1>Payment Successful</h1>
             <p>Transaction: {razorpay_payment_link_id}</p>
             <p>Amount: {final_amount}</p>
+            
             <!-- Add any additional information you want to display -->
         </body>
     </html>
@@ -491,9 +350,10 @@ def render_payment_success_page(final_amount,razorpay_payment_link_id):
 
 
 
-# @frappe.whitelist(allow_guest=True)
+@frappe.whitelist(allow_guest=True)
 def create_payment_entry(final_amount, razorpay_payment_link_reference_id, customer, razorpay_payment_link_id, actual_amount):
     try:
+        frappe.msgprint("Payment Entry Function Called")
         # print("actual_amount=", actual_amount)
         # print("customer=", customer)
         # print("razorpay_payment_link_reference_id=", razorpay_payment_link_reference_id)
@@ -534,6 +394,13 @@ def create_payment_entry(final_amount, razorpay_payment_link_reference_id, custo
 
         # Save the Payment Entry
         payment_entry.insert(ignore_permissions=True)
+
+        payment_link_log = frappe.get_all("Payment Link Log",filters={"sales_order":razorpay_payment_link_id})
+        if payment_link_log:
+            payment_link_log_doc = frappe.get_doc("Payment Link Log",payment_link_log[0].name)
+            payment_link_log_doc.payment_status="Paid"
+            payment_link_log_doc.save(ignore_permissions=True)
+
         frappe.db.commit()
         # print("=============ENDED=============")
         frappe.set_user("Guest")
@@ -551,9 +418,6 @@ def is_payment_entry_exists(reference_id):
     existing_payment_entry = frappe.get_value("Payment Entry", {"reference_no": reference_id})
 
     return bool(existing_payment_entry)
-
-
-
 
 
 
@@ -916,6 +780,166 @@ accounts@lsaoffice.com'''
         frappe.msgprint("An unexpected error occurred while sending the WhatsApp message. Please contact the system administrator.")
     
 
+
+
+
+
+# # Aisensy integration for Sales Invoice
+
+# @frappe.whitelist(allow_guest=True)
+# def aisensy(docname, customer,from_date,to_date,total,new_mobile,razorpay_payment_link):
+#     try:
+#         ai_sensy_api = frappe.get_doc('Ai Sensy Api')
+
+#         application_url = ai_sensy_api.application_url
+#         ai_sensy_url = ai_sensy_api.ai_sensy_url
+#         ai_sensy_api1 = ai_sensy_api.ai_sensy_api
+#         # Check if Sales Invoice exists
+#         if not frappe.get_value('Sales Invoice', docname):
+#             frappe.msgprint(_("Sales Invoice {0} not found.").format(docname))
+#             return
+
+#         # Fetch the Sales Invoice document
+#         sales_invoice = frappe.get_doc('Sales Invoice', docname)
+#         erpnext_url = application_url
+#         # Replace the following URL with the actual AI Sensy API endpoint
+#         sensy_api_url = ai_sensy_url
+
+#         sales_invoice_url = frappe.utils.get_url(
+#             f"/api/method/frappe.utils.print_format.download_pdf?doctype=Sales%20Invoice&name={docname}&format=Sales%20Invoice%20Format&no_letterhead=0&letterhead=LSA&settings=%7B%7D&_lang=en"
+#         )
+#         pdf_url = f"{erpnext_url}/api/method/frappe.utils.print_format.download_pdf?doctype=Sales%20Invoice&name={docname}&format=Standard"
+
+#         # pdf_url1 = frappe.utils.get_url(
+#         #     f"/api/method/frappe.utils.print_format.download_pdf?doctype=Sales%20Invoice&name={docname}&format=Standard"
+#         # )
+
+#         # Example payload to send to the AI Sensy API
+#         payload = {
+#             "apiKey": ai_sensy_api1,  # Replace with your actual API key
+#             "campaignName": "lsa_saleorder_invoice_with_payment_link",
+#             "destination": new_mobile,
+#             "userName": customer,
+#             "templateParams": [
+#                 customer,
+#                 from_date,
+#                 to_date,
+#                 total,
+#                 razorpay_payment_link
+#             ],
+#             "media": {
+#                 "url": sales_invoice_url,
+#                 "filename": docname
+#             }
+#         }
+
+#         # Make a POST request to the AI Sensy API
+#         response = requests.post(sensy_api_url, json=payload)
+
+#         # Check if the request was successful (status code 200)
+#         if response.status_code == 200:
+#             # Log the API response for reference
+#             frappe.logger().info(f"AI Sensy response: {response.text}")
+
+#             # You can update the Sales Invoice or perform other actions based on the API response
+#             # sales_invoice.custom_field = response.json().get('result')
+#             # sales_invoice.save()
+
+#             frappe.msgprint(_("WhatsApp Message Sent successfully : {0}").format(response.text))
+#         else:
+#             # Log the error and provide feedback to the user
+#             frappe.logger().error(f"Sensy API Error: {response.text}")
+#             frappe.msgprint(_("WhatsApp message failed to send!. Please try again Later."))
+
+#     except requests.exceptions.RequestException as e:
+#         # Log the exception and provide feedback to the user
+#         frappe.logger().error(f"Network error: {e}")
+#         frappe.msgprint(_("An error occurred while WhatsApp Message. Please try again Later."))
+
+#     except Exception as e:
+#         # Log the exception and provide feedback to the user
+#         frappe.logger().error(f"Custom Button Script Error: {e}")
+#         frappe.msgprint(_("An error occurred while WhatsApp Message. Please try again Later."))
+
+
+
+# ##########################################################################################
+# #Razorpay Payment Link For Sales Invoice
+# import razorpay
+
+
+# @frappe.whitelist()
+# def create_razorpay_order(amount, invoice_name,customer,customer_name):
+#     # Your Razorpay API key and secret
+#     razorpay_api = frappe.get_doc('Razorpay Api')
+
+#     razorpay_api_url = razorpay_api.razorpay_api_url
+#     razorpay_api_key = razorpay_api.razorpay_api_key
+#     razorpay_api_secret = razorpay_api.razorpay_secret
+    
+    
+#     razorpay_key_id = razorpay_api_key
+#     razorpay_key_secret = razorpay_api_secret
+
+#     # Specify the custom Razorpay API URL
+#     custom_razorpay_api_url = razorpay_api_url
+
+#     # Convert the amount to an integer (representing paise)
+#     amount_in_paise = int(float(amount) * 100)
+
+#     # Create a Razorpay order
+#     order_params = {
+#         "amount": amount_in_paise,
+#         "currency": "INR",
+#         "accept_partial": True,
+#         "first_min_partial_amount": 100,
+#         "description": invoice_name,
+#         "notes": {
+#             "invoice_name": invoice_name
+#         },
+#         # "accept_partial": True,
+#         # "expire_by": 1691097057,
+#         "reference_id": invoice_name
+#     }
+ 
+#     try:
+#         # Use the requests library to send a POST request
+#         order = requests.post(
+#             custom_razorpay_api_url,
+#             json=order_params,
+#             auth=(razorpay_key_id, razorpay_key_secret)  # Add authentication here
+#         )
+
+#         # Check if the request was successful (status code 2xx)
+#         order.raise_for_status()
+
+#         # Get the JSON response
+#         response_json = order.json()
+
+#         # Extract short_url from the response
+#         short_url = response_json.get('short_url')
+
+#         # Optionally, you can store custom_payment_link in a database or use it as needed
+
+#         # Update the Sales Invoice document with the short_url
+#         doc = frappe.get_doc('Sales Invoice', invoice_name)
+#         doc.razorpay_payment_url = short_url
+#         doc.save()
+
+#         frappe.msgprint(f'Successfully created Razorpay order. Short URL: {short_url}')
+
+#     except requests.exceptions.HTTPError as errh:
+#         frappe.msgprint(f'HTTP Error: {errh}')
+#     except requests.exceptions.ConnectionError as errc:
+#         frappe.msgprint(f'Error Connecting: {errc}')
+#     except requests.exceptions.Timeout as errt:
+#         frappe.msgprint(f'Timeout Error: {errt}')
+#     except requests.exceptions.RequestException as err:
+#         frappe.msgprint(f'Request Exception: {err}')
+
+
+
+####################################################################################################################
 
 
 

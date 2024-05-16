@@ -10,7 +10,7 @@
  "is_standard": "Yes",
  "letter_head": "LSA",
  "letterhead": null,
- "modified": "2024-01-16 16:49:49.029336",
+ "modified": "2024-04-25 10:22:42.874403",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Gst Filling Data Custom Report View",
@@ -24,13 +24,13 @@
    "role": "System Manager"
   },
   {
-   "role": "LSA OPS MANAGER"
+   "role": "LSA OPS SENIOR MANAGER"
   },
   {
    "role": "LSA CEO Admin"
   },
   {
-   "role": "LSA GST Executive"
+   "role": "LSA GST Executive(A,B)"
   }
  ]
 }

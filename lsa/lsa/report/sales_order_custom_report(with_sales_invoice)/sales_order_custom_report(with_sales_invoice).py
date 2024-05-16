@@ -7,7 +7,7 @@ def execute(filters=None):
     # Define columns for the report
     columns = [
         # Customer details columns
-        # {"label": "ID", "fieldname": "so_id", "fieldtype": "Link", "options": "Sales Order", "width": 100},
+        {"label": "ID", "fieldname": "so_id", "fieldtype": "Link", "options": "Sales Order", "width": 100},
         {"label": "Status PE", "fieldname": "custom_payment_status", "fieldtype": "Select", "width": 60},
         {"label": "SI", "fieldname": "si_status", "fieldtype": "Data", "width": 35},
 
@@ -302,6 +302,7 @@ def get_data(filters):
                 data += [data_row]
 
     return data
+
 
 
 

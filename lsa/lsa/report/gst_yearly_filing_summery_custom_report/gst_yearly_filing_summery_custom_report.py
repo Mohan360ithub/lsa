@@ -66,11 +66,12 @@ def get_data(filters):
 	data = []
 
 	gst_yearly_filling_summery_filter={}
-	if (filters.get("gstfile_enabled")):
-		if (filters.get("gstfile_enabled"))=="GST Enabled":
-			gst_yearly_filling_summery_filter["gstfile_enabled"]=1
-		elif (filters.get("gstfile_enabled"))=="GST Disabled":
-			gst_yearly_filling_summery_filter["gstfile_enabled"]=0
+	gstfile_enabled=None
+	if (filters.get("gst_status")):
+		if (filters.get("gst_status"))=="GST Enabled":
+			gstfile_enabled=1
+		elif (filters.get("gst_status"))=="GST Disabled":
+			gstfile_enabled=0
 
 	if (filters.get("gst_file")):
 		gst_yearly_filling_summery_filter["gst_file_id"] = filters["gst_file"]
@@ -85,6 +86,7 @@ def get_data(filters):
 		gst_yearly_filling_summery_filter["cid"]=filters.get("customer_id")
 
 
+	
 	gst_yearly_filling_summery_s = frappe.get_all("Gst Yearly Filing Summery", 
 											   filters=gst_yearly_filling_summery_filter,
 											   fields=["name","gst_yearly_summery_report_id","gstin","gst_type","company","cid",
@@ -128,7 +130,19 @@ def get_data(filters):
 				if (customer_list[gst_file["customer_id"]]) :
 					new_data.append(gst_file)
 		data=new_data
+
+	if gstfile_enabled is not None:
+		gst_file_enabled = frappe.get_all("Gstfile", filters={"enabled":gstfile_enabled})
+		gst_file_enabled=[i.name for i in gst_file_enabled]
+		new_data=[]
+
+		for gst_file in data:
+			if (gst_file["gstfile"] in gst_file_enabled) :
+				new_data.append(gst_file)
+	
+		data=new_data
 	return data
+
 
 
 

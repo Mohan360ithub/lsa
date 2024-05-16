@@ -10,10 +10,10 @@
   "customer_id",
   "client_bank",
   "column_break_txrf",
-  "customer_name",
+  "firm_name",
   "cheque_no",
   "column_break_dnix",
-  "firm_name",
+  "contact_person",
   "recorded_by",
   "section_break_ykga",
   "received_date",
@@ -128,16 +128,10 @@
    "fieldtype": "Column Break"
   },
   {
-   "fetch_from": ".customer_name",
-   "fieldname": "customer_name",
-   "fieldtype": "Data",
-   "label": "Customer Name",
-   "reqd": 1
-  },
-  {
    "fieldname": "cheque_no",
    "fieldtype": "Data",
    "label": "Cheque No",
+   "length": 6,
    "reqd": 1
   },
   {
@@ -154,15 +148,18 @@
    "fieldtype": "Column Break"
   },
   {
+   "fetch_from": "customer_id.customer_name",
    "fieldname": "firm_name",
    "fieldtype": "Data",
    "label": "Firm Name"
   },
   {
+   "default": "user",
    "fieldname": "recorded_by",
    "fieldtype": "Link",
    "label": "Recorded By",
-   "options": "User"
+   "options": "User",
+   "read_only": 1
   },
   {
    "fieldname": "section_break_ykga",
@@ -171,11 +168,17 @@
   {
    "fieldname": "column_break_ozxt",
    "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "customer_id.custom_contact_person",
+   "fieldname": "contact_person",
+   "fieldtype": "Data",
+   "label": "Contact Person"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-02-02 12:21:32.437430",
+ "modified": "2024-05-06 19:08:45.196828",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Client Cheque",

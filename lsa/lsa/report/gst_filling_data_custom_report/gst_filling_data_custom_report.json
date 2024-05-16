@@ -6,11 +6,11 @@
  "docstatus": 0,
  "doctype": "Report",
  "filters": [],
- "idx": 17,
+ "idx": 25,
  "is_standard": "Yes",
  "letter_head": "LSA",
  "letterhead": null,
- "modified": "2024-02-19 12:27:00.013723",
+ "modified": "2024-04-24 10:52:15.053167",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Gst Filling Data Custom Report",
@@ -31,16 +31,19 @@
    "role": "LSA OPS SENIOR MANAGER"
   },
   {
-   "role": "LSA GST Executive(B)"
+   "role": "LSA GST Executive(A,B)"
   },
   {
    "role": "Lsa Ops Export"
   },
   {
-   "role": "LSA GST Ops Manager"
+   "role": "LSA GST Ops Manager(A,Sernior)"
   },
   {
-   "role": "LSA Ops Executive(B,C)"
+   "role": "LSA Ops Executive(A,B,C)"
+  },
+  {
+   "role": "LSA GST Basic(A,B,C)"
   }
  ]
 }

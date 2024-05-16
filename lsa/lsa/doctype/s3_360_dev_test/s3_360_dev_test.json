@@ -7,7 +7,8 @@
  "field_order": [
   "access_key",
   "secret_key",
-  "region_name"
+  "region_name",
+  "bucket"
  ],
  "fields": [
   {
@@ -24,12 +25,17 @@
    "fieldname": "region_name",
    "fieldtype": "Data",
    "label": "Region Name"
+  },
+  {
+   "fieldname": "bucket",
+   "fieldtype": "Data",
+   "label": "Bucket"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-04-03 14:47:29.598637",
+ "modified": "2024-05-15 17:35:42.693538",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "S3 360 Dev Test",

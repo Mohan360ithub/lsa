@@ -84,7 +84,7 @@ class RecurringServicePricing(Document):
                     master_service_doc = frappe.get_doc(item.service_type,item.service_id)
                     if master_service_doc.current_recurring_fees!=item.revised_charges:
                         master_service_doc.current_recurring_fees=item.revised_charges
-                    master_service_doc.save()
+                    # master_service_doc.save()
                 self.service_active=1
                 self.previous_pricing=prev_price_doc
                 self.save()
@@ -95,7 +95,7 @@ class RecurringServicePricing(Document):
             doc_frm_dt=datetime.strptime(str(self.effective_from), '%Y-%m-%d').date()
             doc_to_dt=datetime.strptime(str(self.effective_to), '%Y-%m-%d').date()
             if doc_frm_dt >= doc_to_dt:
-                frappe.throw("Invalid Effective To Date")
+                frappe.throw(f"Invalid Effective To Date{self.customer_id}")
 
             for item in self.recurring_services:
                 # print(self.effective_to)
@@ -210,186 +210,165 @@ def fetch_service_pricing(customer_id=None,service_id=None):
 
 
 
-@frappe.whitelist()
-def bulk_first_pricing(customer_id=None,service_id=None):
-    customer_list=frappe.get_all("Customer",fields=["name","disabled"])
-    count=1
-    customer_count=1
-    error_count=1
-    customer_service_list={}
-    for customer in customer_list:
-        exceptions=[]
-        # print(customer)
-        try:
+# @frappe.whitelist()
+# def bulk_first_pricing(customer_id=None,service_id=None):
+#     customer_list=frappe.get_all("Customer",
+#                                 #  filters={'name': "20130009"},
+#                                  fields=["name","disabled"])
+#     count=1
+#     customer_count=1
+#     error_count=1
+#     customer_service_list={}
+#     for customer in customer_list:
+#         exceptions=[]
+#         # print(customer)
+#         try:
             
-            customer_service=fetch_services(customer.name)
-            # print(customer_service)
+#             customer_service=fetch_services(customer.name)
+#             # print(customer_service)
 
-            new_doc = frappe.new_doc('Recurring Service Pricing')
+#             new_doc = frappe.new_doc('Recurring Service Pricing')
 
-            new_doc.customer_id = customer.name
-            new_doc.service_active = 1
+#             new_doc.customer_id = customer.name
+#             new_doc.service_active = 1
 
 
 
-            new_doc.status = "Need to Revise"
+#             new_doc.status = "Need to Revise"
 
-            effective_from_date = dt.date(2023, 4, 1)
+#             effective_from_date = dt.date(2024, 4, 1)
 
-            for service in customer_service:
-                service_item = new_doc.append("recurring_services")
-                service_item.service_type=service["service_type"]
-                service_item.service_id = service.name
-                service_item.company_name=service.description.split("-")[0]
-                service_item.effective_from=effective_from_date
-                service_item.current_charges=service.current_recurring_fees
-                service_item.revised_charges=service.current_recurring_fees
-                service_item.enabled = 1
-                service_item.price_revised="Yes"
-                service_item.frequency=""
-                service_item.service_enabled=service.enabled
-                # print("Service Count: ",count)
-                count+=1
-            # print("Customer Count: ",customer_count)
-            customer_count+=1
-            new_doc.effective_from = effective_from_date
+#             for service in customer_service:
+#                 service_item = new_doc.append("recurring_services")
+#                 service_item.service_type=service["service_type"]
+#                 service_item.service_id = service.name
+#                 service_item.company_name=service.description.split("-")[0]
+#                 service_item.effective_from=effective_from_date
+#                 service_item.current_charges=service.current_recurring_fees
+#                 service_item.revised_charges=service.current_recurring_fees
+#                 service_item.enabled = 1
+#                 service_item.price_revised="Yes"
+#                 service_item.frequency=""
+#                 service_item.service_enabled=service.enabled
+#                 # print("Service Count: ",count)
+#                 count+=1
+#             # print("Customer Count: ",customer_count)
+#             customer_count+=1
+#             new_doc.effective_from = effective_from_date
             
-            new_doc.fy = "2023-2024"
-            new_doc.save()
+#             new_doc.fy = "2023-2024"
+#             new_doc.save()
 
-            new_doc.status = "Revised"
-            new_doc.save()
+#             new_doc.status = "Revised"
+#             new_doc.save()
 
-            new_doc.status = "Informed to Client"
-            new_doc.save()
+#             new_doc.status = "Informed to Client"
+#             new_doc.save()
 
-            new_doc.mode_of_approval = "Meeting"
-            new_doc.status = "Approved"
-            new_doc.previous_pricing=new_doc.name
-            new_doc.save()
-        except Exception as e:
-            exceptions.append(e)
-            # print("Error Count: ",error_count)
-            error_count+=1
-            # print(e)
-    return {"msg":"Pricing Created","errors":exceptions}
+#             new_doc.mode_of_approval = "Meeting"
+#             # new_doc.status = "Approved"
+#             # new_doc.previous_pricing=new_doc.name
+#             # new_doc.save()
+#         except Exception as e:
+#             exceptions.append(e)
+#             # print("Error Count: ",error_count)
+#             error_count+=1
+#             # print(e)
+#     return {"msg":"Pricing Created","errors":exceptions}
         
 
     
 
     
+
 @frappe.whitelist()
 def bulk_price_revision_from_excel():
+    file_path = "/home/frappeuser/bench-lsa/apps/lsa/lsa/modified_15_May.csv"
+    customer_list = []
+    service_price_map = {}
+    exceptions = []
+    exception_record = []
 
-    # Path to your Excel or CSV file
-    module_path = frappe.get_module_path("lsa")
-
-    # Construct the path to your CSV file relative to the module path
-    file_path = os.path.join(module_path, "doctype", "Recurring Service Pricing", "modified_price_revision_3.csv")
-
-
-    file_path = "/home/user1/bench-lsa5/apps/lsa/lsa/lsa/doctype/recurring_service_pricing/modified_price_revision_3.csv"
-
-    customer_list=[]
-    service_price_map={}
     # Read the CSV file
     try:
         with open(file_path, mode='r') as file:
             csv_reader = csv.reader(file)
-            count=0
+            next(csv_reader)  # Skip the header row if there is one
             for row in csv_reader:
                 try:
                     if row[3].strip().isnumeric():
-                        a=float(row[3].strip())
-                        count+=1
-                        service_price_map[(row[0],row[1],row[2])]=a
+                        price = float(row[3].strip())
+                        service_price_map[(row[0].strip(), row[1].strip(), row[2].strip())] = price
                         if row[0].strip() not in customer_list:
                             customer_list.append(row[0].strip())
                     else:
-                        print(row)
-                        # print(row)
+                        exception_record.append(row)
+                        frappe.log_error(f"Non-numeric price found: {row}", "CSV Parsing Error")
                 except Exception as er:
-                    print(row[0],row[7],row[8],row[10],row[12],"row with exception")
-            print(len(service_price_map))
+                    exception_record.append(row)
+                    frappe.log_error(f"Error processing row: {row} - {str(er)}", "CSV Row Processing Error")
     except Exception as e:
-        print("An error occurred:", e)
+        frappe.log_error(f"Error opening file: {str(e)}", "File Read Error")
+        return {"status": False, "message": "File read error", "error": str(e)}
 
-    count=0
-    customer_count=0
-    error_count=1
-    exceptions=[]
-    old_serv_count=0
-    new_serv_count=0
-    customer_service_list={}
+    count = 0
+    customer_count = 0
+    error_count = 1
+    old_serv_count = 0
+    new_serv_count = 0
+
     for customer in customer_list:
-        
-        # print(customer)
         try:
-            customer_service=fetch_services(customer)
-            # print(customer_service)
-            if customer_service :
+            customer_service = fetch_services(customer)
+            if customer_service:
                 new_doc = frappe.new_doc('Recurring Service Pricing')
-                # print(customer_service)
                 new_doc.customer_id = customer
-
                 new_doc.status = "Need to Revise"
-
                 effective_from_date = dt.date(2024, 4, 1)
+                new_doc.effective_from = effective_from_date
+                new_doc.fy = "2024-2025"
 
                 for service in customer_service:
                     service_item = new_doc.append("recurring_services")
-                    service_item.service_type=service["service_type"]
-                    # print(service)
+                    service_item.service_type = service["service_type"]
                     service_item.service_id = service["name"]
-                    service_item.company_name=service["description"].split("-")[0]
-                    service_item.frequency=service.frequency
-                    service_item.current_charges=service.current_recurring_fees
-                    
-                    if (customer,service["service_type"],service.name) in service_price_map and service_price_map[(customer,service["service_type"],service.name)]:
-                        
-                        if service_price_map[(customer,service["service_type"],service["name"])]:
-                            service_item.revised_charges=service_price_map[(customer,service["service_type"],service.name)]
-                            # print(service["service_type"],service["name"])
-                            
-                        else:
-                            # print(service["service_type"],service["name"])
-                            # print("Excel fees",service["service_type"],service["name"],service_price_map[(customer,service["service_type"],service["name"])])
-                            # service_item.revised_charges=service.current_recurring_fees
-                            service_item.revised_charges=service_price_map[(customer,service["service_type"],service.name)]
-                        new_serv_count+=1
-                        del service_price_map[(customer,service["service_type"],service.name)]
+                    service_item.company_name = service["description"].split("-")[0]
+                    service_item.frequency = service.frequency
+                    service_item.current_charges = service.current_recurring_fees
+
+                    key = (customer, service["service_type"], service["name"])
+                    if key in service_price_map:
+                        service_item.revised_charges = service_price_map[key]
+                        new_serv_count += 1
+                        del service_price_map[key]
                     else:
-                        # print(customer,service["service_type"],service["name"])
-                        old_serv_count+=1
-                        service_item.revised_charges=service.current_recurring_fees
+                        service_item.revised_charges = service.current_recurring_fees
+                        old_serv_count += 1
+
                     service_item.enabled = 1
-                    # print(service)
-                    if service_item.revised_charges!=service_item.current_charges:
-                        service_item.price_revised="Yes"
-                    else:
-                        service_item.price_revised="No"
-                    service_item.service_enabled=service.enabled
-                    # print("Service Count: ",count)
-                    count+=1
-                # print("Customer Count: ",customer_count)
-                customer_count+=1
-                new_doc.effective_from = effective_from_date
-                
-                new_doc.fy = "2024-2025"
-                # new_doc.save()
+                    service_item.price_revised = "Yes" if service_item.revised_charges != service_item.current_charges else "No"
+                    service_item.service_enabled = service.enabled
+                    count += 1
+
+                new_doc.save()
+                frappe.db.commit()
+                customer_count += 1
 
         except Exception as e:
-            exceptions.append(e)
-            print("Error Count: ",error_count)
-            # print(customer)
-            error_count+=1
-            print(e)
-    # print(count)
-    # print(old_serv_count)
-    # print(new_serv_count)
-    # print(service_price_map)
-    return {"msg":"Pricing Created","errors":exceptions}
+            frappe.log_error(f"Error processing customer: {customer} - {str(e)}", "Customer Processing Error")
+            exceptions.append(str(e))
+            error_count += 1
 
+    return {
+        "msg": "Pricing Created",
+        "errors": exceptions,
+        "exception_record": exception_record,
+        "customer_count": customer_count,
+        "service_count": count,
+        "old_service_count": old_serv_count,
+        "new_service_count": new_serv_count,
+        "remaining_service_price_map": service_price_map
+    }
 
 
 
@@ -401,16 +380,14 @@ def rsp_revision_mail(rsp_id=None, recipient=None, subject=None, bodyh=None,body
     if rsp_id and recipient and subject and bodyh and bodyf:
         rsp_doc = frappe.get_doc("Recurring Service Pricing", rsp_id)
 
-        email_account = frappe.get_doc("Email Account", "LSA OFFICE")
+        email_account = frappe.get_doc("Email Account", "LSA Accounts")
         sender_email = email_account.email_id
         sender_password = email_account.get_password()
         cc_email = "360ithub.developers@gmail.com"
-
-        print(repr(bodyh))
-        print(repr(bodyf))
+        
         body=""
         for i in (bodyh.split("\n")):
-            print(repr(i))
+            
             if i:
                 body+=f'<pre style="font-family: Arial, sans-serif;margin: 0; padding: 0;">{i}</pre>'
             else:
@@ -423,10 +400,11 @@ def rsp_revision_mail(rsp_id=None, recipient=None, subject=None, bodyh=None,body
                     <thead>
                         <tr style="background-color:#3498DB;color:white;text-align: left;">
                             <th style="vertical-align: middle;border: solid 2px #bcb9b4; width: 10%;">S. No.</th>
-                            <th style="vertical-align: middle;border: solid 2px #bcb9b4; width: 20%;">Service Type</th>
-                            <th style="vertical-align: middle;border: solid 2px #bcb9b4; width: 20%;">Service ID</th>
-                            <th style="vertical-align: middle;border: solid 2px #bcb9b4; width: 40%;">Company Name</th>
-                            <th style="vertical-align: middle;border: solid 2px #bcb9b4; width: 10%;">Revised Charges</th>
+                            <th style="vertical-align: middle;border: solid 2px #bcb9b4; width: 15%;">Service Type</th>
+                            <th style="vertical-align: middle;border: solid 2px #bcb9b4; width: 15%;">Service ID</th>
+                            <th style="vertical-align: middle;border: solid 2px #bcb9b4; width: 35%;">Company Name</th>
+                            <th style="vertical-align: middle;border: solid 2px #bcb9b4; width: 15%;">Revised Charges(INR)</th>
+                            <th style="vertical-align: middle;border: solid 2px #bcb9b4; width: 10%;">Payment Terms</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -440,6 +418,7 @@ def rsp_revision_mail(rsp_id=None, recipient=None, subject=None, bodyh=None,body
                     <td style="border: solid 2px #bcb9b4;">{service.service_id}</td>
                     <td style="border: solid 2px #bcb9b4;">{service.company_name}</td>
                     <td style="border: solid 2px #bcb9b4;">{service.revised_charges}</td>
+                    <td style="border: solid 2px #bcb9b4;">{service.frequency}</td>
                 </tr>
             """
             count+=1
@@ -482,7 +461,7 @@ def rsp_revision_mail(rsp_id=None, recipient=None, subject=None, bodyh=None,body
             message.attach(part)
 
         # Connect to the SMTP server and send the email
-        smtp_server = 'smtp.gmail.com'
+        smtp_server = 'smtp-mail.outlook.com'
         smtp_port = 587
         with smtplib.SMTP(smtp_server, smtp_port) as server:
             server.starttls()
@@ -637,7 +616,305 @@ def get_pdf_for_record(rsp_id):
     
 
 
+######################################### WhatsApp #####################################################
 
+
+
+########################################Single RSP template with PDF###########################################################
+
+@frappe.whitelist()
+def whatsapp_RSP_template(docname,new_mobile):
+    #new_mobile="9098543046"
+
+    whatsapp_demo = frappe.get_all('WhatsApp Instance',filters={'module':'Accounts','connection_status':1,'active':1})
+    if whatsapp_demo:
+        sales_invoice_whatsapp_log = frappe.new_doc('WhatsApp Message Log')
+        whatsapp_items = []
+
+        invoice_doc = frappe.get_doc('Recurring Service Pricing', docname)
+        customer = invoice_doc.customer_id
+        effective_from = invoice_doc.effective_from
+        customer_name = invoice_doc.customer_name
+        docname = invoice_doc.name
+
+        instance = frappe.get_doc('WhatsApp Instance',whatsapp_demo[0].name)
+        ins_id = instance.instance_id
+
+
+        try:
+            # Check if the mobile number has 10 digits
+            if len(new_mobile) != 10:
+                frappe.msgprint("Please provide a valid 10-digit mobile number.")
+                return
+            parsed_date = datetime.strptime(str(effective_from), '%Y-%m-%d')
+            formatted_effective_from = parsed_date.strftime('%B %d, %Y')
+            
+            message = f'''Dear Sir/Madam,
+
+Please be informed that there will be a revision in pricing effective from {formatted_effective_from}. Should you have any questions or require further discussion, please do not hesitate to contact us.
+
+For continued service, kindly acknowledge this notice by taking a printout, signing it, and returning the signed copy to our office. Alternatively, you may email a scanned copy to accounts@lsaoffice.com at your earliest convenience.
+
+Thank you for your attention to this matter.
+
+Regards
+Accounts Team
+LSA Office
+8951692788'''
+            
+            ########################### Below commented link is work on Live #######################
+            link=f"https://online.lsaoffice.com/api/method/frappe.utils.print_format.download_pdf?doctype=Recurring%20Service%20Pricing&name={docname}&format=Recurring%20Service%20Pricing%20default&no_letterhead=0&letterhead=LSA&settings=%7B%7D&_lang=en/{docname}.pdf"
+            # link = f"https://online.lsaoffice.com/api/method/frappe.utils.print_format.download_pdf?doctype=Sales%20Order&name={docname}&format=Sales%20Order%20Format&no_letterhead=0&letterhead=LSA&settings=%7B%7D&_lang=en/{docname}.pdf"
+            # link = "https://online.lsaoffice.com/api/method/frappe.utils.print_format.download_pdf?doctype=Sales%20Order&name=SAL-ORD-2023-00262&format=Sales%20Order%20Format&no_letterhead=0&letterhead=LSA&settings=%7B%7D&_lang=en/Invoice.pdf"
+
+            url = "https://wts.vision360solutions.co.in/api/sendFileWithCaption"
+            params_1 = {
+                "token": ins_id,
+                "phone": f"91{new_mobile}",
+                "message": message,
+                "link": link
+            }
+
+            whatsapp_items.append( {"type": "Sales Order",
+                                    "document_id": invoice_doc.name,
+                                    "mobile_number": new_mobile,
+                                    "customer":customer,})
+            
+            response = requests.post(url, params=params_1)
+            response.raise_for_status()  # Raise an error for HTTP errors (status codes other than 2xx)
+            response_data = response.json()
+            message_id = response_data['data']['messageIDs'][0]
+
+
+            # Check if the response status is 'success'
+            if response_data.get('status') == 'success':
+                # Log the success
+
+                frappe.logger().info("WhatsApp message sent successfully")
+                sales_invoice_whatsapp_log.append("details", {
+                                                "type": "Recurring Service Pricing",
+                                                "document_id": invoice_doc.name,
+                                                "mobile_number": new_mobile,
+                                                "customer":customer,
+                                                "message_id":message_id
+                                                            
+                                                # Add other fields of the child table row as needed
+                                            })
+                sales_invoice_whatsapp_log.send_date = frappe.utils.now_datetime()
+                sales_invoice_whatsapp_log.sender = frappe.session.user
+                sales_invoice_whatsapp_log.type = "Template"
+                sales_invoice_whatsapp_log.message = message
+                sales_invoice_whatsapp_log.insert()
+                return {"status":True,"msg":"WhatsApp message sent successfully"}
+            else:
+                return {"status":False,"error":f"{response.json()}","msg":"An error occurred while sending the WhatsApp message."}
+            # return {"status":True,"msg":f"{invoice_doc.effective_from},{formatted_effective_from}","template":message}
+
+        except requests.exceptions.RequestException as e:
+            # Log the exception and provide feedback to the user
+            frappe.logger().error(f"Network error: {e}")
+            return {"status":False,"error":e,"msg":"An error occurred while sending the WhatsApp message. Please try again later."}
+        except Exception as er:
+            # Log the exception and provide feedback to the user
+            frappe.logger().error(f"Error: {er}")
+            return {"status":False,"error":er,"msg":"An unexpected error occurred while sending the WhatsApp message. Please contact the system administrator."}
+    else:
+        return {"status":False,"msg":"Your WhatApp API instance is not connected"}
+
+
+#####################################################################################################
+########################## Selected RSP Whatsapp(BULK)  ##################
+################################## (RSP with PDF Button)###########################
+
+
+@frappe.whitelist()
+def send_rsp_whatsapp_bulk(new_mobile):
+    pass
+#     new_mobile_dict = json.loads(new_mobile)
+#     count = 0
+#     success_number = []
+#     success_sales_invoices = []
+#     whatsapp_items = []
+#     # instance_id=whatsapp_demo.instance_id
+#     whatsapp_demo = frappe.get_all('WhatsApp Instance',filters={'module':'Accounts','connection_status':1,'active':1})
+#     if whatsapp_demo:
+#         whatsapp_demo_doc = instance = frappe.get_doc('WhatsApp Instance',whatsapp_demo[0].name)
+#         connection_status = whatsapp_demo_doc.connection_status
+#         mobile_numbers =[]
+        
+#         sales_invoice_whatsapp_log = frappe.new_doc('WhatsApp Message Log')
+#         for invoice_key in new_mobile_dict:
+#                 # Fetch the sales invoice document based on the key
+#                 invoice_doc = frappe.get_doc('Sales Order', invoice_key)
+                
+#                 from_date = invoice_doc.custom_so_from_date
+#                 to_date = invoice_doc.custom_so_to_date
+#                 customer = invoice_doc.customer
+#                 total = invoice_doc.rounded_total
+#                 customer_name = invoice_doc.customer_name
+#                 docname = invoice_doc.name
+                
+#                 ins_id = whatsapp_demo_doc.instance_id
+
+
+#                 try:
+#                     # Check if the mobile number has 10 digits
+#                     if len(new_mobile_dict[invoice_key]) != 10:
+#                         frappe.msgprint("Please provide a valid 10-digit mobile number.")
+#                         return
+#                     payment_link=""
+#                     if (invoice_doc.custom_razorpay_payment_url):
+#                         payment_link=f"Payment Link is : {invoice_doc.custom_razorpay_payment_url}"
+                    
+#                     mobile_numbers.append(new_mobile_dict[invoice_key])
+
+
+                    
+            
+#                     message = f'''Dear {customer_name},
+            
+# Your Sale Invoice for {from_date} to {to_date} period is due for amount of Rs {total}/- Kindly pay on below bank amount details
+        
+# Our Bank Account
+# Lokesh Sankhala and ASSOSCIATES
+# Account No = 73830200000526
+# IFSC = BARB0VJJCRO
+# Bank = Bank of Baroda,JC Road,Bangalore-560002
+# UPI id = LSABOB@UPI
+# Gpay / Phonepe no = 9513199200
+# {payment_link}
+        
+# Call us immediately in case of query.
+        
+# Best Regards,
+# LSA Office Account Team
+# accounts@lsaoffice.com'''
+                    
+#                     ########################### Below commented link is work on Live #######################
+#                     link = f"https://online.lsaoffice.com/api/method/frappe.utils.print_format.download_pdf?doctype=Sales%20Order&name={invoice_key}&format=Sales%20Order%20Format&no_letterhead=0&letterhead=LSA&settings=%7B%7D&_lang=en/{invoice_key}.pdf"
+#                     # link = "https://online.lsaoffice.com/api/method/frappe.utils.print_format.download_pdf?doctype=Sales%20Order&name=SAL-ORD-2023-00262&format=Sales%20Order%20Format&no_letterhead=0&letterhead=LSA&settings=%7B%7D&_lang=en/Invoice.pdf"
+            
+#                     url = "https://wts.vision360solutions.co.in/api/sendFileWithCaption"
+#                     params_1 = {
+#                         "token": ins_id,
+#                         "phone": f"91{new_mobile_dict[invoice_key]}",
+#                         "message": message,
+#                         "link": link
+#                     }
+#                     # print(new_mobile_dict[invoice_key])
+#                     # whatsapp_items.append( {"type": "Sales Invoice",
+#                     #                         "document_id": invoice_doc.name,
+#                     #                         "mobile_number": new_mobile_dict[invoice_key],
+#                     #                         "customer":invoice_doc.customer,})
+                    
+#                     response = requests.post(url, params=params_1)
+#                     response.raise_for_status()  # Raise an error for HTTP errors (status codes other than 2xx)
+#                     response_data = response.json()
+
+#                     message_id = response_data['data']['messageIDs'][0]
+
+#                     # Check if the response status is 'success'
+#                     if response_data.get('status') == 'success':
+#                         # Log the success
+
+#                         frappe.logger().info("WhatsApp message sent successfully")
+#                         # print("send succesfully")
+#                         sales_invoice_whatsapp_log.append("details", {
+#                                                         "type": "Sales Order",
+#                                                         "document_id": invoice_doc.name,
+#                                                         "mobile_number": new_mobile_dict[invoice_key],
+#                                                         "customer":invoice_doc.customer,
+#                                                         "message_id":message_id
+                                                                    
+#                                                         # Add other fields of the child table row as needed
+#                                                     })
+#                     else:
+#                         frappe.logger().error(f"Failed to send Whatsapp Message for {invoice_doc.name}")
+            
+            
+#                     frappe.logger().info(f"Sales Order response: {response.text}")
+            
+#                     # Create a new WhatsApp Message Log document
+                    
+                    
+#                     count += 1 
+#                     success_number+=[new_mobile_dict[invoice_key]]
+#                     success_sales_invoices+=[invoice_key]
+
+                
+            
+#                 except requests.exceptions.RequestException as e:
+#                     # Log the exception and provide feedback to the user
+#                     frappe.logger().error(f"Network error: {e}")
+#                     # frappe.msgprint("An error occurred while sending the WhatsApp message. Please try again later.")
+#                 except Exception as e:
+#                     # Log the exception and provide feedback to the user
+#                     frappe.logger().error(f"Error: {e}")
+#                     # frappe.msgprint("An unexpected error occurred while sending the WhatsApp message. Please contact the system administrator.")
+#         message = '''Dear {customer_name},
+            
+# Your Sale Invoice for {from_date} to {due_date} period is due for amount of Rs {total}/- Kindly pay on below bank amount details
+            
+# Our Bank Account
+# Lokesh Sankhala and ASSOSCIATES
+# Account No = 73830200000526
+# IFSC = BARB0VJJCRO
+# Bank = Bank of Baroda,JC Road,Bangalore-560002
+# UPI id = LSABOB@UPI
+# Gpay / Phonepe no = 9513199200
+# {payment_link}
+        
+# Call us immediately in case of query.
+        
+# Best Regards,
+# LSA Office Account Team
+# accounts@lsaoffice.com'''
+        
+#         # sales_invoice_whatsapp_log.sales_invoice = ",".join(success_sales_invoices)
+#         # sales_invoice_whatsapp_log.customer = invoice_doc.customer
+#         # sales_invoice_whatsapp_log.posting_date = from_date
+#         sales_invoice_whatsapp_log.send_date = frappe.utils.now_datetime()
+#         # sales_invoice_whatsapp_log.total_amount = total
+#         # sales_invoice_whatsapp_log.mobile_no = ",".join(success_number)
+#         sales_invoice_whatsapp_log.sender = frappe.session.user
+#         # sales_invoice_whatsapp_log.sales_invoice =  docname
+#         sales_invoice_whatsapp_log.type = "Template"
+#         sales_invoice_whatsapp_log.message = message
+#         # sales_invoice_whatsapp_log.file = link
+#         # sales_invoice_whatsapp_log.details = whatsapp_items
+#         # print( "Sales Invoice",invoice_salesinvoice,mobile_number,invoice_doc.customer)
+#         # print(whatsapp_items)
+#         sales_invoice_whatsapp_log.insert()
+#         if len(success_number)==len(new_mobile_dict):
+#             return {"status":True,"msg":"WhatsApp messages sent successfully"}
+#         else:
+#             msg=f"{len(success_number)} of {len(new_mobile_dict)} WhatsApp messages sent successfully"
+#             return {"status":True,"msg":msg}
+       
+#     else:
+#         return {"status":False,"msg":"Your WhatApp API instance is not connected"}
+
+###################################################### RSP with GST Regular ####################################################
+
+@frappe.whitelist()
+def mark_gst_regular():
+    try:
+        gst_pricing=frappe.get_all("Recurring Service Item",
+                                filters={"service_type":"Gstfile"},
+                                fields=["name","parent","service_id"],)
+        gst_pricing_dict={pr.service_id:pr.parent for pr in gst_pricing}
+        if gst_pricing_dict:
+            gst_reg=frappe.get_all("Gstfile",
+                                filters={"gst_type":"Regular","enabled":1})
+            gst_reg=[gst.name for gst in gst_reg]
+            for gst_pr in gst_pricing_dict :
+                if gst_pr in gst_reg:
+                    pr_doc=frappe.get_doc("Recurring Service Pricing",gst_pricing_dict[gst_pr])
+                    pr_doc.gst_type="Regular"
+                    pr_doc.save()
+        return {"status":True,"msg":"RSP with GST Regular have been Marked"}
+    except Exception as er:
+        return {"status":False,"msg":f"Error: {er}"}
 
 
 

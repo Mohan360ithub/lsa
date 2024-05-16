@@ -1,0 +1,30 @@
+{
+ "add_total_row": 1,
+ "columns": [],
+ "creation": "2024-04-24 09:54:16.216357",
+ "disabled": 1,
+ "docstatus": 0,
+ "doctype": "Report",
+ "filters": [],
+ "idx": 0,
+ "is_standard": "Yes",
+ "letter_head": "LSA",
+ "letterhead": null,
+ "modified": "2024-04-25 12:56:58.802676",
+ "modified_by": "Administrator",
+ "module": "Lsa",
+ "name": "Payment Entry Mapping Sales Orders and Invoice(Cleared)",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "ref_doctype": "Payment Entry",
+ "report_name": "Payment Entry Mapping Sales Orders and Invoice(Cleared)",
+ "report_type": "Script Report",
+ "roles": [
+  {
+   "role": "LSA Account Executive"
+  },
+  {
+   "role": "LSA CEO ADMIN TEAM"
+  }
+ ]
+}

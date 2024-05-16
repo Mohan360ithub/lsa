@@ -59,7 +59,10 @@
   "associate_partner_tab",
   "prof_partner",
   "column_break_lhbr",
-  "partner_mobile_no"
+  "partner_mobile_no",
+  "admin_info_tab",
+  "admin_notes",
+  "admin_notes_table"
  ],
  "fields": [
   {
@@ -381,10 +384,28 @@
    "fieldtype": "Data",
    "label": "Lost Reason",
    "read_only": 1
+  },
+  {
+   "fieldname": "admin_info_tab",
+   "fieldtype": "Tab Break",
+   "label": "Admin Info"
+  },
+  {
+   "fieldname": "admin_notes",
+   "fieldtype": "HTML",
+   "label": "Admin Notes",
+   "permlevel": 5
+  },
+  {
+   "fieldname": "admin_notes_table",
+   "fieldtype": "Table",
+   "label": "Admin Notes Table",
+   "options": "CRM Note",
+   "permlevel": 5
   }
  ],
  "links": [],
- "modified": "2024-03-29 17:20:37.008842",
+ "modified": "2024-04-19 15:43:11.181183",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Client Notices",

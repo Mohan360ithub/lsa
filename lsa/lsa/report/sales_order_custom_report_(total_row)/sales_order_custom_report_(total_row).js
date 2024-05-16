@@ -25,11 +25,28 @@ frappe.query_reports["Sales Order Custom Report (Total row)"] = {
 			default: "Unpaid,Partially Paid",
 		},
 		{
+			fieldname: "customer_enabled",
+			label: __("Customer Enabled"),
+			fieldtype: "Select",
+			options:["","Customer Enabled","Customer Disabled"],
+			default: "Customer Enabled",
+		},
+		{
 			fieldname: "sales_invoice",
 			label: __("Sales Invoice"),
 			fieldtype: "Select",
 			options:["Yes","No",""],
 			default: "No",
+		},
+				{
+			fieldname: "from_date",
+			label: __("From Date"),
+			fieldtype: "Date",
+		},
+		{
+			fieldname: "to_date",
+			label: __("To Date"),
+			fieldtype: "Date",
 		},
 	]
 };

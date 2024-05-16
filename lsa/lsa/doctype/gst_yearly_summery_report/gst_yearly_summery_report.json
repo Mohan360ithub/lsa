@@ -51,7 +51,7 @@
    "link_fieldname": "fy"
   }
  ],
- "modified": "2024-01-17 13:03:36.232688",
+ "modified": "2024-05-06 11:05:09.109420",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Gst Yearly Summery Report",
@@ -68,6 +68,16 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "LSA OPS SENIOR MANAGER",
+   "select": 1,
+   "submit": 1,
    "write": 1
   }
  ],

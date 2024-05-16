@@ -11,6 +11,8 @@
   "customer_name",
   "contact_person",
   "mobile_no",
+  "email",
+  "gstin",
   "service_active",
   "customer_disabled",
   "customer_status",
@@ -27,7 +29,8 @@
   "recurring_services",
   "section_break_nvah",
   "next_price_revision",
-  "previous_price_revision"
+  "previous_price_revision",
+  "gst_type"
  ],
  "fields": [
   {
@@ -171,11 +174,31 @@
    "label": "Customer Status",
    "options": "ACTIVE\nHOLD",
    "read_only": 1
+  },
+  {
+   "fetch_from": "customer_id.custom_primary_email",
+   "fieldname": "email",
+   "fieldtype": "Data",
+   "label": "Email",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "customer_id.gstin",
+   "fieldname": "gstin",
+   "fieldtype": "Data",
+   "label": "GSTIN",
+   "read_only": 1
+  },
+  {
+   "fieldname": "gst_type",
+   "fieldtype": "Data",
+   "label": "GST Type",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-03-25 11:21:58.186025",
+ "modified": "2024-05-15 18:56:43.776356",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Recurring Service Pricing",

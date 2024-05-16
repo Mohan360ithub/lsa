@@ -1,0 +1,114 @@
+{
+ "actions": [],
+ "autoname": "field:module",
+ "creation": "2024-04-30 15:33:45.550647",
+ "default_view": "List",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "instance_id",
+  "instance_name",
+  "remaining_credits",
+  "credits_usage",
+  "expiry_date",
+  "column_break_nwfc",
+  "module",
+  "connected_number",
+  "connection_status",
+  "webhook",
+  "creation_time",
+  "today_credits_usage"
+ ],
+ "fields": [
+  {
+   "fieldname": "instance_id",
+   "fieldtype": "Data",
+   "label": "Instance Id"
+  },
+  {
+   "fieldname": "instance_name",
+   "fieldtype": "Data",
+   "label": "Instance Name"
+  },
+  {
+   "fieldname": "remaining_credits",
+   "fieldtype": "Data",
+   "label": "Remaining Credits"
+  },
+  {
+   "fieldname": "credits_usage",
+   "fieldtype": "Data",
+   "label": "Credits Usage"
+  },
+  {
+   "fieldname": "expiry_date",
+   "fieldtype": "Datetime",
+   "label": "Expiry Date"
+  },
+  {
+   "fieldname": "column_break_nwfc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "module",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Module",
+   "reqd": 1,
+   "set_only_once": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "connected_number",
+   "fieldtype": "Data",
+   "label": "Connected Number"
+  },
+  {
+   "fieldname": "connection_status",
+   "fieldtype": "Data",
+   "label": "Connection status"
+  },
+  {
+   "fieldname": "webhook",
+   "fieldtype": "Data",
+   "label": "Webhook"
+  },
+  {
+   "fieldname": "creation_time",
+   "fieldtype": "Datetime",
+   "label": "Creation Time"
+  },
+  {
+   "fieldname": "today_credits_usage",
+   "fieldtype": "Data",
+   "label": "Today Credits Usage"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-04-30 15:33:50.476918",
+ "modified_by": "Administrator",
+ "module": "Lsa",
+ "name": "Whats App Demo",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1,
+ "track_seen": 1
+}

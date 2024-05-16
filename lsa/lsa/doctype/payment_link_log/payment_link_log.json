@@ -1,18 +1,24 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "format:RZP-LNK-{MM}-{YY}-{#####}",
  "creation": "2024-02-02 12:04:57.490078",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "sales_order",
   "customer_id",
-  "total_amount",
-  "enabled",
+  "customer_name",
+  "contact_person",
+  "mobile_number",
+  "live_link",
   "column_break_yucj",
   "date_of_generation",
+  "total_amount",
+  "payment_status",
   "link_short_url",
-  "link_id"
+  "link_id",
+  "enabled"
  ],
  "fields": [
   {
@@ -25,6 +31,8 @@
   {
    "fieldname": "customer_id",
    "fieldtype": "Link",
+   "in_filter": 1,
+   "in_standard_filter": 1,
    "label": "Customer ID",
    "options": "Customer",
    "read_only": 1
@@ -39,16 +47,19 @@
    "default": "1",
    "fieldname": "enabled",
    "fieldtype": "Check",
-   "label": "Enabled"
+   "in_filter": 1,
+   "in_standard_filter": 1,
+   "label": "Enabled",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_yucj",
    "fieldtype": "Column Break"
   },
   {
-   "default": "Today",
+   "default": "Now",
    "fieldname": "date_of_generation",
-   "fieldtype": "Date",
+   "fieldtype": "Datetime",
    "label": "Date of Generation",
    "read_only": 1
   },
@@ -63,14 +74,53 @@
    "fieldtype": "Data",
    "label": "Link ID",
    "read_only": 1
+  },
+  {
+   "fetch_from": "customer_id.customer_name",
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "label": "Customer Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "customer_id.custom_contact_person",
+   "fieldname": "contact_person",
+   "fieldtype": "Data",
+   "label": "Contact Person",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "customer_id.custom_primary_mobile_no",
+   "fieldname": "mobile_number",
+   "fieldtype": "Data",
+   "label": "Mobile Number",
+   "read_only": 1
+  },
+  {
+   "default": "Unpaid",
+   "fieldname": "payment_status",
+   "fieldtype": "Select",
+   "in_filter": 1,
+   "in_standard_filter": 1,
+   "label": "Payment Status",
+   "options": "Unpaid\nPaid",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "live_link",
+   "fieldtype": "Check",
+   "label": "Live Link",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-02-21 15:31:01.008503",
+ "modified": "2024-05-09 11:02:47.125915",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Payment Link Log",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {

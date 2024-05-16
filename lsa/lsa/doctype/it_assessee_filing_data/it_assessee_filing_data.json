@@ -78,6 +78,8 @@
    "fetch_from": "it_assessee_file.customer_id",
    "fieldname": "customer_id",
    "fieldtype": "Link",
+   "in_filter": 1,
+   "in_standard_filter": 1,
    "label": "Customer ID",
    "options": "Customer"
   },
@@ -126,7 +128,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-02-17 19:25:44.123895",
+ "modified": "2024-04-15 13:22:20.829422",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "IT Assessee Filing Data",

@@ -1,0 +1,119 @@
+{
+ "actions": [],
+ "autoname": "autoincrement",
+ "creation": "2024-05-13 18:18:36.010175",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "full_name",
+  "dob",
+  "resume",
+  "section_break_tvvd",
+  "s3_url",
+  "column_break_ralm",
+  "section_break_gyki",
+  "remove_file",
+  "column_break_kusj",
+  "downlaod_file",
+  "column_break_qbdr",
+  "column_break_hckz",
+  "section_break_fzuf",
+  "file_upload"
+ ],
+ "fields": [
+  {
+   "fieldname": "full_name",
+   "fieldtype": "Data",
+   "label": "Full Name",
+   "unique": 1
+  },
+  {
+   "fieldname": "dob",
+   "fieldtype": "Date",
+   "label": "DOB"
+  },
+  {
+   "fieldname": "resume",
+   "fieldtype": "Attach",
+   "label": "Resume"
+  },
+  {
+   "fieldname": "s3_url",
+   "fieldtype": "Data",
+   "label": "S3 URL",
+   "read_only": 1
+  },
+  {
+   "fieldname": "file_upload",
+   "fieldtype": "HTML",
+   "label": "File Upload"
+  },
+  {
+   "fieldname": "section_break_tvvd",
+   "fieldtype": "Section Break"
+  },
+  {
+   "depends_on": "s3_url",
+   "fieldname": "column_break_ralm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "s3_url",
+   "fieldname": "remove_file",
+   "fieldtype": "Button",
+   "label": "Remove File"
+  },
+  {
+   "fieldname": "section_break_fzuf",
+   "fieldtype": "Section Break",
+   "hidden": 1
+  },
+  {
+   "fieldname": "section_break_gyki",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_kusj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "s3_url",
+   "fieldname": "downlaod_file",
+   "fieldtype": "Button",
+   "label": "Downlaod File"
+  },
+  {
+   "fieldname": "column_break_qbdr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_hckz",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-05-16 15:49:58.988661",
+ "modified_by": "Administrator",
+ "module": "Lsa",
+ "name": "Job Application",
+ "naming_rule": "Autoincrement",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

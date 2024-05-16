@@ -40,7 +40,7 @@ def checking_user_authentication(user_email):
     except Exception as e:
         print(e)
         return {"status":"Failed"}
-
+    
 
 @frappe.whitelist()
 def create_gst_yearly_filing_manually(gst_yearly_summary_report,gstfile,
@@ -48,60 +48,91 @@ def create_gst_yearly_filing_manually(gst_yearly_summary_report,gstfile,
     try:
         existing_doc=frappe.get_all("Gst Yearly Filing Summery",
                                     filters={"gst_file_id":gstfile,
-                                             "fy":gst_yearly_summary_report,
-                                             "step2_enabled":1,})
+                                             "fy":gst_yearly_summary_report,})
         
         if not(existing_doc):
-            existing_doc_gst_type=frappe.get_all("Gst Yearly Filing Summery",
-                                    filters={"gst_file_id":gstfile,
-                                             "fy":gst_yearly_summary_report,
-                                             "step2_enabled":0,},
-                                    fields=["name","gst_type_changed","gst_type"])
-            if not(existing_doc_gst_type):
-                new_doc = frappe.new_doc('Gst Yearly Filing Summery')
+            
+            new_doc = frappe.new_doc('Gst Yearly Filing Summery')
 
-                new_doc.gst_yearly_summery_report_id = gst_yearly_summary_report
-                new_doc.fy = gst_yearly_summary_report
-                new_doc.cid = customer_id
-                new_doc.gst_file_id = gstfile
-                new_doc.customer_status = customer_status
-                new_doc.gstin = gstfile
-                new_doc.gst_executive = executive_name
-                new_doc.gst_type = gst_type
-                new_doc.created_manually=1
+            new_doc.gst_yearly_summery_report_id = gst_yearly_summary_report
+            new_doc.fy = gst_yearly_summary_report
+            new_doc.cid = customer_id
+            new_doc.gst_file_id = gstfile
+            new_doc.customer_status = customer_status
+            new_doc.gstin = gstfile
+            new_doc.gst_executive = executive_name
+            new_doc.gst_type = gst_type
+            new_doc.created_manually=1
 
-                new_doc.save()
-                return "Gst Yearly Filing Summery created successfully."
-            elif existing_doc_gst_type[0].gst_type_changed==1 and len(existing_doc_gst_type)<2 and gst_type!=existing_doc_gst_type[0].gst_type:
-                try:
-                    new_doc = frappe.new_doc('Gst Yearly Filing Summery')
-
-                    new_doc_name=str(existing_doc_gst_type[0].name)+"-1"
-
-                    new_doc.gst_yearly_summery_report_id = gst_yearly_summary_report
-                    new_doc.fy = gst_yearly_summary_report
-                    new_doc.cid = customer_id
-                    new_doc.gst_file_id = gstfile
-                    new_doc.customer_status = customer_status
-                    new_doc.gstin = gstfile
-                    new_doc.gst_executive = executive_name
-                    new_doc.gst_type = gst_type
-                    new_doc.created_manually=1
-
-                    new_doc.gst_type_changed=1
-
-                    new_doc.insert()
-                    return "Gst Yearly Filing Summery created successfully."
-                except Exception as er:
-                    return f"Error: {er}"
-            elif len(existing_doc_gst_type)>1:
-                return "You can't create Gst Yearly Filing Summery more than twice"
-            else:
-                return "You can't create multiple Gst Yearly Filing Summery without changing the GST Type"
+            new_doc.save()
+            return {"status":True,"msg":"Gst Yearly Filing Summery created successfully."}
+        
         else:
-            return "An enabled Gst Yearly Filing Summery you are trying to create already exists"
+            return {"status":False,"msg":"The Gst Yearly Filing Summery(Step 2) you are trying to create already exists"}
     except Exception as e:
-        return {"status":"Failed","dvalues":e}
+        return {"status":False,"msg":f"Error in creating Step 2: {e}","dvalues":e}
+
+#################Incomplete development for GST Type Change in middle of year
+# @frappe.whitelist()
+# def create_gst_yearly_filing_manually(gst_yearly_summary_report,gstfile,
+# 									  company_name,customer_id,customer_status,executive_name,gst_type):
+#     try:
+#         existing_doc=frappe.get_all("Gst Yearly Filing Summery",
+#                                     filters={"gst_file_id":gstfile,
+#                                              "fy":gst_yearly_summary_report,
+#                                              "step2_enabled":1,})
+        
+#         if not(existing_doc):
+#             existing_doc_gst_type=frappe.get_all("Gst Yearly Filing Summery",
+#                                     filters={"gst_file_id":gstfile,
+#                                              "fy":gst_yearly_summary_report,
+#                                              "step2_enabled":0,},
+#                                     fields=["name","gst_type_changed","gst_type"])
+#             if not(existing_doc_gst_type):
+#                 new_doc = frappe.new_doc('Gst Yearly Filing Summery')
+
+#                 new_doc.gst_yearly_summery_report_id = gst_yearly_summary_report
+#                 new_doc.fy = gst_yearly_summary_report
+#                 new_doc.cid = customer_id
+#                 new_doc.gst_file_id = gstfile
+#                 new_doc.customer_status = customer_status
+#                 new_doc.gstin = gstfile
+#                 new_doc.gst_executive = executive_name
+#                 new_doc.gst_type = gst_type
+#                 new_doc.created_manually=1
+
+#                 new_doc.save()
+#                 return "Gst Yearly Filing Summery created successfully."
+#             elif existing_doc_gst_type[0].gst_type_changed==1 and len(existing_doc_gst_type)<2 and gst_type!=existing_doc_gst_type[0].gst_type:
+#                 try:
+#                     new_doc = frappe.new_doc('Gst Yearly Filing Summery')
+
+#                     new_doc_name=str(existing_doc_gst_type[0].name)+"-1"
+
+#                     new_doc.gst_yearly_summery_report_id = gst_yearly_summary_report
+#                     new_doc.fy = gst_yearly_summary_report
+#                     new_doc.cid = customer_id
+#                     new_doc.gst_file_id = gstfile
+#                     new_doc.customer_status = customer_status
+#                     new_doc.gstin = gstfile
+#                     new_doc.gst_executive = executive_name
+#                     new_doc.gst_type = gst_type
+#                     new_doc.created_manually=1
+
+#                     new_doc.gst_type_changed=1
+
+#                     new_doc.insert()
+#                     return "Gst Yearly Filing Summery created successfully."
+#                 except Exception as er:
+#                     return f"Error: {er}"
+#             elif len(existing_doc_gst_type)>1:
+#                 return "You can't create Gst Yearly Filing Summery more than twice"
+#             else:
+#                 return "You can't create multiple Gst Yearly Filing Summery without changing the GST Type"
+#         else:
+#             return "An enabled Gst Yearly Filing Summery you are trying to create already exists"
+#     except Exception as e:
+#         return {"status":"Failed","dvalues":e}
 
 
 @frappe.whitelist()
@@ -291,3 +322,4 @@ def fetch_gst_filling_data(gst_yearly_summary_id):
     # print(step_4_ordered_list)
 
     return {"gst_filling_data_records":step_4_ordered_list}
+

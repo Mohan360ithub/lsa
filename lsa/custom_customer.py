@@ -111,11 +111,21 @@ def sync_sales_orders_customer(customer_id):
             for pe in pes:
                 custom_so_balance-=pe.allocated_amount
                 advance_paid+=pe.allocated_amount
+
+            sales_invoice_exists=None
+            if custom_so_balance>0:
+                si_list=frappe.get_all("Sales Invoice Item",filters={"sales_order":sales_order.name,"docstatus": 1},fields=["name","parent"])
+                if si_list:
+                    si_list=list(set([i.parent for i in si_list]))
+                    sales_invoice_exists=", ".join(si_list)
+
+
             docstatus="Drafted"
             if sales_order.docstatus==1:
                 docstatus="Submitted"
             elif sales_order.docstatus==2:
                 docstatus="Cancelled"
+
             if custom_so_balance>0:
                 custom_count_of_so_due+=1
                 custom_total_amount_due_of_so+=(custom_so_balance)
@@ -129,6 +139,7 @@ def sync_sales_orders_customer(customer_id):
                 if custom_so_balance<sales_order.rounded_total:
                     payment_status="Partially Paid"
                 so_details[sales_order.name]+=[payment_status]
+                so_details[sales_order.name]+=[sales_invoice_exists]
         custom_details_of_so_due=", ".join(custom_details_of_so_due)
 
 
@@ -321,6 +332,7 @@ def sync_sales_orders_followup(sales_order_summary=None,customer_id=None,followu
 def checking_user_authentication(user_email=None):
     try:
         status = False
+        wa_status=False
         user_roles = frappe.get_all('Has Role', filters={'parent': user_email}, fields=['role'])
 
         if user_email=="pankajsankhla90@gmail.com":
@@ -329,17 +341,182 @@ def checking_user_authentication(user_email=None):
         # Extract roles from the result
         roles = [role.get('role') for role in user_roles]
         doc_perm_roles = ["LSA Accounts Manager","LSA Account Executive"]
+        doc_wa_perm_roles=["GST Front Desk Team","Lsa Front Desk CRM Executive(A,B)"]
 
         for role in roles:
             if role in doc_perm_roles:
                 status = True
-                break
+            if role in doc_wa_perm_roles:
+                wa_status = True
+        
 
-        return {"status": status, "value": [roles]}
+        return {"status": status, "value": [roles],"wa_status":wa_status}
 
     except Exception as e:
         #print(e)
         return {"status": "Failed"}
+
+
+# return followup_button,followup_values,[so_details,custom_count_of_so_due,custom_total_amount_due_of_so,custom_details_of_so_due],open_followups,open_followup_i
+     
+@frappe.whitelist()
+def wa_followup_customer(customer_id,customer_name,new_mobile):
+    # new_mobile="9098543046"
+    existing_sales_orders=frappe.get_all("Sales Order",
+                                filters={"customer":customer_id,
+                                            "docstatus":['in', [0,1]]})
+    # print(existing_sales_orders)
+    message=f'''Dear {customer_name},
+
+You are having due amount to be paid for following Sales Invoices: 
+'''
+    custom_count_of_so_due=0
+    custom_total_amount=0.00
+    custom_total_amount_due_of_so=0.00
+    custom_details_of_so_due={}
+
+    if existing_sales_orders:
+
+        for existing_sales_order in existing_sales_orders:
+            # print(existing_sales_order)
+            sales_order=frappe.get_doc("Sales Order",existing_sales_order.name)
+            
+            msg_so_line=""
+            custom_so_balance=sales_order.rounded_total
+            advance_paid=0
+            pes=frappe.get_all("Payment Entry Reference",filters={"reference_doctype":"Sales Order","reference_name":sales_order.name,"docstatus": 1},fields=["name","parent","allocated_amount"])
+            # doc.custom_pe_counts=len(pes)
+            for pe in pes:
+                custom_so_balance-=pe.allocated_amount
+                advance_paid+=pe.allocated_amount
+
+            sales_invoice_exists=None
+            if custom_so_balance>0:
+                si_item_list=frappe.get_all("Sales Invoice Item",filters={"sales_order":sales_order.name,"docstatus": 1},fields=["name","parent"])
+                si_list=[ si.parent for si in si_item_list]
+                si_list=list(set(si_list))
+                if si_list:
+                    for si_name in si_list:
+                        si_pe=frappe.get_all("Payment Entry Reference",filters={"reference_doctype":"Sales Invoice","reference_name":si_name,"docstatus": 1},fields=["name","parent","allocated_amount"])
+                        for pe in si_pe:
+                            custom_so_balance-=pe.allocated_amount
+                            advance_paid+=pe.allocated_amount
+
+            if custom_so_balance>0:
+                custom_count_of_so_due+=1
+                
+                custom_total_amount+=sales_order.rounded_total
+                custom_total_amount_due_of_so+=(custom_so_balance)
+                custom_details_of_so_due[sales_order.name]=["Unpaid",sales_order.rounded_total,advance_paid,custom_so_balance,
+                                                            sales_order.custom_so_from_date,sales_order.custom_so_to_date,
+                                                            sales_order.custom_followup_count]
+                #print(sales_order.docstatus,sales_order.status)
+                if custom_so_balance<sales_order.rounded_total:
+                    custom_details_of_so_due[sales_order.name][0]="Partially Paid"
+                message+=f'''\n{custom_count_of_so_due}.{sales_order.name} from {sales_order.custom_so_from_date} to {sales_order.custom_so_to_date} with due amount ₹{custom_so_balance}/-.'''
+
+    message+=f'''\n\nKindly pay the net due amount of ₹{custom_total_amount_due_of_so}/- to below bank details:
+
+Our Bank Account:
+Lokesh Sankhala and ASSOSCIATES
+Account No = 73830200000526
+IFSC = BARB0VJJCRO
+Bank = Bank of Baroda,JC Road,Bangalore-560002
+UPI id = LSABOB@UPI
+Gpay / Phonepe no = 9513199200
+
+Call us immediately in case of query.
+
+Best Regards,
+LSA Office Account Team
+accounts@lsaoffice.com
+8951692788
+'''
+                    
+    sales_invoice_whatsapp_log = frappe.new_doc('WhatsApp Message Log')
+    whatsapp_items = []
+    for due_so in custom_details_of_so_due:
+        wa_response=due_so_whatsapp(due_so,custom_details_of_so_due[due_so][0],new_mobile,message)
+        if wa_response["status"]==True:
+            whatsapp_items.append({"type": "Sales Order",
+                            "document_id": due_so,
+                            "mobile_number": new_mobile,
+                            "customer":customer_id,})
+            message=""
+
+    sales_invoice_whatsapp_log.send_date = frappe.utils.now_datetime()
+    sales_invoice_whatsapp_log.sender = frappe.session.user
+    sales_invoice_whatsapp_log.type = "Template"
+    sales_invoice_whatsapp_log.message = message
+    sales_invoice_whatsapp_log.insert()
+
+@frappe.whitelist()
+def due_so_whatsapp(docname,paymentstatus,new_mobile,template):
+    # new_mobile="9098543046"
+
+    whatsapp_demo = frappe.get_all('WhatsApp Instance',filters={'module':'Accounts','connection_status':1,'active':1})
+    if whatsapp_demo:
+        
+        instance = frappe.get_doc('WhatsApp Instance',whatsapp_demo[0].name)
+        ins_id = instance.instance_id
+
+
+        try:
+            # Check if the mobile number has 10 digits
+            if len(new_mobile) != 10:
+                frappe.msgprint("Please provide a valid 10-digit mobile number.")
+                return
+
+            
+            
+            message = template
+            
+            ########################### Below commented link is work on Live #######################
+            link = f"https://online.lsaoffice.com/api/method/frappe.utils.print_format.download_pdf?doctype=Sales%20Order&name={docname}&format=Sales%20Order%20Format&no_letterhead=0&letterhead=LSA&settings=%7B%7D&_lang=en/{docname}.pdf"
+            if paymentstatus=="Partially Paid":
+                link=f"https://online.lsaoffice.com/api/method/frappe.utils.print_format.download_pdf?doctype=Sales%20Order&name={docname}&format=Sales%20Order%20with%20payment%20details&no_letterhead=0&letterhead=LSA&settings=%7B%7D&_lang=en/{docname}.pdf"
+            # link = "https://online.lsaoffice.com/api/method/frappe.utils.print_format.download_pdf?doctype=Sales%20Order&name=SAL-ORD-2023-00262&format=Sales%20Order%20Format&no_letterhead=0&letterhead=LSA&settings=%7B%7D&_lang=en/Invoice.pdf"
+
+            url = "https://wts.vision360solutions.co.in/api/sendFileWithCaption"
+            params_1 = {
+                "token": ins_id,
+                "phone": f"91{new_mobile}",
+                "message": message,
+                "link": link
+            }
+
+            
+            
+            response = requests.post(url, params=params_1)
+            response.raise_for_status()  # Raise an error for HTTP errors (status codes other than 2xx)
+            response_data = response.json()
+            message_id = response_data['data']['messageIDs'][0]
+
+
+            # Check if the response status is 'success'
+            if response_data.get('status') == 'success':
+                # Log the success
+
+                frappe.logger().info("WhatsApp message sent successfully")
+                
+                return {"status":True,"msg":"WhatsApp message sent successfully"}
+            else:
+                return {"status":False,"error":f"{response.json()}","msg":"An error occurred while sending the WhatsApp message."}
+
+
+        except requests.exceptions.RequestException as e:
+            # Log the exception and provide feedback to the user
+            frappe.logger().error(f"Network error: {e}")
+            return {"status":False,"error":e,"msg":"An error occurred while sending the WhatsApp message. Please try again later."}
+        except Exception as er:
+            # Log the exception and provide feedback to the user
+            frappe.logger().error(f"Error: {er}")
+            return {"status":False,"error":er,"msg":"An unexpected error occurred while sending the WhatsApp message. Please contact the system administrator."}
+    else:
+        return {"status":False,"msg":"Your WhatApp API instance is not connected"}
+
+                    
+
 
 
 

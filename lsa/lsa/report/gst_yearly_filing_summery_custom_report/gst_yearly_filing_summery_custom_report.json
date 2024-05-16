@@ -6,12 +6,12 @@
  "docstatus": 0,
  "doctype": "Report",
  "filters": [],
- "idx": 1,
+ "idx": 5,
  "is_standard": "Yes",
  "json": "{}",
  "letter_head": "LSA",
  "letterhead": null,
- "modified": "2024-03-15 10:49:02.003887",
+ "modified": "2024-04-24 10:52:55.974617",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Gst Yearly Filing Summery custom report",
@@ -43,7 +43,7 @@
    "role": "Lsa Ops Export"
   },
   {
-   "role": "Lsa Front Desk CRM Executive(A,B)"
+   "role": "LSA GST Basic(A,B,C)"
   }
  ]
 }

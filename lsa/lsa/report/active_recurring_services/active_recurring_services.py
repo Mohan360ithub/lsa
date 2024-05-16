@@ -22,6 +22,7 @@ def execute(filters=None):
         
         {"label": "Service Name", "fieldname": "service_name", "fieldtype": "Data", "width": 100, },
         {"label": "File ID", "fieldname": "file_id", "fieldtype": "Data", "width": 100, },
+        {"label": "File Type", "fieldname": "file_type", "fieldtype": "Data", "width": 100, },
         
         {"label": "Go To file", "fieldname": "go_to_file", "fieldtype": "HTML", "width": 90, },
         
@@ -72,7 +73,7 @@ def execute(filters=None):
 def customer_services(filters):
 
     master_service_fields = {
-        "Gstfile": ["gstfile", ["name","customer_id", "company_name", "gst_number", "gst_user_name", "gst_password","current_recurring_fees","frequency","annual_fees","executive_name"]],
+        "Gstfile": ["gstfile", ["name","customer_id", "company_name", "gst_number", "gst_user_name", "gst_password","current_recurring_fees","frequency","annual_fees","executive_name","gst_type"]],
         "IT Assessee File": ["it-assessee-file", ["name","customer_id", "assessee_name", "pan", "pan", "it_password","current_recurring_fees","frequency","annual_fees","executive_name"]],
         "MCA ROC File": ["mca-roc-file", ["name","customer_id", "company_name", "cin", "trace_user_id", "trace_password","current_recurring_fees","frequency","annual_fees","executive_name"]],
         "Professional Tax File": ["professional-tax-file", ["name","customer_id", "assessee_name", "registration_no", "user_id", "trace_password","current_recurring_fees","frequency","annual_fees","executive_name"]],
@@ -141,6 +142,11 @@ def customer_services(filters):
                     "annual_fees":customer_service[master_service_fields[service.name][1][8]],
                     "executive_name":customer_service[master_service_fields[service.name][1][9]],
                 }
+                if service.name=="Gstfile":
+                    data_row["file_type"]=customer_service[master_service_fields[service.name][1][10]]
+                else:
+                    data_row["file_type"]="Non-GST"
+
                 if custome_map[cid]["disabled"]==0:
                     data_row["enabled"]="Yes"
                 else:
@@ -160,4 +166,5 @@ def get_services():
     services = frappe.get_all("Customer Chargeable Doctypes", fields=["name"])
     services = [ser.name for ser in services]
     return json.dumps(services)
+
 

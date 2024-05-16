@@ -28,7 +28,7 @@ def execute(filters=None):
 
     # Construct additional filters based on the provided filters
     additional_filters = {}
-
+    gstfile_enabled_filter=1
     # Check if the mandatory filters are provided
     if filters.get("gst_type") and filters.get("fy") and filters.get("month"):
         additional_filters["gst_type"] = filters["gst_type"]
@@ -65,123 +65,81 @@ def execute(filters=None):
                     data_new.append(gst_file)
         data=data_new
 
-    if "cid" in additional_filters:                             
+    if "cid" in additional_filters:
         del additional_filters["cid"]
 
-    data_old = frappe.get_all(
-        "Gst Filling Data",
-        filters=additional_filters,
-        fields=["cid", "customer_status", "name", "filing_status", "gstfile", "gstfile_enabled", "company",
-                "mobile_no_gst", "gst_user_name", "gst_password", "proprietor_name", "executive",
-                "gst_type", "month", "fy", "gst_yearly_filling_summery_id", "filing_notes"],
-                as_list=True
-    )
-    # Fetch counts for different filing statuses using custom SQL queries
+    # data_old = frappe.get_list(
+    #     "Gst Filling Data",
+    #     filters=additional_filters,
+    #     fields=["cid", "customer_status", "name", "filing_status", "gstfile", "gstfile_enabled", "company",
+    #             "mobile_no_gst", "gst_user_name", "gst_password", "proprietor_name", "executive",
+    #             "gst_type", "month", "fy", "gst_yearly_filling_summery_id", "filing_notes"],
+    # )
+    gst_file_enabled = frappe.get_all("Gstfile", filters={"enabled":gstfile_enabled_filter})
+    gst_file_enabled=[i.name for i in gst_file_enabled]
+
+    data_gst_enabled=[]
+    for data_i in data:
+        if data_i.gstfile in gst_file_enabled:
+            data_gst_enabled.append(data_i)
+
+    data=data_gst_enabled
+    data_old=data_gst_enabled
+
+    # Fetch counts for different filing statuses using Frappe's ORM
     statuses = ["Pending", "Filed Summery Shared With Client", "GSTR-1 or IFF Prepared and Filed",
                 "GSTR-2A/2B or 4A/4B Reco done", "Data Collected", "Data Finalized", "Tax Calculation Done",
                 "Tax Informed to Client", "Tax Payment Processed", "GSTR-3B / CMP08 Prepared and Filed"]
+    
+    total_records_count=len(data_old)
     status_counts = {}
-
-
+    executive_counts = {}
+    executive_files  ={}
+    executive_files_done={}
     filed_summery_shared_count = 0
 
-    for status in statuses:
-        count_query = f"""
-            SELECT COUNT(name) as count
-            FROM `tabGst Filling Data`
-            {"WHERE filing_status = %s" if not additional_filters else "WHERE filing_status = %s AND "
-            + " AND ".join([f"{key} = %s" for key in additional_filters])}
-        """
+    for row_i in data_old:
+        if row_i.filing_status in status_counts:
+            status_counts[row_i.filing_status]+=1
+        else:
+            status_counts[row_i.filing_status]=1
 
-        count_result = frappe.db.sql(count_query, [status, *additional_filters.values()], as_dict=True)
-        status_count = count_result[0].get("count") if count_result else 0
-        status_counts[status] = status_count
+        if row_i.executive in executive_files:
+            executive_files[row_i.executive]+=1
+        else:
+            executive_files[row_i.executive]=1
+        
+        if row_i.filing_status == "Filed Summery Shared With Client":
 
-        if status == "Filed Summery Shared With Client":
-            filed_summery_shared_count = status_count
+            filed_summery_shared_count = status_counts[row_i.filing_status]
 
-    total_records_count = sum(status_counts.values())
-
+            if row_i.executive in executive_files_done :
+                executive_files_done[row_i.executive]+=1
+            else:
+                executive_files_done[row_i.executive]=1
+    
     filed_summery_shared_percentage = (filed_summery_shared_count / total_records_count) * 100 if total_records_count != 0 else 0
 
-    executive_counts = {}
+    
 
-    for executive in set([row[11] for row in data_old]):
-        # Count for all filing statuses
-        count_query = f"""
-            SELECT COUNT(name) as count
-            FROM `tabGst Filling Data`
-            {"WHERE executive = %s" if not additional_filters else "WHERE executive = %s AND "
-            + " AND ".join([f"{key} = %s" for key in additional_filters])}
-        """
+    for executive in executive_files:
+        executive_count=0
+        if executive in executive_files :
+            executive_count=executive_files[executive]
 
-        count_result = frappe.db.sql(count_query, [executive, *additional_filters.values()], as_dict=True)
-        executive_count = count_result[0].get("count") if count_result else 0
+        filed_summery_shared_count=0
+        if executive in executive_files_done :
+            filed_summery_shared_count=executive_files_done[executive]
 
-        # Count specifically for "Filed Summery Shared With Client"
-        filed_summery_shared_query = f"""
-            SELECT COUNT(name) as filed_summery_shared_count
-            FROM `tabGst Filling Data`
-            WHERE executive = %s AND filing_status = 'Filed Summery Shared With Client'
-            AND gst_type = %s AND fy = %s AND month = %s
-        """
-
-        filed_summery_shared_count_result = frappe.db.sql(filed_summery_shared_query, [executive, *additional_filters.values()], as_dict=True)
-        filed_summery_shared_count = filed_summery_shared_count_result[0].get("filed_summery_shared_count") if filed_summery_shared_count_result else 0
-
-        # Count specifically for statuses other than "Filed Summery Shared With Client"
-        not_filed_summery_shared_count_query = f"""
-            SELECT COUNT(name) as not_filed_summery_shared_count
-            FROM `tabGst Filling Data`
-            WHERE executive = %s AND filing_status != 'Filed Summery Shared With Client'
-            AND gst_type = %s AND fy = %s AND month = %s
-        """
-
-        not_filed_summery_shared_count_result = frappe.db.sql(not_filed_summery_shared_count_query, [executive, *additional_filters.values()], as_dict=True)
-        not_filed_summery_shared_count = not_filed_summery_shared_count_result[0].get("not_filed_summery_shared_count") if not_filed_summery_shared_count_result else 0
-
-        # Assign the counts to the executive
         executive_counts[executive] = {
             "total_count": executive_count,
             "filed_summery_shared_count": filed_summery_shared_count,
-            "not_filed_summery_shared_count": not_filed_summery_shared_count
+            "not_filed_summery_shared_count": executive_count-filed_summery_shared_count
         }
 
-    # ...
-
-    executive_table = """
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>Executive</th>
-                <th>Total Count</th>
-                <th>Filed </th>
-                <th>Not Filed </th>
-                <th>Target Achieved </th>
-            </tr>
-        </thead>
-        <tbody>
-            {0}
-        </tbody>
-    </table>
-    """
-
-    executive_rows = "".join([
-        f"""
-        <tr>
-            <td>{executive}</td>
-            <td>{executive_counts[executive]["total_count"]}</td>
-            <td>{executive_counts[executive]["filed_summery_shared_count"]}</td>
-            <td>{executive_counts[executive]["not_filed_summery_shared_count"]}</td>
-            <td>{(executive_counts[executive]["filed_summery_shared_count"] / executive_counts[executive]["total_count"]) * 100:.2f}%</td>
-        </tr>
-        """
-        for executive in executive_counts.keys()
-    ])
     # Create HTML card with counts for different filing statuses
     html_card = f"""
- 
-    <div class="frappe-card" style="margin-bottom: 10px;>
+    <div class="frappe-card" style="margin-bottom: 10px;">
         <div class="frappe-card-head" data-toggle="collapse" data-target="#collapsible-content">
             <strong>Filing Status Counts</strong>
             <strong>(Overall Target Achieved: {filed_summery_shared_percentage:.2f}%)</strong>
@@ -190,7 +148,6 @@ def execute(filters=None):
         </div>
         <div class="frappe-card-body collapse" id="collapsible-content">
             <div class="flex-container" style="display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 20px;">
-                 
                 <div class="frappe-card" style="flex: 1; min-width: 200px; max-width: 300px;">
                     <div class="frappe-card-content">
                         <div class="frappe-card-count">{status_counts.get("Pending", 0)}</div>
@@ -251,66 +208,65 @@ def execute(filters=None):
                         <div class="frappe-card-label">Filed Summery Shared With Client Count</div>
                     </div>
                 </div>
-                <!-- Add other card elements here -->
             </div>
         </div>
     </div>
-    <div class="frappe-card" style="margin-bottom: 10px;>
-    <div class="frappe-card-head" data-toggle="collapse" data-target="#executive-content">
-        <strong>Executive-wise Counts</strong>
-        <span class="caret"></span>
+    <div class="frappe-card" style="margin-bottom: 10px;">
+        <div class="frappe-card-head" data-toggle="collapse" data-target="#executive-content">
+            <strong>Executive-wise Counts</strong>
+            <span class="caret"></span>
+        </div>
+        <div class="frappe-card-body collapse" id="executive-content">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Executive</th>
+                        <th>Total Count</th>
+                        <th>Filed Summery Shared</th>
+                        <th>Not Filed Summery Shared</th>
+                        <th>Target Achieved</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {"".join([
+                        f"<tr><td>{executive}</td><td>{executive_counts[executive]['total_count']}</td><td>{executive_counts[executive]['filed_summery_shared_count']}</td><td>{executive_counts[executive]['not_filed_summery_shared_count']}</td><td>{(executive_counts[executive]['filed_summery_shared_count'] / executive_counts[executive]['total_count']) * 100:.2f}%</td></tr>"
+                        for executive in executive_counts.keys()
+                    ])}
+                </tbody>
+            </table>
+        </div>
     </div>
-    <div class="frappe-card-body collapse" id="executive-content">
-        {executive_table.format(executive_rows)}
-    </div>
-    
-</div>
-
-<script>
-        document.addEventListener('click', function(event) {{
-            // Check if the clicked element is a cell
-            var clickedCell = event.target.closest('.dt-cell__content');
-            if (clickedCell) {{
-                // Remove highlight from previously highlighted cells
-                var previouslyHighlightedCells = document.querySelectorAll('.highlighted-cell');
-                previouslyHighlightedCells.forEach(function(cell) {{
-                    cell.classList.remove('highlighted-cell');
-                    cell.style.backgroundColor = ''; // Remove background color
-                    cell.style.border = ''; // Remove border
-                    cell.style.fontWeight = '';
-                }});
-                
-                // Highlight the clicked row's cells
-                var clickedRow = event.target.closest('.dt-row');
-                var cellsInClickedRow = clickedRow.querySelectorAll('.dt-cell__content');
-                cellsInClickedRow.forEach(function(cell) {{
-                    cell.classList.add('highlighted-cell');
-                    cell.style.backgroundColor = '#d7eaf9'; // Light blue background color
-                    cell.style.border = '2px solid #90c9e3'; // Border color
-                    cell.style.fontWeight = 'bold';
-                }});
-            }}
-        }});
-
-
-
-    
-    </script>
-
-    """
-    """
     <script>
-        frappe.ui.form.on('Gst Filling Data', {
-            refresh: function (frm) {
-                frm.fields_dict['collapsible-content'].$wrapper.find('.frappe-card-head').on('click', function () {
-                    frm.fields_dict['collapsible-content'].toggle();
-                });
-            }
-        });
+    document.addEventListener('click', function(event) {{
+        // Check if the clicked element is a cell
+        var clickedCell = event.target.closest('.dt-cell__content');
+        if (clickedCell) {{
+            // Remove highlight from previously highlighted cells
+            var previouslyHighlightedCells = document.querySelectorAll('.highlighted-cell');
+            previouslyHighlightedCells.forEach(function(cell) {{
+                cell.classList.remove('highlighted-cell');
+                cell.style.backgroundColor = ''; // Remove background color
+                cell.style.border = ''; // Remove border
+                cell.style.fontWeight = '';
+            }});
+            
+            // Highlight the clicked row's cells
+            var clickedRow = event.target.closest('.dt-row');
+            var cellsInClickedRow = clickedRow.querySelectorAll('.dt-cell__content');
+            cellsInClickedRow.forEach(function(cell) {{
+                cell.classList.add('highlighted-cell');
+                cell.style.backgroundColor = '#d7eaf9'; // Light blue background color
+                cell.style.border = '2px solid #90c9e3'; // Border color
+                cell.style.fontWeight = 'bold';
+            }});
+        }}
+    }});
     </script>
     """
+
 
     return columns, data, html_card
+
 
 
 
