@@ -1,0 +1,154 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:{year}-{month}",
+ "creation": "2024-06-06 12:48:07.939431",
+ "default_view": "List",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "month",
+  "date",
+  "column_break_ecij",
+  "year",
+  "booking_section",
+  "monthly_plan_amount",
+  "column_break_bemp",
+  "monthly_actual_amount_so",
+  "column_break_stdf",
+  "monthly_achieved_percentage_so",
+  "billing_section",
+  "si_monthly_plan_amount",
+  "column_break_hhxg",
+  "monthly_actual_amount_si",
+  "column_break_hkjd",
+  "monthly_achieved_percentage_si",
+  "collection_section",
+  "table_kjwd",
+  "expenses_section",
+  "table_mljv"
+ ],
+ "fields": [
+  {
+   "fieldname": "booking_section",
+   "fieldtype": "Section Break",
+   "label": "Booking (Sales Order)"
+  },
+  {
+   "fieldname": "monthly_plan_amount",
+   "fieldtype": "Currency",
+   "label": "Monthly Plan Amount"
+  },
+  {
+   "fieldname": "billing_section",
+   "fieldtype": "Section Break",
+   "label": "Billing (Sales Invoices)"
+  },
+  {
+   "fieldname": "si_monthly_plan_amount",
+   "fieldtype": "Currency",
+   "label": "Monthly Plan Amount"
+  },
+  {
+   "fieldname": "collection_section",
+   "fieldtype": "Section Break",
+   "label": "Collection"
+  },
+  {
+   "fieldname": "table_kjwd",
+   "fieldtype": "Table",
+   "options": "Monthly Budget Type"
+  },
+  {
+   "fieldname": "expenses_section",
+   "fieldtype": "Section Break",
+   "label": "Expenses"
+  },
+  {
+   "fieldname": "table_mljv",
+   "fieldtype": "Table",
+   "options": "Monthly Budget Type"
+  },
+  {
+   "fieldname": "month",
+   "fieldtype": "Select",
+   "label": "Month",
+   "options": "January\nFebruary\nMarch\nApril\nMay\nJune\nJuly\nAugust\nSeptember\nOctober\nNovember\nDecember"
+  },
+  {
+   "fieldname": "column_break_ecij",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "year",
+   "fieldtype": "Link",
+   "label": "Year",
+   "options": "Year"
+  },
+  {
+   "default": "Today",
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "label": "Date"
+  },
+  {
+   "fieldname": "column_break_bemp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_stdf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "monthly_achieved_percentage_so",
+   "fieldtype": "Data",
+   "label": "Monthly Achieved Percentage"
+  },
+  {
+   "fieldname": "column_break_hhxg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "monthly_achieved_percentage_si",
+   "fieldtype": "Data",
+   "label": "Monthly Achieved Percentage"
+  },
+  {
+   "fieldname": "column_break_hkjd",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "monthly_actual_amount_so",
+   "fieldtype": "Currency",
+   "label": "Monthly Actual Amount"
+  },
+  {
+   "fieldname": "monthly_actual_amount_si",
+   "fieldtype": "Currency",
+   "label": "Monthly Actual Amount"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-06-06 17:15:18.356987",
+ "modified_by": "Administrator",
+ "module": "Lsa",
+ "name": "Monthly Budget",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

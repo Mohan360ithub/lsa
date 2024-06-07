@@ -1,0 +1,94 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-06-06 11:57:05.611117",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "booking_section",
+  "sales_order",
+  "monthly_plan_amount",
+  "billing_section",
+  "sales_invoices",
+  "si_monthly_plan_amount",
+  "collection_section",
+  "table_kjwd",
+  "expenses_section",
+  "table_mljv"
+ ],
+ "fields": [
+  {
+   "fieldname": "booking_section",
+   "fieldtype": "Section Break",
+   "label": "Booking"
+  },
+  {
+   "fieldname": "sales_order",
+   "fieldtype": "Heading",
+   "label": "Sales Order"
+  },
+  {
+   "fieldname": "monthly_plan_amount",
+   "fieldtype": "Currency",
+   "label": "Monthly Plan Amount"
+  },
+  {
+   "fieldname": "billing_section",
+   "fieldtype": "Section Break",
+   "label": "Billing"
+  },
+  {
+   "fieldname": "sales_invoices",
+   "fieldtype": "Heading",
+   "label": "Sales Invoices"
+  },
+  {
+   "fieldname": "si_monthly_plan_amount",
+   "fieldtype": "Currency",
+   "label": "Monthly Plan Amount"
+  },
+  {
+   "fieldname": "collection_section",
+   "fieldtype": "Section Break",
+   "label": "Collection"
+  },
+  {
+   "fieldname": "table_kjwd",
+   "fieldtype": "Table",
+   "options": "Monthly Budget Type"
+  },
+  {
+   "fieldname": "expenses_section",
+   "fieldtype": "Section Break",
+   "label": "Expenses"
+  },
+  {
+   "fieldname": "table_mljv",
+   "fieldtype": "Table",
+   "options": "Monthly Budget Type"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2024-06-06 12:53:42.020072",
+ "modified_by": "Administrator",
+ "module": "Lsa",
+ "name": "Monthly Budgeting Template",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
