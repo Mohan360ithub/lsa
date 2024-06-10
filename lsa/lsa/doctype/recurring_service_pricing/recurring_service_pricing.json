@@ -74,13 +74,15 @@
    "fieldname": "previous_pricing",
    "fieldtype": "Link",
    "label": "Previous Pricing",
-   "options": "Recurring Service Pricing"
+   "options": "Recurring Service Pricing",
+   "read_only": 1
   },
   {
    "fieldname": "next_pricing",
    "fieldtype": "Link",
    "label": "Next Pricing",
-   "options": "Recurring Service Pricing"
+   "options": "Recurring Service Pricing",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_jewh",
@@ -198,7 +200,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-05-15 18:56:43.776356",
+ "modified": "2024-05-21 10:44:54.043818",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Recurring Service Pricing",

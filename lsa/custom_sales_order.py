@@ -3,6 +3,11 @@ import requests,random,json
 from frappe import _
 from frappe.utils import today
 from datetime import datetime
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.base import MIMEBase
+from email import encoders
 
 
 
@@ -462,6 +467,9 @@ def whatsapp_so_template(docname,from_date,to_date,new_mobile):
         customer_name = invoice_doc.customer_name
         docname = invoice_doc.name
 
+        advance_paid_amount=0
+        balance_amount=invoice_doc.rounded_total
+
         sales_invoice = frappe.get_all('Sales Invoice Item',filters={'sales_order':invoice_doc.name,'docstatus':("in",[0,1])},fields=["parent"])
         if sales_invoice:
             return {"status":False,"msg":f"A Sales Invoice <a href='https://online.lsaoffice.com/app/sales-invoice/{sales_invoice[0].parent}'>{sales_invoice[0].parent}</a> already exist for the Sales Order"}
@@ -484,8 +492,6 @@ def whatsapp_so_template(docname,from_date,to_date,new_mobile):
 
             pe_list = frappe.get_all('Payment Entry Reference',filters={"reference_doctype":"Sales Order",'reference_name':invoice_doc.name,'docstatus':1},fields=["name","allocated_amount","parent"])
             if pe_list:
-                advance_paid_amount=0
-                balance_amount=invoice_doc.rounded_total
                 for pe in pe_list:
                     advance_paid_amount+=pe.allocated_amount
                     balance_amount-=pe.allocated_amount
@@ -515,6 +521,8 @@ Best Regards,
 LSA Office Account Team
 accounts@lsaoffice.com
 8951692788'''
+            if balance_amount<1:
+                message=""
             
             ########################### Below commented link is work on Live #######################
             link = f"https://online.lsaoffice.com/api/method/frappe.utils.print_format.download_pdf?doctype=Sales%20Order&name={docname}&format=Sales%20Order%20Format&no_letterhead=0&letterhead=LSA&settings=%7B%7D&_lang=en/{docname}.pdf"
@@ -805,5 +813,219 @@ def send_bulk_custom_so_whatsapp_message(values_prompt):
             return {"status":False,"msg":"Your WhatApp API instance is not connected"}
     except Exception as er:
         return {"status":False,"msg":f"Error: {er}"}
+
+
+
+
+@frappe.whitelist()
+def sales_order_mail(so_id=None, recipient=None, subject=None, customer_name=None,from_date=None, to_date=None):
+    if so_id and recipient and subject and customer_name :
+        so_doc = frappe.get_doc("Sales Order", so_id)
+
+        email_account = frappe.get_doc("Email Account", "LSA Accounts")
+        sender_email = email_account.email_id
+        sender_password = email_account.get_password()
+
+
+        sales_invoice = frappe.get_all('Sales Invoice Item',filters={'sales_order':so_id,'docstatus':("in",[0,1])},fields=["parent"])
+        if sales_invoice:
+            return {"status":False,"msg":f"A Sales Invoice <a href='https://online.lsaoffice.com/app/sales-invoice/{sales_invoice[0].parent}'>{sales_invoice[0].parent}</a> already exist for the Sales Order"}
+        
+
+        total = so_doc.rounded_total
+        advance_paid_amount=0
+        balance_amount=so_doc.rounded_total
+        payment_status=f"Unpaid"
+        payment_link=""
+        if so_doc.custom_razorpay_payment_url:
+            payment_link=f'''
+For your convenience, you can also use the following payment link:
+{so_doc.custom_razorpay_payment_url}'''
+        
+        
+
+        pe_list = frappe.get_all('Payment Entry Reference',filters={"reference_doctype":"Sales Order",'reference_name':so_doc.name,'docstatus':1},fields=["name","allocated_amount","parent"])
+        if pe_list:
+            for pe in pe_list:
+                advance_paid_amount+=pe.allocated_amount
+                balance_amount-=pe.allocated_amount
+            
+            if balance_amount<1:
+                payment_status=f"Cleared"
+            elif balance_amount>1:
+                payment_status=f"Partially Paid"
+                
+        
+        
+        body=f'''<pre style="font-family: Arial, sans-serif; font-size: 14px; color: #000000;">Dear {so_doc.customer_name},
+
+I hope this email finds you well.
+
+This is a friendly reminder regarding your sales invoice due amount of {balance_amount} for the period from {from_date} to {to_date}. The invoice details are as follows:</pre>'''
+        
+
+        body += """
+                <br><table class="table table-bordered" style="border-color: #444444; border-collapse: collapse; width: 80%;">
+                    <thead>
+                        <tr style="background-color:#3498DB;color:white;text-align: left;">
+                            <th style="vertical-align: middle;border: solid 2px #bcb9b4; width: 10%;">S. No.</th>
+                            <th style="vertical-align: middle;border: solid 2px #bcb9b4; width: 20%;">Item</th>
+                            <th style="vertical-align: middle;border: solid 2px #bcb9b4; width: 40%;">Description</th>
+                            <th style="vertical-align: middle;border: solid 2px #bcb9b4; width: 10%;">Quantity</th>
+                            <th style="vertical-align: middle;border: solid 2px #bcb9b4; width: 10%;">Rate(INR)</th>
+                            <th style="vertical-align: middle;border: solid 2px #bcb9b4; width: 10%;">Amount(INR)</th>
+                            
+                        </tr>
+                    </thead>
+                    <tbody>
+                """
+        count=1
+        for item in so_doc.items:
+            body += f"""
+                <tr>
+                    <td style="border: solid 2px #bcb9b4;">{count}</td>
+                    <td style="border: solid 2px #bcb9b4;">{item.item_code}</td>
+                    <td style="border: solid 2px #bcb9b4;">{item.description}</td>
+                    <td style="border: solid 2px #bcb9b4;">{item.qty}</td>
+                    <td style="border: solid 2px #bcb9b4;">₹ {item.rate}</td>
+                    <td style="border: solid 2px #bcb9b4;">₹ {item.amount}</td>
+                    
+                </tr>
+            """
+            count+=1
+
+        body += """
+                    </tbody>
+                </table><br>
+
+        """
+        body+=f'''<pre style="font-family: Arial, sans-serif; font-size: 14px; color: #000000;">We kindly request you to make the payment using the below bank account details:
+
+Bank Account Details:
+
+Account Name: Lokesh Sankhala and Associates
+Account Number: 73830200000526
+IFSC Code: BARB0VJJCRO
+Bank: Bank of Baroda, JC Road, Bangalore-560002
+UPI ID: LSABOB@UPI
+GPay / PhonePe Number: 9513199200
+{payment_link}
+
+Please reach out to us immediately if you have any queries or need further assistance.
+
+Best Regards,
+
+LSA Office Account Team
+Email: accounts@lsaoffice.com
+Phone: 8951692788 </pre>'''
+
+        # print(body)
+        # Create the email message
+        message = MIMEMultipart()
+        message['From'] = sender_email
+        message['To'] = recipient
+        message['Subject'] = subject
+        message.attach(MIMEText(body, 'html'))
+
+        # Attach the PDF file
+        pdf_link = f"https://online.lsaoffice.com/api/method/frappe.utils.print_format.download_pdf?doctype=Sales%20Order&name={so_id}&format=Sales%20Order%20Format&no_letterhead=0&letterhead=LSA&settings=%7B%7D&_lang=en/{so_id}.pdf"
+        if pe_list:
+            pdf_link=f"https://online.lsaoffice.com/api/method/frappe.utils.print_format.download_pdf?doctype=Sales%20Order&name={so_id}&format=Sales%20Order%20with%20payment%20details&no_letterhead=0&letterhead=LSA&settings=%7B%7D&_lang=en/{so_id}.pdf"
+
+        pdf_filename = f"SalesOrder_{so_id}.pdf"
+        attachment = get_file_from_link(pdf_link)
+        if attachment:
+            part = MIMEBase("application", "octet-stream")
+            part.set_payload(attachment)
+            encoders.encode_base64(part)
+            part.add_header(
+                "Content-Disposition",
+                f"attachment; filename= {pdf_filename}",
+            )
+            message.attach(part)
+
+        # Connect to the SMTP server and send the email
+        smtp_server = 'smtp-mail.outlook.com'
+        smtp_port = 587
+        with smtplib.SMTP(smtp_server, smtp_port) as server:
+            server.starttls()
+            server.login(sender_email, sender_password)
+            try:
+                # Send email
+                server.sendmail(sender_email, recipient.split(','), message.as_string())
+                return "Email sent successfully!"
+            except Exception as e:
+                print(f"Failed to send email. Error: {e}")
+                return "Failed to send email."
+    else:
+        return "Invalid parameters passed."
+
+
+def get_file_from_link(link):
+    try:
+        response = requests.get(link)
+        if response.status_code == 200:
+            return response.content
+        else:
+            print(f"Failed to fetch file from link. Status code: {response.status_code}")
+            return None
+    except Exception as e:
+        print(f"Error fetching file from link: {e}")
+        return None
+
+@frappe.whitelist()
+def fetch_service_history(customer_id=None,so_id=None):
+    # try:
+    so_id_list=[None]
+    if so_id:
+        so_id_list.append(so_id)
+    if True:
+        master_service_fields = {
+            "Gstfile": ["gst_file", ["name", "company_name", "gst_number", "gst_user_name", "gst_password","current_recurring_fees","frequency","annual_fees","executive_name","last_filed"]],
+            "IT Assessee File": ["it_assessee_file", ["name", "assessee_name", "pan", "pan", "it_password","current_recurring_fees","frequency","annual_fees","executive_name","last_filed"]],
+            "MCA ROC File": ["mca_roc_file", ["name", "company_name", "cin", "trace_user_id", "trace_password","current_recurring_fees","frequency","annual_fees","executive_name","last_filed"]],
+            "Professional Tax File": ["professional_tax_file", ["name", "assessee_name", "registration_no", "user_id", "trace_password","current_recurring_fees","frequency","annual_fees","executive_name","last_filed"]],
+            "TDS File": ["tds_file", ["name", "deductor_name", "tan_no", "trace_user_id", "trace_password","current_recurring_fees","frequency","annual_fees","executive_name","last_filed"]],
+            "ESI File": ["esi_file", ["name", "assessee_name", "registartion_no", "trace_user_id", "trace_password","current_recurring_fees","frequency","annual_fees","executive_name","last_filed"]],
+            "Provident Fund File": ["provident_fund_file", ["name", "assessee_name", "registartion_no", "trace_user_id", "trace_password","current_recurring_fees","frequency","annual_fees","executive_name","last_filed"]],
+        }
+
+        services_bill_history=[]
+        chargeable_services=frappe.get_all("Customer Chargeable Doctypes")
+        for chargeable_service in chargeable_services:
+            # print(chargeable_service)
+            chargeable_service_values=frappe.get_all(chargeable_service.name,
+                                            filters={"customer_id":customer_id,
+                                                    "enabled":1},
+                                                # fields=master_service_fields[chargeable_service.name][1]
+                                                fields=["name","service_name","description",master_service_fields[chargeable_service.name][1][1]]
+                                                )
+            # print(chargeable_service_values)
+            for chargeable_service_value in chargeable_service_values:
+                
+                services_history=[chargeable_service.name,chargeable_service_value.name,chargeable_service_value[master_service_fields[chargeable_service.name][1][1]]]
+                
+                service_slug="-".join([i.lower() for i in ((chargeable_service.name).split(" "))])
+                services_history.append(service_slug)
+
+                so_item=frappe.get_all("Sales Order Item",
+                                            filters={"item_code":chargeable_service_value.service_name,
+                                                    "custom_service_master":chargeable_service_value.description,
+                                                    "custom_soi_from_date":(">=","2024-04-01"),
+                                                    "docstatus":("in",[0,1]),
+                                                    "parent":("not in",so_id_list)
+                                                    },
+                                            fields=["name","parent","amount","custom_soi_from_date","custom_soi_to_date"],
+                                            order_by="custom_soi_to_date desc",
+                                            limit=1)
+                if so_item:
+                    services_history+=[True,so_item[0].parent,so_item[0].amount,so_item[0].custom_soi_from_date,so_item[0].custom_soi_to_date,]
+                else:
+                    services_history+=[False,None,None,None,None,]
+                services_bill_history+=[services_history]
+
+        return {"status":True,"services_bill_history":services_bill_history}
+    # except Exception as e:
+    #     return {"status":False,"msg":f"Error Fetching Past Bills History: {e}"}
 
 

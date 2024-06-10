@@ -14,7 +14,7 @@ def execute(filters=None):
         {"label": "Allocated Amount", "fieldname": "allocated_amount", "fieldtype": "Currency", "width": 100},
         {"label": "Paid Amount", "fieldname": "paid_amount", "fieldtype": "Currency", "width": 100},
         {"label": "Cheque/Reference No", "fieldname": "reference_no", "fieldtype": "Data", "width": 150},
-        {"label": "Cheque/Reference Date", "fieldname": "reference_date", "fieldtype": "Date", "width": 100},
+        {"label": "Cheque/Reference Date", "fieldname": "reference_date", "fieldtype": "Date", "width": 110},
         {"label": "Account Paid To", "fieldname": "paid_to", "fieldtype": "Data","width": 150},
         {"label": "Mode of Payment", "fieldname": "mode_of_payment", "fieldtype": "Data","width": 100},
         {"label": "Sales Order", "fieldname": "so_id", "fieldtype": "Link", "options": "Sales Order", "width": 100},
@@ -101,19 +101,26 @@ def get_data(filters):
             status_list=[z.strip() for z in status_list if z.isalpha()]
             status_list=[doc_status_map_reverse[x] for x in status_list]
             additional_filters["docstatus"] = ["in", status_list]
-        if filters.get("from_date"):
-            additional_filters["custom_so_from_date"] = [">=", filters.get("from_date")]
-        if filters.get("to_date"):
-            additional_filters["custom_so_to_date"] = ["<=", filters.get("to_date")]
+        if filters.get("so_from_date"):
+            additional_filters["custom_so_from_date"] = [">=", filters.get("so_from_date")]
+        if filters.get("so_to_date"):
+            additional_filters["custom_so_to_date"] = ["<=", filters.get("so_to_date")]
         if filters.get("sales_invoice"):
             si_filter=filters.get("sales_invoice")
         if filters.get("custom_payment_status"):
             payment_status_filter=filters.get("custom_payment_status")
 
         if filters.get("mode_of_payment"):
-                additional_filters_pe["mode_of_payment"]=filters.get("mode_of_payment")
+            additional_filters_pe["mode_of_payment"]=filters.get("mode_of_payment")
         if filters.get("paid_to"):
-                additional_filters_pe["paid_to"]=filters.get("paid_to")
+            additional_filters_pe["paid_to"]=filters.get("paid_to")
+        if filters.get("pe_from_date") and filters.get("pe_to_date"):
+            additional_filters_pe["reference_date"]=["between", (filters.get("pe_from_date"),filters.get("pe_to_date"))]
+        elif filters.get("pe_from_date"):
+            additional_filters_pe["reference_date"]=[">=", filters.get("pe_from_date")]
+        elif filters.get("pe_to_date"):
+            additional_filters_pe["reference_date"]=["<=", filters.get("pe_to_date")]
+
 
     # additional_filters["customer"] = "20130301"
 

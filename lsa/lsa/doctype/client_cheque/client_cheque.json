@@ -1,6 +1,6 @@
 {
  "actions": [],
- "allow_rename": 1,
+ "autoname": "autoincrement",
  "creation": "2024-01-12 09:52:59.849939",
  "default_view": "Report",
  "doctype": "DocType",
@@ -8,28 +8,34 @@
  "field_order": [
   "section_break_uixl",
   "customer_id",
-  "client_bank",
-  "column_break_txrf",
   "firm_name",
-  "cheque_no",
-  "column_break_dnix",
   "contact_person",
+  "column_break_txrf",
+  "mobile_number",
+  "email",
+  "column_break_dnix",
+  "client_bank",
   "recorded_by",
   "section_break_ykga",
   "received_date",
   "cheque_date",
-  "column_break_ozxt",
-  "fees",
-  "tax",
-  "others",
+  "regarding",
   "column_break_zxid",
   "cheque_serial_no",
   "cheque_status",
+  "bounced",
+  "column_break_ozxt",
+  "fees",
+  "others",
+  "cheque_submission_date_post_bounce",
   "column_break_hfhe",
-  "regarding",
+  "tax",
   "total_amt",
+  "bounce_charges",
   "section_break_jkpc",
-  "description"
+  "description",
+  "calendar_field",
+  "calendar_date"
  ],
  "fields": [
   {
@@ -42,9 +48,11 @@
   {
    "fieldname": "cheque_date",
    "fieldtype": "Date",
-   "label": "Cheque Date"
+   "label": "Cheque Date",
+   "reqd": 1
   },
   {
+   "default": "0.00",
    "fieldname": "fees",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -62,9 +70,11 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Cheque Serial No",
+   "length": 6,
    "reqd": 1
   },
   {
+   "default": "0.00",
    "fieldname": "tax",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -74,6 +84,7 @@
    "reqd": 1
   },
   {
+   "default": "0.00",
    "fieldname": "others",
    "fieldtype": "Currency",
    "label": "Others",
@@ -93,17 +104,22 @@
    "reqd": 1
   },
   {
+   "default": "Received",
    "fieldname": "cheque_status",
    "fieldtype": "Select",
    "label": "Cheque Status",
+   "options": "Received\nPresented\nCleared\nBounced",
+   "read_only": 1,
    "reqd": 1
   },
   {
+   "default": "0.00",
    "fieldname": "total_amt",
    "fieldtype": "Currency",
    "label": "Total Amt",
    "non_negative": 1,
    "precision": "2",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -128,13 +144,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "cheque_no",
-   "fieldtype": "Data",
-   "label": "Cheque No",
-   "length": 6,
-   "reqd": 1
-  },
-  {
    "fieldname": "section_break_jkpc",
    "fieldtype": "Section Break"
   },
@@ -151,7 +160,8 @@
    "fetch_from": "customer_id.customer_name",
    "fieldname": "firm_name",
    "fieldtype": "Data",
-   "label": "Firm Name"
+   "label": "Firm Name",
+   "read_only": 1
   },
   {
    "default": "user",
@@ -173,15 +183,64 @@
    "fetch_from": "customer_id.custom_contact_person",
    "fieldname": "contact_person",
    "fieldtype": "Data",
-   "label": "Contact Person"
+   "label": "Contact Person",
+   "read_only": 1
+  },
+  {
+   "fieldname": "calendar_field",
+   "fieldtype": "Small Text",
+   "hidden": 1,
+   "label": "Calendar Field"
+  },
+  {
+   "fetch_from": "customer_id.custom_primary_mobile_no",
+   "fieldname": "mobile_number",
+   "fieldtype": "Data",
+   "label": "Mobile Number",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "customer_id.custom_primary_email",
+   "fieldname": "email",
+   "fieldtype": "Data",
+   "label": "Email",
+   "read_only": 1
+  },
+  {
+   "fieldname": "calendar_date",
+   "fieldtype": "Date",
+   "hidden": 1,
+   "label": "Calendar Date"
+  },
+  {
+   "default": "0",
+   "fieldname": "bounced",
+   "fieldtype": "Check",
+   "label": "Bounced",
+   "read_only": 1
+  },
+  {
+   "depends_on": "bounced",
+   "fieldname": "bounce_charges",
+   "fieldtype": "Currency",
+   "label": "Bounce Charges",
+   "mandatory_depends_on": "bounced"
+  },
+  {
+   "depends_on": "bounced",
+   "fieldname": "cheque_submission_date_post_bounce",
+   "fieldtype": "Date",
+   "label": "Cheque submission date post Bounce"
   }
  ],
  "index_web_pages_for_search": 1,
+ "is_calendar_and_gantt": 1,
  "links": [],
- "modified": "2024-05-06 19:08:45.196828",
+ "modified": "2024-05-28 14:57:57.337572",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Client Cheque",
+ "naming_rule": "Autoincrement",
  "owner": "Administrator",
  "permissions": [
   {

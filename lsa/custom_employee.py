@@ -2,7 +2,7 @@ import frappe
 import requests
 from frappe import _
 from frappe.utils import today,add_days, cint, flt, getdate,get_first_day,get_last_day
-from datetime import datetime
+from datetime import datetime, timedelta, date
 from hrms.hr.doctype.leave_allocation.leave_allocation import get_previous_allocation
 from hrms.hr.doctype.leave_application.leave_application import (get_leave_balance_on,get_leaves_for_period,)
 from itertools import groupby
@@ -22,7 +22,7 @@ def checking_user_authentication(user_email=None):
 
         # Extract roles from the result
         roles = [role.get('role') for role in user_roles]
-        doc_perm_roles = ["HR Manager","HR User","LSA CEO Admin","LSA CEO ADMIN TEAM"]
+        doc_perm_roles = ["HR Manager","HR User","LSA CEO Admin","LSA CEO ADMIN TEAM","Lsa HR"]
 
         for role in roles:
             if role in doc_perm_roles:
@@ -52,16 +52,22 @@ def get_employees_with_birthday_in_current_month():
         filters={
             "status": "Active",
         },
-        fields=["name", "employee_name", "date_of_birth"],
-        order_by="date_of_birth asc"
+        fields=["name", "employee_name", "date_of_birth","custom_anniversary_date"],
     )
-    curr_mon_birthday=[]
+    curr_mon={}
     for emp in employees:
         if emp.date_of_birth and emp.date_of_birth.month == cur_month:
-            curr_mon_birthday.append(emp)
-
-    return curr_mon_birthday
-
+            if emp.date_of_birth in curr_mon:
+                curr_mon[str(emp.date_of_birth)[5:]]+=[(emp.employee_name,"birthday")]
+            else:
+                curr_mon[str(emp.date_of_birth)[5:]]=[(emp.employee_name,"birthday")]
+        if emp.custom_anniversary_date and emp.custom_anniversary_date.month == cur_month:
+            if emp.custom_anniversary_date in curr_mon:
+                curr_mon[str(emp.custom_anniversary_date)[5:]]+=[(emp.employee_name,"anniversary")]
+            else:
+                curr_mon[str(emp.custom_anniversary_date)[5:]]=[(emp.employee_name,"anniversary")]
+    sorted_curr_mon = {key: curr_mon[key] for key in sorted(curr_mon)}
+    return sorted_curr_mon
 
 
 
@@ -222,8 +228,132 @@ def get_leave_ledger_entries(
 
 
 
+# @frappe.whitelist()
+# def get_employees_with_absent():
+#     cur_month = frappe.utils.now_datetime().month
+
+
+#     # Fetch employees with birthdays in the current month
+#     employee = get_employee_for_user()
+#     if employee:
+#         today = date.today()
+
+#         # Calculate the start date of the current month
+#         start_date = date(today.year, today.month, 1)
+
+#         # Calculate the end date of the current month
+#         if today.month == 12:
+#             end_date = date(today.year + 1, 1, 1) - timedelta(days=1)
+#         else:
+#             end_date = date(today.year, today.month + 1, 1) - timedelta(days=1)
+#         absent_date = frappe.get_all("Attendance",
+#                                     filters={"docstatus":1,
+#                                             "status":"Absent",
+#                                             "attendance_date":("between",[str(start_date),str(end_date)]),
+#                                             "employee":employee[0].name,
+#                                             },
+#                                     fields=["name","attendance_date"])
+#         absent_data={}
+#         for ab_date in absent_date:
+#             absent_date_checkin = frappe.get_all("Employee Checkin",
+#                                     filters={"attendance":ab_date.name,
+#                                             "employee":employee[0].name,
+#                                             },
+#                                     fields=["name","time","log_type"]
+#                                             )
+#             if absent_date_checkin:
+#                 absent_data[str(ab_date.attendance_date)]=absent_date_checkin
+#             else:
+#                 absent_data[str(ab_date.attendance_date)]=[]
+            
+
+#         print(absent_data)
+#         return absent_data
+#     return None
+
+
+@frappe.whitelist()
+def get_employees_with_absent():
+
+    cur_month = frappe.utils.now_datetime().month
+
+    # Fetch employees with birthdays in the current month
+    employees = get_employee_for_user()
+    if employees:
+        employees_dict = {}
+        for emp in employees:
+            employees_dict[emp.name] = emp.employee_name
+        
+        today = date.today()
+        # today = datetime.strptime("2024-05-15", "%Y-%m-%d")
+
+
+        # Calculate the start date of the current month
+        start_date = date(today.year, today.month, 1)
+
+        # Calculate the end date of the current month
+        if today.month == 12:
+            end_date = date(today.year + 1, 1, 1) - timedelta(days=1)
+        else:
+            end_date = date(today.year, today.month + 1, 1) - timedelta(days=1)
+
+
+        leave_applications = frappe.get_all("Leave Application",
+                                             filters={
+                                                      "from_date": ("between", [str(start_date), str(end_date)]),
+                                                      "employee":employees[0].name,
+                                                      },
+                                             fields=["name", "from_date", "to_date", "employee","status"])
+        
+
+        # Initialize the dictionary
+        leave_dict = {}
+
+        # Iterate over each leave application
+        for leave in leave_applications:
+            # from_date = datetime.strptime(str(leave["from_date"]), "%Y-%m-%d")
+            # to_date = datetime.strptime(str(leave["to_date"]), "%Y-%m-%d")
+            from_date = leave.from_date
+            to_date = leave.to_date
+            employee = leave["employee"]
+            status = leave["status"]
+            
+            # Generate key-value pairs for each day in the leave application range
+            current_date = from_date
+            while current_date <= to_date or current_date<=end_date:
+                leave_dict[(current_date, employee)] = status
+                current_date += timedelta(days=1)
+        
+        absent_date = frappe.get_all("Attendance",
+                                     filters={"docstatus": 1,
+                                              "status": "Absent",
+                                              "employee":employees[0].name,
+                                              "attendance_date": ("between", [str(start_date), str(end_date)]),
+                                              },
+                                     fields=["name", "attendance_date", "employee","working_hours"])
+        absent_data = {}
+        for ab_date in absent_date:
+            absent_date_checkin = frappe.get_all("Employee Checkin",
+                                     filters={"attendance": ab_date.name},
+                                     fields=["name", "time", "log_type"],
+                                     order_by="time asc")
+
+            if str(ab_date.attendance_date) not in absent_data:
+                absent_data[str(ab_date.attendance_date)] = []
 
 
 
-	
+            if (ab_date.attendance_date,ab_date.employee) in leave_dict:
+                absent_data[str(ab_date.attendance_date)].append([employees_dict[ab_date.employee], False, [],ab_date.working_hours,"Applied for leave but not approved"])
+            elif absent_date_checkin and (len(absent_date_checkin)%2 != 0 or absent_date_checkin[0].log_type == "OUT"):
+                absent_data[str(ab_date.attendance_date)].append([employees_dict[ab_date.employee], True, absent_date_checkin,ab_date.working_hours,"Mismatch in Checkins"])
+            elif absent_date_checkin :
+                absent_data[str(ab_date.attendance_date)].append([employees_dict[ab_date.employee], True, absent_date_checkin,ab_date.working_hours,"Short working hours"])
+            else:
+                absent_data[str(ab_date.attendance_date)].append([employees_dict[ab_date.employee], False, [],ab_date.working_hours,"Need to apply for Leave"])
+
+        return absent_data
+    return None
+
+
 

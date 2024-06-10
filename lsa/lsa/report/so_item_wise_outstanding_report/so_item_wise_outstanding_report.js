@@ -30,13 +30,13 @@ frappe.query_reports["SO Item wise Outstanding Report"] = {
 				options: ["Unpaid","Cleared","Partially Paid"],
 				default: "Unpaid,Partially Paid",
 			},
-			// {
-			// 	fieldname: "customer_enabled",
-			// 	label: __("Customer Enabled"),
-			// 	fieldtype: "Select",
-			// 	options:["","Customer Enabled","Customer Disabled"],
-			// 	default: "Customer Enabled",
-			// },
+			{
+				fieldname: "customer_enabled",
+				label: __("Customer Enabled"),
+				fieldtype: "Select",
+				options:["","Customer Enabled","Customer Disabled"],
+				default: "Customer Enabled",
+			},
 			{
 				fieldname: "sales_invoice",
 				label: __("Sales Invoice"),
@@ -74,3 +74,4 @@ frappe.query_reports["SO Item wise Outstanding Report"] = {
 			},
 		]
 };
+

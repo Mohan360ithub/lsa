@@ -1,0 +1,133 @@
+{
+ "actions": [],
+ "creation": "2024-06-07 15:42:34.944472",
+ "default_view": "List",
+ "doctype": "DocType",
+ "document_type": "Document",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "project_details",
+  "department",
+  "master",
+  "billable",
+  "customer_id",
+  "linked_file",
+  "column_break_2",
+  "activity",
+  "status",
+  "customer_name",
+  "time",
+  "file_id",
+  "section_break_hxfc",
+  "notes"
+ ],
+ "fields": [
+  {
+   "fieldname": "project_details",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fetch_from": "task_type.task_group",
+   "fieldname": "department",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Department",
+   "options": "\nGST\nIncome Tax\nProfessional Tax\nROC\nTDS\nRegistration\nClient Notice\nCRM\nHR\nAccounts",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "activity.master",
+   "fieldname": "master",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Master",
+   "options": "DocType"
+  },
+  {
+   "fieldname": "billable",
+   "fieldtype": "Select",
+   "label": "Billable",
+   "options": "\nYes\nNo",
+   "reqd": 1
+  },
+  {
+   "fieldname": "customer_id",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Customer ID",
+   "options": "Customer"
+  },
+  {
+   "fieldname": "linked_file",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Linked File",
+   "options": "master"
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "activity",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Activity",
+   "options": "Task Group",
+   "remember_last_selected_value": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "In Process\nCompleted",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "customer_id.customer_name",
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "label": "Customer Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "time",
+   "fieldtype": "Int",
+   "hide_days": 1,
+   "hide_seconds": 1,
+   "label": "Time(Min)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "file_id",
+   "fieldtype": "Data",
+   "label": "File ID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_hxfc",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes"
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2024-06-07 16:26:05.916729",
+ "modified_by": "Administrator",
+ "module": "Lsa",
+ "name": "Custom Timesheet Detail",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "ASC",
+ "states": []
+}

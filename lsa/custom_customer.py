@@ -11,11 +11,12 @@ def sync_customer(customer_id=None):
         followup_button,followup_values,values,open_followup,open_followup_i=sync_sales_orders_customer(customer_id)
         services_values=sync_services_customer(customer_id)
         pricing_value=sync_services_pricing(customer_id)
+        turnover_list=sync_turnover_gst(customer_id)
         if [followup_button,followup_values,values,open_followup,open_followup_i] or services_values or pricing_value:
 
             return {"status":"Synced successfully.","followup_button":followup_button,"values":values,
                         "followup_values":followup_values,"services_values":services_values,"open_followup":open_followup,
-                        "open_followup_i":open_followup_i,"pricing_value":pricing_value}
+                        "open_followup_i":open_followup_i,"pricing_value":pricing_value,"turnover_list":turnover_list}
         else:
             return {"status":"Sync Failed."}
     except Exception as e:
@@ -31,6 +32,14 @@ def sync_services_pricing(customer_id=None):
                                 fields=["customer_id","name","effective_from","effective_to","status","fy"])
 
     return pricings
+
+def sync_turnover_gst(customer_id):
+    gst_filing_list=frappe.get_all("Gst Yearly Filing Summery",
+                                filters={"cid":customer_id,},
+                                fields=["cid","name","fy","company","gst_file_id","gst_executive","sales_total_taxable","purchase_total_taxable","fy_last_month_of_filling"],
+                                order_by="creation")
+    
+    return gst_filing_list[:5]
 
 def sync_services_customer(customer_id=None):
 
@@ -374,6 +383,7 @@ You are having due amount to be paid for following Sales Invoices:
     custom_total_amount=0.00
     custom_total_amount_due_of_so=0.00
     custom_details_of_so_due={}
+    sales_invoice_whatsapp_log = frappe.new_doc('WhatsApp Message Log')
 
     if existing_sales_orders:
 
@@ -433,21 +443,30 @@ accounts@lsaoffice.com
 8951692788
 '''
                     
-    sales_invoice_whatsapp_log = frappe.new_doc('WhatsApp Message Log')
-    whatsapp_items = []
+    
+    # whatsapp_items = []
+
+    sales_invoice_whatsapp_log.message = message
+    
     for due_so in custom_details_of_so_due:
         wa_response=due_so_whatsapp(due_so,custom_details_of_so_due[due_so][0],new_mobile,message)
         if wa_response["status"]==True:
-            whatsapp_items.append({"type": "Sales Order",
-                            "document_id": due_so,
-                            "mobile_number": new_mobile,
-                            "customer":customer_id,})
+            # whatsapp_items.append({"type": "Sales Order",
+            #                 "document_id": due_so,
+            #                 "mobile_number": new_mobile,
+            #                 "customer":customer_id,})
+            sales_invoice_whatsapp_log.append("details", {
+                                    "type": "Sales Order",
+                                    "document_id": due_so,
+                                    "mobile_number": new_mobile,
+                                    "customer":customer_id,
+                                    "message_id":wa_response["message_id"]                 
+                                })
             message=""
 
     sales_invoice_whatsapp_log.send_date = frappe.utils.now_datetime()
     sales_invoice_whatsapp_log.sender = frappe.session.user
     sales_invoice_whatsapp_log.type = "Template"
-    sales_invoice_whatsapp_log.message = message
     sales_invoice_whatsapp_log.insert()
 
 @frappe.whitelist()
@@ -499,7 +518,7 @@ def due_so_whatsapp(docname,paymentstatus,new_mobile,template):
 
                 frappe.logger().info("WhatsApp message sent successfully")
                 
-                return {"status":True,"msg":"WhatsApp message sent successfully"}
+                return {"status":True,"msg":"WhatsApp message sent successfully","message_id":message_id}
             else:
                 return {"status":False,"error":f"{response.json()}","msg":"An error occurred while sending the WhatsApp message."}
 
@@ -517,21 +536,42 @@ def due_so_whatsapp(docname,paymentstatus,new_mobile,template):
 
                     
 
+def update_linked_doctypes(doc, method):
+    # Get the new and old status of the customer
+    new_status = doc.custom_customer_status_
+    old_status = frappe.db.get_value('Customer', doc.name, 'custom_customer_status_')
+    print(new_status,old_status)
+    # Check if the status has changed
+    if True:
+        try:
+            linked_doctypes = {
+                                "Client Notices":("cid","customer_status"),
+                                "DSC Digital Sign":("customer_id","customer_status"), 
+                                "ESI File":("customer_id","customer_status"), 
+                                "Gst Filling Data":("cid","customer_status"),
+                                "Gst Yearly Filing Summery":("cid","customer_status"), 
+                                "Gstfile":("customer_id","customer_status"), 
+                                "IT Assessee File":("customer_id","customer_status"), 
+                                "IT Assessee Filing Data":("customer_id","customer_status"),
+                                "MCA ROC File":("customer_id","customer_status"), 
+                                "Provident Fund File":("customer_id","customer_status"), 
+                                "Professional Tax File":("customer_id","customer_status"), 
+                                "TDS File":("customer_id","customer_status"),
+                                "Recurring Service Pricing":("customer_id","customer_status"), 
+                                "NTC Payment":("customer_id","customer_status"), 
+                                "TDS QTRLY FILING":("customer_id","customer_status"),
+                            }
 
+            for doctypei in linked_doctypes:
+                linked_docs = frappe.get_all(doctypei, 
+                                             filters={linked_doctypes[doctypei][0]: doc.name},
+                                             fields=["name",linked_doctypes[doctypei][1]])
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+                for linked_doc in linked_docs:
+                    if new_status==linked_doc[linked_doctypes[doctypei][1]]:
+                        continue
+                    doc_to_update = frappe.get_doc(doctypei, linked_doc.name)
+                    doc_to_update.save()
+                    
+        except Exception as e:
+            frappe.logger().error(f"Error Triggering status Change for Customer {doc.name}: {e}")

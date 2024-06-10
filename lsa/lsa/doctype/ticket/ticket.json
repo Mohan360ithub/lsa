@@ -1,0 +1,126 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:TKT-{YY}{MM}{DD}-{###}",
+ "creation": "2024-06-10 12:20:03.934032",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "title",
+  "type",
+  "column_break_iien",
+  "created_by",
+  "status",
+  "section_break_oeed",
+  "description",
+  "reference_section",
+  "department",
+  "referred_doctype",
+  "column_break_lwgs",
+  "reference_attachment",
+  "reference_id"
+ ],
+ "fields": [
+  {
+   "default": "user",
+   "fieldname": "created_by",
+   "fieldtype": "Link",
+   "label": "Created By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Type",
+   "options": "\nRequest\nSuggestion\nFeedback",
+   "reqd": 1
+  },
+  {
+   "default": "Open",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Open\nApproved/Closed\nRejected/Cancelled",
+   "permlevel": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Title",
+   "reqd": 1
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description"
+  },
+  {
+   "fieldname": "column_break_iien",
+   "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "reference_section",
+   "fieldtype": "Section Break",
+   "label": "Reference"
+  },
+  {
+   "fieldname": "referred_doctype",
+   "fieldtype": "Link",
+   "label": "Referred Doctype",
+   "options": "DocType"
+  },
+  {
+   "fieldname": "reference_attachment",
+   "fieldtype": "Attach",
+   "label": "Reference Attachment"
+  },
+  {
+   "fieldname": "column_break_lwgs",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "reference_id",
+   "fieldtype": "Dynamic Link",
+   "label": "Reference ID",
+   "options": "referred_doctype"
+  },
+  {
+   "fieldname": "department",
+   "fieldtype": "Data",
+   "label": "Department"
+  },
+  {
+   "fieldname": "section_break_oeed",
+   "fieldtype": "Section Break"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-06-10 12:42:30.082313",
+ "modified_by": "Administrator",
+ "module": "Lsa",
+ "name": "Ticket",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

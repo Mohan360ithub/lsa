@@ -22,7 +22,10 @@ def execute(filters=None):
 
         {"label": "Status", "fieldname": "status", "fieldtype": "Data", "width": 100, "height": 100},
         {"label": "Enabled", "fieldname": "enable", "fieldtype": "Data", "width": 50, "height": 100},
-        
+
+        #RSP
+        {"label": "RSP", "fieldname": "rsp", "fieldtype": "Link", "options": "Recurring Service Pricing", "width": 100, "height": 100},
+
         # Sales Order related columns
         {"label": "Service Count", "fieldname": "service_count", "fieldtype": "Int", "width": 100, "height": 100},
         {"label": "Service Amount", "fieldname": "service_amount", "fieldtype": "Currency", "width": 100, "height": 100},
@@ -118,11 +121,17 @@ def get_data(services, filters):
                                        "custom_primary_email","disabled","custom_customer_status_","custom_customer_tags",
                                        "custom_customer_behaviour_","custom_customer_status_"])
     
-
     unsettled_sales_orders = frappe.get_all(
                 "Sales Order",
                 fields=["name","customer", "rounded_total","advance_paid","status"], 
                 )
+    rsp_list = frappe.get_all(
+                "Recurring Service Pricing",
+                filters={"status":"Approved"},
+                fields=["name","customer_id"], 
+                ) 
+    rsp_dict={rs.customer_id:rs.name for rs in rsp_list}
+
     sos={}
     for unsettled_sales_order in unsettled_sales_orders:
         if unsettled_sales_order["customer"] in sos:
@@ -199,6 +208,11 @@ def get_data(services, filters):
 
         # Set enable status based on 'disabled' field
         data_row["enable"] = "No" if i.disabled else "Yes"
+
+        if i.name in rsp_dict:
+            data_row["rsp"] = rsp_dict[i.name]
+        else:
+            data_row["rsp"] = None
 
         # Sales Order Details associated with Customer
         # unsettled_sales_orders = frappe.get_all(
@@ -307,6 +321,7 @@ def get_data(services, filters):
             data = [d1 for d1 in data if d1["status"] == status_filter]
 
     return data
+
 
 
 

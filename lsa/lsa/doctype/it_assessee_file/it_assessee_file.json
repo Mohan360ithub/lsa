@@ -106,7 +106,8 @@
    "fieldname": "assessee_first_name",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Assessee First Name"
+   "label": "Assessee First Name",
+   "reqd": 1
   },
   {
    "fieldname": "assessee_name",
@@ -404,7 +405,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-03-27 15:47:24.947978",
+ "modified": "2024-05-17 11:56:47.182584",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "IT Assessee File",

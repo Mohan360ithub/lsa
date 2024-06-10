@@ -130,6 +130,13 @@ app_license = "mit"
 #	}
 # }
 
+doc_events = {
+    "Customer": {
+        "on_update": "lsa.custom_customer.update_linked_doctypes"
+    }
+}
+
+
 # Scheduled Tasks
 # ---------------
 
@@ -238,6 +245,7 @@ scheduler_events = {
 # auth_hooks = [
 #	"lsa.auth.validate"
 # ]
+
 
 
 

@@ -83,21 +83,28 @@ def send_reminder_email_timesheet(mail_emp_date):
                                         "name":("in",list(mail_emp_date)),
                                         "status":"Active",
                                     },
-                                    fields=["name","employee_name","personal_email","company_email","reports_to"]
+                                    fields=["name","employee_name","personal_email","company_email","reports_to","custom_timesheet"]
                                 )
         # print(emp_ls)
-        email_account = frappe.get_doc("Email Account", "LSA OFFICE")
+        # email_account = frappe.get_doc("Email Account", "LSA OFFICE")
+
+        email_account = frappe.get_doc("Email Account", "LSA HR")
+        sender_email = email_account.email_id
+        sender_password = email_account.get_password()
 
         # Send the email
         sender_email = email_account.email_id
         sender_password=email_account.get_password()
 
         for emp in emp_ls:
-            cc_email = "hr@lsaoffice.com"
+            # cc_email = "hr@lsaoffice.com"
+            cc_email=""
             if emp.reports_to:
                 emp_rep_to=frappe.get_doc("Employee",emp.reports_to)
                 if emp_rep_to.user_id:
                     cc_email+=(","+emp_rep_to.user_id)
+                if not emp.custom_timesheet:
+                    continue
 
             emp_name=emp.employee_name
             emp_pers_mail=emp.personal_email
@@ -171,22 +178,22 @@ def send_reminder_email_timesheet(mail_emp_date):
             message['To'] = receiver_email
             message['Cc'] = cc_email 
 
-            bcc_email = "360ithub.developers@gmail.com"
-            message['Bcc'] = bcc_email
+            #bcc_email = "360ithub.developers@gmail.com"
+            #message['Bcc'] = bcc_email
 
             message['Subject'] = subject
             message.attach(MIMEText(body, 'html'))
 
 
             # Connect to the SMTP server
-            smtp_server = 'smtp.gmail.com'
+            smtp_server = 'smtp-mail.outlook.com'
             smtp_port = 587
             with smtplib.SMTP(smtp_server, smtp_port) as server:
                 server.starttls()
                 server.login(sender_email, your_password)
                 try:
                     # Send email
-                    server.sendmail(sender_email, receiver_email.split(',') + cc_email.split(',')+ bcc_email.split(','), message.as_string())
+                    server.sendmail(sender_email, receiver_email.split(',') + cc_email.split(','), message.as_string())
                     # print ("Email sent successfully!")
                 except Exception as e:
                     print (f"Failed to send email. Error: {e}")
@@ -196,5 +203,64 @@ def send_reminder_email_timesheet(mail_emp_date):
 
 
 
+@frappe.whitelist()
+def nonsubmitted_timesheet_dates():
+    from datetime import datetime, date, timedelta
+
+    current_user = frappe.session.user
+    employee_list = frappe.get_all("Employee", 
+                                   filters={"user_id": current_user, "status": "Active"}, 
+                                   fields=["name", "employee_name", "company", "designation", "department"])
+    if not employee_list:
+        return []
+    employee = employee_list[0].name
+
+    # Get the current year and month
+    current_year = datetime.now().year
+    current_month = datetime.now().month
+    # current_year = 2023
+    # current_month = 12
+    first_day_of_month = date(current_year, current_month, 1)
+
+    # Get the last day of the current month
+    if current_month == 12:
+        last_day_of_month = date(current_year, current_month, 31)
+    else:
+        last_day_of_month = date(current_year, current_month + 1, 1) - timedelta(days=1)
+
+    # Retrieve attendance data
+    attendance_data = frappe.get_all('Attendance', 
+                                     filters={
+                                         "employee": employee,
+                                         'docstatus': 1,
+                                         'status': 'Present',
+                                         'attendance_date': ['between', [first_day_of_month, last_day_of_month]]
+                                     },
+                                     fields=['employee', 'attendance_date', 'working_hours'])
+    attendance_data_emp = {}
+    for at in attendance_data:
+        date_str = str(datetime.strptime(str(at.attendance_date), '%Y-%m-%d').strftime('%d-%m-%Y'))
+        attendance_data_emp[date_str] = at.working_hours
+
+    timesheet_data = frappe.get_all('Timesheet', 
+                                     filters={
+                                         "employee": employee,
+                                         'docstatus': ["in", (0, 1)],
+                                         'custom_date': ['between', [first_day_of_month, last_day_of_month]],
+                                     },
+                                     fields=['employee', 'custom_date', 'docstatus'])
+    timesheet_data_emp = {}
+    for ts in timesheet_data:
+        date_str = str(datetime.strptime(str(ts.custom_date), '%Y-%m-%d').strftime('%d-%m-%Y'))
+        timesheet_data_emp[date_str] = ts.docstatus
+
+    mail_emp_date = []
+    for day, working_hours in attendance_data_emp.items():
+        if day not in timesheet_data_emp:
+            mail_emp_date.append((day, working_hours, "Timesheet Not Created"))
+        elif timesheet_data_emp[day] == 0:
+            mail_emp_date.append((day, working_hours, "Timesheet Created, Not Submitted"))
+
+    return mail_emp_date
 
 

@@ -45,11 +45,16 @@ def cancel_link(p_id=None):
             if response.status_code == 200:
                 payment_link.enabled=0
                 payment_link.save()
+                
+                sales_order_doc = frappe.get_doc('Sales Order',payment_link.sales_order)
+                sales_order_doc.custom_razorpay_payment_url=None
+                sales_order_doc.save()
                 return "Payment link canceled successfully:"
             else:
                 return f"Error canceling payment link. Status code: {response.status_code},{response_dict['error']['description']}"
 
         except requests.exceptions.RequestException as e:
             return "Error in Payment Link Log"
+
 
 

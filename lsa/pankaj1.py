@@ -3,6 +3,7 @@ import requests
 from frappe import _
 from frappe.utils import today
 import random
+from lsa.custom_payment_entry import pe_mail,whatsapp_pe_template
 
 @frappe.whitelist()
 def fetch_sales_orders(cid=None):
@@ -301,7 +302,7 @@ def get_razorpay_payment_details(razorpay_payment_link_reference_id,customer,act
                 final_amount = int(float(payment_amount) / 100)
                 # print(final_amount)
                 # frappe.msgprint(final_amount)
-                create_payment_entry(final_amount,razorpay_payment_link_reference_id[:18],customer,razorpay_payment_link_id,actual_amount)
+                resp=create_payment_entry(final_amount,razorpay_payment_link_reference_id[:18],customer,razorpay_payment_link_id,actual_amount)
                 
                     
                 return render_payment_success_page(final_amount,razorpay_payment_link_id)
@@ -394,19 +395,36 @@ def create_payment_entry(final_amount, razorpay_payment_link_reference_id, custo
 
         # Save the Payment Entry
         payment_entry.insert(ignore_permissions=True)
-
-        payment_link_log = frappe.get_all("Payment Link Log",filters={"sales_order":razorpay_payment_link_id})
+        frappe.db.commit()
+        payment_link_log = frappe.get_all("Payment Link Log",filters={"link_id":razorpay_payment_link_id})
         if payment_link_log:
             payment_link_log_doc = frappe.get_doc("Payment Link Log",payment_link_log[0].name)
             payment_link_log_doc.payment_status="Paid"
             payment_link_log_doc.save(ignore_permissions=True)
 
-        frappe.db.commit()
+        payment_entries = frappe.get_all("Payment Entry",filters={"mode_of_payment": "Razorpay","reference_no": razorpay_payment_link_id})
+        if payment_entries:
+            wa_resp=whatsapp_pe_template(payment_entries[0].name,today(),customer)
+            if not wa_resp["status"]:
+                frappe.log_error(f'Failed make WhatsApp notifcation for Razorpay payment done for {customer} with link id {razorpay_payment_link_id}' )
+
+            mail_resp=pe_mail(payment_entries[0].name, customer)
+            if not mail_resp["status"]:
+                frappe.log_error(f'Failed make Email notifcation for Razorpay payment done for {customer} with link id {razorpay_payment_link_id}' )
+
+            frappe.db.commit()
+        else:
+            frappe.log_error(f'Failed to get Payment Entry doc for Razorpay payment done for {customer} with link id {razorpay_payment_link_id} to notify customer for the transaction' )
+
+        
         # print("=============ENDED=============")
         frappe.set_user("Guest")
+        return payment_link_log
 
     except frappe.exceptions.ValidationError as e:
+        frappe.log_error(f"Error creating Payment Entry: {e}")
         frappe.msgprint(_('Error creating Payment Entry: {0}').format(str(e)))
+        return f"Error creating Payment Entry: {e}"
 
 # Rest of your code...
 
@@ -940,6 +958,8 @@ accounts@lsaoffice.com'''
 
 
 ####################################################################################################################
+
+
 
 
 

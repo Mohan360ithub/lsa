@@ -41,14 +41,14 @@ frappe.query_reports["Payment Entry Mapping Sales Orders and Invoice"] = {
 			default: "No",
 			//hidden:1,
 		},
-				{
-			fieldname: "from_date",
-			label: __("From Date"),
+		{
+			fieldname: "so_from_date",
+			label: __("SO From Date"),
 			fieldtype: "Date",
 		},
 		{
-			fieldname: "to_date",
-			label: __("To Date"),
+			fieldname: "so_to_date",
+			label: __("SO To Date"),
 			fieldtype: "Date",
 		},
 
@@ -66,6 +66,16 @@ frappe.query_reports["Payment Entry Mapping Sales Orders and Invoice"] = {
 			fieldtype: "Link",
 			options:"Mode of Payment"
 			
+		},
+		{
+			fieldname: "pe_from_date",
+			label: __("PE From Date"),
+			fieldtype: "Date",
+		},
+		{
+			fieldname: "pe_to_date",
+			label: __("PE To Date"),
+			fieldtype: "Date",
 		},
 	]
 	

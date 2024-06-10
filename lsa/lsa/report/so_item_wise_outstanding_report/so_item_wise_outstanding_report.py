@@ -111,13 +111,14 @@ def get_data(filters):
         additional_filters["custom_so_to_date"] = ["<=", to_date]
 
     customer_filter={}
-    # if filters.get("customer_enabled"):
-    #     if filters.get("customer_enabled")=="Customer Enabled":
-    #         customer_filter["disabled"] = 0
-    #     elif filters.get("customer_enabled")=="Customer Disabled":
-    #         customer_filter["disabled"] = 1
+    if filters.get("customer_enabled"):
+        if filters.get("customer_enabled")=="Customer Enabled":
+            customer_filter["disabled"] = 0
+        elif filters.get("customer_enabled")=="Customer Disabled":
+            customer_filter["disabled"] = 1
+
     if filters.get("customer_tag"):
-        customer_filter["customer_tag"] = 0
+        customer_filter["custom_customer_tags"] = filters.get("customer_tag")
 
     if filters.get("service_type"):
         service_filter_item=filters.get("service_type")
@@ -140,9 +141,9 @@ def get_data(filters):
                         # filters={"enabled":1},
                         fields=["name","customer_id","service_name","executive","frequency"])
         for ser_exe in services_executive:
-            if ser_exe.service_name in cu_l[ser_exe.customer_id]:
+            if ser_exe.customer_id in cu_l and ser_exe.service_name in cu_l[ser_exe.customer_id]:
                 cu_l[ser_exe.customer_id][ser_exe.service_name]+=[(ser_exe.executive,ser_exe.frequency,ser_exe.name)]
-            else:
+            elif ser_exe.customer_id in cu_l:
                 cu_l[ser_exe.customer_id][ser_exe.service_name]=[(ser_exe.executive,ser_exe.frequency,ser_exe.name)]
 
     
@@ -332,4 +333,5 @@ def get_data(filters):
 #         'custom_customer_tags': '<p style="color:Orange;">Not Approached</p>', 'item_code': 'Incometax Filing', 
 #         'item_id': None, 'total_with_gst': 4500.0, 'item_balance': 4500.0} 
 # END
+
 
