@@ -221,6 +221,8 @@ def nonsubmitted_timesheet_dates():
     # current_year = 2023
     # current_month = 12
     first_day_of_month = date(current_year, current_month, 1)
+    if current_year==2024 and current_month==6:
+        first_day_of_month = date(current_year, current_month, 11)
 
     # Get the last day of the current month
     if current_month == 12:
@@ -242,16 +244,16 @@ def nonsubmitted_timesheet_dates():
         date_str = str(datetime.strptime(str(at.attendance_date), '%Y-%m-%d').strftime('%d-%m-%Y'))
         attendance_data_emp[date_str] = at.working_hours
 
-    timesheet_data = frappe.get_all('Timesheet', 
+    timesheet_data = frappe.get_all('Team Timesheet', 
                                      filters={
                                          "employee": employee,
                                          'docstatus': ["in", (0, 1)],
-                                         'custom_date': ['between', [first_day_of_month, last_day_of_month]],
+                                         'date': ['between', [first_day_of_month, last_day_of_month]],
                                      },
-                                     fields=['employee', 'custom_date', 'docstatus'])
+                                     fields=['employee', 'date', 'docstatus'])
     timesheet_data_emp = {}
     for ts in timesheet_data:
-        date_str = str(datetime.strptime(str(ts.custom_date), '%Y-%m-%d').strftime('%d-%m-%Y'))
+        date_str = str(datetime.strptime(str(ts.date), '%Y-%m-%d').strftime('%d-%m-%Y'))
         timesheet_data_emp[date_str] = ts.docstatus
 
     mail_emp_date = []
@@ -262,5 +264,6 @@ def nonsubmitted_timesheet_dates():
             mail_emp_date.append((day, working_hours, "Timesheet Created, Not Submitted"))
 
     return mail_emp_date
+
 
 

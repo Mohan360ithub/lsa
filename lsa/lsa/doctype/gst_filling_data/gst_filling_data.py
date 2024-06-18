@@ -1,6 +1,8 @@
 import frappe
 from frappe.model.document import Document
 from datetime import datetime
+import datetime as dt
+from dateutil.relativedelta import relativedelta
 
 class GstFillingData(Document):
     def before_insert(self):
@@ -96,77 +98,86 @@ class GstFillingData(Document):
                     gst_doc = frappe.get_doc("Gstfile", doc.gstfile)
                     gst_doc.last_filed = ""
                     gst_doc.save()
+            if doc.submitted ==1 and old_doc.submitted==0:
+                        gst_filling_data = frappe.get_all(doc.doctype,
+                                            filters={'gst_yearly_filling_summery_id': doc.gst_yearly_filling_summery_id,
+                                                     'non_compliant':1,
+                                                     'name':("not in",[doc.name]),
+                                                     },)
+                        doc.non_compliant=0
+                        if not gst_filling_data :
+                            gst_doc = frappe.get_doc("Gst Yearly Filing Summery", doc.gst_yearly_filling_summery_id)
+                            gst_doc.non_compliant = 0
+                            gst_doc.save()
+                        
+            elif doc.submitted ==0 and old_doc.submitted==1:
+                doc.non_compliant=1
+                if doc.non_compliant==1:
+                    gst_doc = frappe.get_doc("Gst Yearly Filing Summery", doc.gst_yearly_filling_summery_id)
+                    gst_doc.non_compliant = 1
+                    gst_doc.save()
 
-        
 
 
-                
-            
+def get_financial_year(date):
+    if date.month >= 4:
+        start_year = date.year
+        end_year = date.year + 1
+    else:
+        start_year = date.year - 1
+        end_year = date.year
+    return f"{start_year}-{end_year}"
 
+@frappe.whitelist()
+def check_gst_compliance():
+    month_dict = {
+                    1: "JAN",
+                    2: "FEB",
+                    3: "MAR",
+                    4: "APR",
+                    5: "MAY",
+                    6: "JUN",
+                    7: "JUL",
+                    8: "AUG",
+                    9: "SEP",
+                    10: "OCT",
+                    11: "NOV",
+                    12: "DEC"
+                }
+    today = dt.date.today()
+    # today=dt.date(2024, 5, 5)
 
+    one_month_before = today - relativedelta(months=1)
+    fy = get_financial_year(one_month_before)
+    month_number = one_month_before.month
+    month_name=month_dict[month_number]
+    today_day_number = today.day
+    print(today_day_number,month_number,fy)
+    if today_day_number == 21:
+    # if True:
+        gst_type=["Regular","QRMP"]
+        if month_number%3==0:
+            gst_type.append("Composition")
 
-    # def on_submit(self):
-    #     # Get the gst_yearly_filling_summery_id from the current form
-    #     gst_yearly_filling_summery_id = self.gst_yearly_filling_summery_id
+        gst_filling_data = frappe.get_all("Gst Filling Data",
+                                            filters={'fy': fy,
+                                                     'gst_type':("in",gst_type),
+                                                     'month':("like","%"+month_name),
+                                                    #  'gstfile_enabled':1,
+                                                    #  'filing_status':("not in",["Filed Summery Shared With Client"]),
+                                                     'submitted':0,
+                                                     },)
+        print(len(gst_filling_data))
+        for step_4 in gst_filling_data:
+            gst_filling = frappe.get_doc("Gst Filling Data", step_4.name)
+            gst_filling.non_compliant = 1
+            gst_filling.save()
+            gst_yearly_summary = frappe.get_doc("Gst Yearly Filing Summery", gst_filling.gst_yearly_filling_summery_id)
+            gst_yearly_summary.non_compliant = 1
+            gst_yearly_summary.save()
+    return len(gst_filling_data)
 
-    #     # Search for the Gst Yearly Filing Summery document
-    #     gst_yearly_filing_summery = frappe.get_doc("Gst Yearly Filing Summery", {"name": gst_yearly_filling_summery_id})
-
-    #     # Update sales_total_taxable
-    #     self.update_field(gst_yearly_filing_summery, 'sales_total_taxable')
-
-    #     # Update purchase_total_taxable
-    #     self.update_field(gst_yearly_filing_summery, 'purchase_total_taxable')
-
-    #     # Update tax_paid_amount
-    #     self.update_field(gst_yearly_filing_summery, 'tax_paid_amount')
-
-    #     # Update interest_paid_amount
-    #     self.update_field(gst_yearly_filing_summery, 'interest_paid_amount')
-
-    #     # Update penalty_paid_amount
-    #     self.update_field(gst_yearly_filing_summery, 'penalty_paid_amount')
-
-    #     # Save the changes
-    #     gst_yearly_filing_summery.save()
-
-    # def on_cancel(self):
-    #     # Get the gst_yearly_filling_summery_id from the current form
-    #     gst_yearly_filling_summery_id = self.gst_yearly_filling_summery_id
-
-    #     # Search for the Gst Yearly Filing Summery document
-    #     gst_yearly_filing_summery = frappe.get_doc("Gst Yearly Filing Summery", {"name": gst_yearly_filling_summery_id})
-
-    #     # Update sales_total_taxable
-    #     self.update_field(gst_yearly_filing_summery, 'sales_total_taxable', subtract=True)
-
-    #     # Update purchase_total_taxable
-    #     self.update_field(gst_yearly_filing_summery, 'purchase_total_taxable', subtract=True)
-
-    #     # Update tax_paid_amount
-    #     self.update_field(gst_yearly_filing_summery, 'tax_paid_amount', subtract=True)
-
-    #     # Update interest_paid_amount
-    #     self.update_field(gst_yearly_filing_summery, 'interest_paid_amount', subtract=True)
-
-    #     # Update penalty_paid_amount
-    #     self.update_field(gst_yearly_filing_summery, 'penalty_paid_amount', subtract=True)
-
-    #     # Save the changes
-    #     gst_yearly_filing_summery.save()
-
-    # def update_field(self, gst_yearly_filing_summery, field_name, subtract=False):
-    #     # Get the field value from the current form
-    #     field_value = getattr(self, field_name)
-
-    #     # Check if subtract flag is set
-    #     if subtract:
-    #         # Subtract the field value from the current value
-    #         setattr(gst_yearly_filing_summery, field_name, getattr(gst_yearly_filing_summery, field_name) - field_value)
-    #     else:
-    #         # Increment the field by the current value
-    #         setattr(gst_yearly_filing_summery, field_name, getattr(gst_yearly_filing_summery, field_name) + field_value)
-
+    
 
 @frappe.whitelist()
 def create_gst_filing_data(gst_yearly_filling_summery_id,gstfile,gst_type,fy,gst_filing_data_report):
@@ -392,5 +403,67 @@ def custom_save_as_draft(gst_yearly_filling_summary_id, sales_total_taxable, pur
 
 
 
+
+# def on_submit(self):
+    #     # Get the gst_yearly_filling_summery_id from the current form
+    #     gst_yearly_filling_summery_id = self.gst_yearly_filling_summery_id
+
+    #     # Search for the Gst Yearly Filing Summery document
+    #     gst_yearly_filing_summery = frappe.get_doc("Gst Yearly Filing Summery", {"name": gst_yearly_filling_summery_id})
+
+    #     # Update sales_total_taxable
+    #     self.update_field(gst_yearly_filing_summery, 'sales_total_taxable')
+
+    #     # Update purchase_total_taxable
+    #     self.update_field(gst_yearly_filing_summery, 'purchase_total_taxable')
+
+    #     # Update tax_paid_amount
+    #     self.update_field(gst_yearly_filing_summery, 'tax_paid_amount')
+
+    #     # Update interest_paid_amount
+    #     self.update_field(gst_yearly_filing_summery, 'interest_paid_amount')
+
+    #     # Update penalty_paid_amount
+    #     self.update_field(gst_yearly_filing_summery, 'penalty_paid_amount')
+
+    #     # Save the changes
+    #     gst_yearly_filing_summery.save()
+
+    # def on_cancel(self):
+    #     # Get the gst_yearly_filling_summery_id from the current form
+    #     gst_yearly_filling_summery_id = self.gst_yearly_filling_summery_id
+
+    #     # Search for the Gst Yearly Filing Summery document
+    #     gst_yearly_filing_summery = frappe.get_doc("Gst Yearly Filing Summery", {"name": gst_yearly_filling_summery_id})
+
+    #     # Update sales_total_taxable
+    #     self.update_field(gst_yearly_filing_summery, 'sales_total_taxable', subtract=True)
+
+    #     # Update purchase_total_taxable
+    #     self.update_field(gst_yearly_filing_summery, 'purchase_total_taxable', subtract=True)
+
+    #     # Update tax_paid_amount
+    #     self.update_field(gst_yearly_filing_summery, 'tax_paid_amount', subtract=True)
+
+    #     # Update interest_paid_amount
+    #     self.update_field(gst_yearly_filing_summery, 'interest_paid_amount', subtract=True)
+
+    #     # Update penalty_paid_amount
+    #     self.update_field(gst_yearly_filing_summery, 'penalty_paid_amount', subtract=True)
+
+    #     # Save the changes
+    #     gst_yearly_filing_summery.save()
+
+    # def update_field(self, gst_yearly_filing_summery, field_name, subtract=False):
+    #     # Get the field value from the current form
+    #     field_value = getattr(self, field_name)
+
+    #     # Check if subtract flag is set
+    #     if subtract:
+    #         # Subtract the field value from the current value
+    #         setattr(gst_yearly_filing_summery, field_name, getattr(gst_yearly_filing_summery, field_name) - field_value)
+    #     else:
+    #         # Increment the field by the current value
+    #         setattr(gst_yearly_filing_summery, field_name, getattr(gst_yearly_filing_summery, field_name) + field_value)
 
 

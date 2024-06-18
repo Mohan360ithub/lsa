@@ -20,6 +20,7 @@
   "gst_executive",
   "gst_type",
   "gstfile_enabled",
+  "non_compliant",
   "section_break_dspl",
   "fy_first_month_of_filling",
   "sales_total_taxable",
@@ -268,11 +269,18 @@
    "fieldname": "step_4_summary",
    "fieldtype": "HTML",
    "label": "Step 4 Summary"
+  },
+  {
+   "default": "0",
+   "fieldname": "non_compliant",
+   "fieldtype": "Check",
+   "label": "Non-Compliant",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-05-06 10:56:43.048560",
+ "modified": "2024-06-14 16:11:20.443086",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Gst Yearly Filing Summery",

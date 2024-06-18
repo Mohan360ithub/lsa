@@ -89,7 +89,9 @@ def get_leave_data():
     from_date = datetime(year, 1, 1)
     to_date = datetime(year, 12, 31 )
 
-    leave_types = get_leave_types()
+    # leave_types = get_leave_types()
+    leave_types = ['Leave Without Pay', 'Compensatory Off',  'Privilege Leave', 'Sick Leave', 'Special Leave']
+
     active_employees = get_employee_for_user()
 
     precision = cint(frappe.db.get_single_value("System Settings", "float_precision"))
@@ -124,6 +126,9 @@ def get_leave_data():
 
                 closing = new_allocation + opening - (row.leaves_expired + leaves_taken)
                 row.closing_balance = flt(closing, precision)
+                if leave_type=="Leave Without Pay":
+                    row.closing_balance = 0
+
                 row.indent = 1
                 data.append(row)
 
@@ -320,7 +325,7 @@ def get_employees_with_absent():
             
             # Generate key-value pairs for each day in the leave application range
             current_date = from_date
-            while current_date <= to_date or current_date<=end_date:
+            while current_date <= to_date or current_date<=to_date:
                 leave_dict[(current_date, employee)] = status
                 current_date += timedelta(days=1)
         
@@ -330,12 +335,13 @@ def get_employees_with_absent():
                                               "employee":employees[0].name,
                                               "attendance_date": ("between", [str(start_date), str(end_date)]),
                                               },
-                                     fields=["name", "attendance_date", "employee","working_hours"])
+                                     fields=["name", "attendance_date", "employee","working_hours"],
+                                     order_by="attendance_date desc")
         absent_data = {}
         for ab_date in absent_date:
             absent_date_checkin = frappe.get_all("Employee Checkin",
                                      filters={"attendance": ab_date.name},
-                                     fields=["name", "time", "log_type"],
+                                     fields=["name", "time", "log_type","custom_automatically_marked_by_system"],
                                      order_by="time asc")
 
             if str(ab_date.attendance_date) not in absent_data:
@@ -344,16 +350,19 @@ def get_employees_with_absent():
 
 
             if (ab_date.attendance_date,ab_date.employee) in leave_dict:
-                absent_data[str(ab_date.attendance_date)].append([employees_dict[ab_date.employee], False, [],ab_date.working_hours,"Applied for leave but not approved"])
+                absent_data[str(ab_date.attendance_date)].append([employees_dict[ab_date.employee], False, absent_date_checkin,ab_date.working_hours,"Applied for leave but not approved"])
             elif absent_date_checkin and (len(absent_date_checkin)%2 != 0 or absent_date_checkin[0].log_type == "OUT"):
                 absent_data[str(ab_date.attendance_date)].append([employees_dict[ab_date.employee], True, absent_date_checkin,ab_date.working_hours,"Mismatch in Checkins"])
             elif absent_date_checkin :
                 absent_data[str(ab_date.attendance_date)].append([employees_dict[ab_date.employee], True, absent_date_checkin,ab_date.working_hours,"Short working hours"])
             else:
-                absent_data[str(ab_date.attendance_date)].append([employees_dict[ab_date.employee], False, [],ab_date.working_hours,"Need to apply for Leave"])
+                absent_data[str(ab_date.attendance_date)].append([employees_dict[ab_date.employee], False, absent_date_checkin,ab_date.working_hours,"Need to apply for Leave"])
 
         return absent_data
     return None
+
+
+
 
 
 

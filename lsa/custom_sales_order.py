@@ -87,6 +87,7 @@ def sync_sales_orders_followup(so_id=None):
 def whatsapp_button(user_email=None):
     try:
         status = False
+        wa_status = False
         user_roles = frappe.get_all('Has Role', filters={'parent': user_email}, fields=['role'])
 
         if user_email=="pankajsankhla90@gmail.com":
@@ -96,13 +97,15 @@ def whatsapp_button(user_email=None):
         # Extract roles from the result
         roles = [role.get('role') for role in user_roles]
         doc_perm_roles = ["LSA Accounts Manager","LSA Account Executive"]
+        doc_wa_perm_roles=["GST Front Desk Team","Lsa Front Desk CRM Executive(A,B)"]
 
         for role in roles:
             if role in doc_perm_roles:
                 status = True
-                break
+            if role in doc_wa_perm_roles:
+                wa_status = True
 
-        return {"status": status, "value": [roles]}
+        return {"status": status, "value": [roles],"wa_status":wa_status}
 
     except Exception as e:
         #print(e)
@@ -1027,5 +1030,6 @@ def fetch_service_history(customer_id=None,so_id=None):
         return {"status":True,"services_bill_history":services_bill_history}
     # except Exception as e:
     #     return {"status":False,"msg":f"Error Fetching Past Bills History: {e}"}
+
 
 

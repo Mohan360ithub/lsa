@@ -146,8 +146,6 @@ scheduler_events = {
         "* * * * *":
             [
             #"lsa.pankaj1.cron",
-            #"lsa.notice_reminder_mail.mail_remainder_for_client_notice",
-            #"lsa.timesheet_reminder.mail_remainder_for_timesheet",
             ],
         "0 9 * * *":
             [
@@ -157,6 +155,14 @@ scheduler_events = {
         "0,30 * * * *":
             [
             #"lsa.unofficial_whatsapp_scheduler.send_scheduled_whatsapp_message",
+            ],
+        "0 0 1 21 * *":
+            [
+            "lsa.lsa.doctype.gst_filling_data.gst_filling_data.check_gst_compliance"
+            ],
+        "00 23 * * *":
+            [
+            "lsa.custom_attendance.checkin_out_for_missed_logs"
             ],
             
     },
@@ -245,6 +251,8 @@ scheduler_events = {
 # auth_hooks = [
 #	"lsa.auth.validate"
 # ]
+
+
 
 
 

@@ -917,7 +917,58 @@ def send_rsp_whatsapp_bulk(new_mobile):
 #         return {"status":False,"msg":f"Error: {er}"}
 
 
+####################################Srikanth code start ###############################################################################
+##########################################  USER AUTH ######################################
+import frappe
+ 
+@frappe.whitelist()
+def check_user_permission(service_master):
+    try:
+        # Print the current user for debugging
+        print(frappe.session.user)
+        
+        # Get all Department Manager documents
+        department_managers = frappe.get_all(
+            "Department Manager",
+            filters={"master_file": service_master},
+            fields=["department_head"]
+        )
+ 
+        # Check if the department_head matches the current user
+        if department_managers and frappe.session.user in [department_managers[0].department_head,"Administrator"] :
+            # Conditions met
+            return {"status":True,"msg":"Authorised User"}
+        elif frappe.session.user in ["Administrator"] :
+            # Conditions met
+            return {"status":True,"msg":"Authorised User"}
+        
+        return {"status":False,"msg":"Unauthorised User"}
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), "Failed to check user permission")
+        return {"status":False,"msg":f"Error authenticating user{e}"}
 
+@frappe.whitelist()
+def check_and_send_email(recipients, subject, message):
+    try:
+        # Check if all necessary fields are provided
+        if recipients and subject and message:
+            send_email(recipients, subject, message)
+            return {"status":True,"msg":"Mail sent successfully"}
+        else:
+            frappe.throw("Recipients, subject, and message are all required to send an email.")
+            return {"status":False,"msg":"Error sending mail"}
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), "Failed to check and send email")
+        return {"status":False,"msg":f"Error sending mail: {e}"}
+ 
+def send_email(recipients, subject, message):
+    frappe.sendmail(
+        recipients=recipients.split(','),
+        subject=subject,
+        message=message,
+    )
+    frappe.db.commit()
+ 
 
-
+#################################################################Srikanth Code End####################################################
 

@@ -1,0 +1,78 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:{department_name}",
+ "creation": "2024-06-15 18:48:16.244177",
+ "default_view": "List",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "department_name",
+  "department_head",
+  "department_head_name",
+  "master_file",
+  "email_account"
+ ],
+ "fields": [
+  {
+   "fieldname": "department_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Department Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "department_head",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Department Head",
+   "options": "User",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "department_head.full_name",
+   "fieldname": "department_head_name",
+   "fieldtype": "Data",
+   "label": "Department Head Name"
+  },
+  {
+   "fieldname": "master_file",
+   "fieldtype": "Link",
+   "label": "Master File",
+   "options": "DocType"
+  },
+  {
+   "fieldname": "email_account",
+   "fieldtype": "Link",
+   "label": "Email Account",
+   "options": "Email Account",
+   "reqd": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-06-15 18:48:16.244177",
+ "modified_by": "Administrator",
+ "module": "Lsa",
+ "name": "Department Manager",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

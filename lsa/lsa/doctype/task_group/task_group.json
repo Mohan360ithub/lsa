@@ -2,7 +2,7 @@
  "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
- "autoname": "format:{department}-{activity}",
+ "autoname": "format:{department}-{###}",
  "creation": "2024-06-07 15:42:03.446022",
  "default_view": "List",
  "doctype": "DocType",
@@ -12,6 +12,7 @@
   "master",
   "activity",
   "type",
+  "status",
   "custom_name"
  ],
  "fields": [
@@ -41,10 +42,10 @@
   {
    "fieldname": "type",
    "fieldtype": "Select",
+   "hidden": 1,
    "in_standard_filter": 1,
    "label": "Type",
-   "options": "One Time\nRecurring",
-   "reqd": 1
+   "options": "One Time\nRecurring"
   },
   {
    "fieldname": "custom_name",
@@ -52,11 +53,19 @@
    "hidden": 1,
    "label": "Custom Name",
    "read_only": 1
+  },
+  {
+   "default": "Active",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Active\nInactive",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-06-07 16:02:10.259361",
+ "modified": "2024-06-13 12:03:15.216244",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Task Group",
@@ -76,9 +85,10 @@
    "write": 1
   }
  ],
- "search_fields": "department,activity,type",
+ "search_fields": "department,activity",
+ "show_title_field_in_link": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],
- "title_field": "custom_name"
+ "title_field": "activity"
 }

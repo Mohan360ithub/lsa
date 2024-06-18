@@ -1,0 +1,74 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-06-18 10:13:49.235698",
+ "default_view": "List",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "customer_status_change_notification_tab",
+  "employees_to_be_notified_for_customer_status_change_column",
+  "customer_status_change_mail",
+  "section_break_dmup",
+  "employees_to_be_notified_for_leave_application_column",
+  "leave_application_mails"
+ ],
+ "fields": [
+  {
+   "fieldname": "customer_status_change_notification_tab",
+   "fieldtype": "Tab Break",
+   "label": "Customer Status Change Notification"
+  },
+  {
+   "fieldname": "employees_to_be_notified_for_customer_status_change_column",
+   "fieldtype": "Column Break",
+   "label": "Employees to be notified for Customer status change"
+  },
+  {
+   "fieldname": "customer_status_change_mail",
+   "fieldtype": "Table MultiSelect",
+   "label": "Customer status change Mails",
+   "options": "Multiselect User",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_dmup",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "employees_to_be_notified_for_leave_application_column",
+   "fieldtype": "Column Break",
+   "label": "Employees to be notified for Leave Application"
+  },
+  {
+   "fieldname": "leave_application_mails",
+   "fieldtype": "Table MultiSelect",
+   "label": "Leave Application Mails",
+   "options": "Multiselect User",
+   "reqd": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2024-06-18 12:22:43.456621",
+ "modified_by": "Administrator",
+ "module": "Lsa",
+ "name": "Admin Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

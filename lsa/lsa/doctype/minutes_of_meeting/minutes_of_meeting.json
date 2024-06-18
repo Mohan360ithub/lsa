@@ -1,0 +1,202 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-06-18 10:07:02.622680",
+ "default_view": "List",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "meeting_tab",
+  "section_break_1rgq",
+  "meeting_title",
+  "meeting_type",
+  "attendies",
+  "absentees",
+  "column_break_wsgb",
+  "project_name",
+  "customer",
+  "supplier_name",
+  "status",
+  "meeting_start_time",
+  "meeting_end_time",
+  "duration",
+  "meeting_discussion_tab",
+  "meeting_agenda",
+  "column_break_grii",
+  "discussion_points",
+  "amended_from",
+  "out_comes_tab",
+  "assigned_to_with_deadlines",
+  "attachments",
+  "link_mirp",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "meeting_tab",
+   "fieldtype": "Tab Break",
+   "label": "Meeting"
+  },
+  {
+   "fieldname": "section_break_1rgq",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "meeting_title",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Meeting Title",
+   "no_copy": 1,
+   "options": "Minutes of Meeting",
+   "print_hide": 1,
+   "read_only": 1,
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "meeting_type",
+   "fieldtype": "Select",
+   "label": "Meeting Type"
+  },
+  {
+   "fieldname": "attendies",
+   "fieldtype": "Small Text",
+   "label": "Attendies"
+  },
+  {
+   "fieldname": "absentees",
+   "fieldtype": "Small Text",
+   "label": "Absentees"
+  },
+  {
+   "fieldname": "column_break_wsgb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "project_name",
+   "fieldtype": "Link",
+   "label": "Project Name",
+   "options": "Project"
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Customer"
+  },
+  {
+   "fieldname": "supplier_name",
+   "fieldtype": "Link",
+   "label": "Supplier Name",
+   "options": "Supplier"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "\nPlanned\nCompleted\nPostponed"
+  },
+  {
+   "fieldname": "meeting_start_time",
+   "fieldtype": "Datetime",
+   "label": "Meeting Start Time"
+  },
+  {
+   "fieldname": "meeting_end_time",
+   "fieldtype": "Datetime",
+   "label": "Meeting End Time"
+  },
+  {
+   "fieldname": "duration",
+   "fieldtype": "Data",
+   "label": "Duration"
+  },
+  {
+   "fieldname": "meeting_discussion_tab",
+   "fieldtype": "Tab Break",
+   "label": "Meeting Discussion"
+  },
+  {
+   "fieldname": "meeting_agenda",
+   "fieldtype": "Text Editor",
+   "label": "Meeting Agenda"
+  },
+  {
+   "fieldname": "column_break_grii",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "discussion_points",
+   "fieldtype": "Text Editor",
+   "label": "Discussion Points"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Minutes of Meeting",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "out_comes_tab",
+   "fieldtype": "Tab Break",
+   "label": "Out Comes"
+  },
+  {
+   "fieldname": "assigned_to_with_deadlines",
+   "fieldtype": "Text Editor",
+   "label": "Assigned To With Deadlines"
+  },
+  {
+   "fieldname": "attachments",
+   "fieldtype": "Table",
+   "label": "Attachments",
+   "options": "Multi Attachments"
+  },
+  {
+   "fieldname": "link_mirp",
+   "fieldtype": "Link",
+   "options": "Minutes of Meeting",
+   "search_index": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Minutes of Meeting",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2024-06-18 10:07:02.622680",
+ "modified_by": "Administrator",
+ "module": "Lsa",
+ "name": "Minutes of Meeting",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

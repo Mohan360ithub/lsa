@@ -12,11 +12,13 @@ def sync_customer(customer_id=None):
         services_values=sync_services_customer(customer_id)
         pricing_value=sync_services_pricing(customer_id)
         turnover_list=sync_turnover_gst(customer_id)
+        disabled_services_values= sync_disabled_services_customer(customer_id)
         if [followup_button,followup_values,values,open_followup,open_followup_i] or services_values or pricing_value:
 
             return {"status":"Synced successfully.","followup_button":followup_button,"values":values,
                         "followup_values":followup_values,"services_values":services_values,"open_followup":open_followup,
-                        "open_followup_i":open_followup_i,"pricing_value":pricing_value,"turnover_list":turnover_list}
+                        "open_followup_i":open_followup_i,"pricing_value":pricing_value,"turnover_list":turnover_list,
+                        'disabled_services_values':disabled_services_values}
         else:
             return {"status":"Sync Failed."}
     except Exception as e:
@@ -93,6 +95,48 @@ def sync_services_customer(customer_id=None):
             chargeable_service_value_n.append("Client Notices")
             services_values.append(chargeable_service_value_n)
     return services_values
+
+
+##################Srikanth's Code Start#########################################################################################
+
+
+
+def sync_disabled_services_customer(customer_id=None):
+
+    master_service_fields = {
+        "Gstfile": ["gst_file", ["name", "company_name", "gst_number", "gst_user_name", "gst_password","current_recurring_fees","frequency","annual_fees","executive_name","last_filed"]],
+        "IT Assessee File": ["it_assessee_file", ["name", "assessee_name", "pan", "pan", "it_password","current_recurring_fees","frequency","annual_fees","executive_name","last_filed"]],
+        "MCA ROC File": ["mca_roc_file", ["name", "company_name", "cin", "trace_user_id", "trace_password","current_recurring_fees","frequency","annual_fees","executive_name","last_filed"]],
+        "Professional Tax File": ["professional_tax_file", ["name", "assessee_name", "registration_no", "user_id", "trace_password","current_recurring_fees","frequency","annual_fees","executive_name","last_filed"]],
+        "TDS File": ["tds_file", ["name", "deductor_name", "tan_no", "trace_user_id", "trace_password","current_recurring_fees","frequency","annual_fees","executive_name","last_filed"]],
+        "ESI File": ["esi_file", ["name", "assessee_name", "registartion_no", "trace_user_id", "trace_password","current_recurring_fees","frequency","annual_fees","executive_name","last_filed"]],
+        "Provident Fund File": ["provident_fund_file", ["name", "assessee_name", "registartion_no", "trace_user_id", "trace_password","current_recurring_fees","frequency","annual_fees","executive_name","last_filed"]],
+    }
+
+    services_values=[]
+    chargeable_services=frappe.get_all("Customer Chargeable Doctypes")
+    for chargeable_service in chargeable_services:
+        # print(chargeable_service)
+        chargeable_service_values=frappe.get_all(chargeable_service.name,
+                                           filters={"customer_id":customer_id,
+                                                   "enabled":0},
+                                            fields=master_service_fields[chargeable_service.name][1]
+                                            )
+        # print(chargeable_service_values)
+        for chargeable_service_value in chargeable_service_values:
+            chargeable_service_value=[chargeable_service_value[i] for i in master_service_fields[chargeable_service.name][1] ]
+            # print(chargeable_service_value)
+            service_slug="-".join([i.lower() for i in ((chargeable_service.name).split(" "))])
+            chargeable_service_value.append(service_slug)
+            chargeable_service_value.append(chargeable_service.name)
+            services_values.append(chargeable_service_value)
+    # print(services_values)
+            
+    
+    return services_values
+
+
+##################Srikanth's Code End#########################################################################################
 
 
 def sync_sales_orders_customer(customer_id):
@@ -575,3 +619,204 @@ def update_linked_doctypes(doc, method):
                     
         except Exception as e:
             frappe.logger().error(f"Error Triggering status Change for Customer {doc.name}: {e}")
+
+
+@frappe.whitelist()
+def disable_customer(customer_id):
+    try:
+        customer_doc=frappe.get_doc("Customer",customer_id)
+        master_service_fields = {
+            "Gstfile": ["gst_file", ["name", "company_name", "gst_number", "gst_user_name", "gst_password","current_recurring_fees","frequency","annual_fees","executive_name","last_filed"]],
+            "IT Assessee File": ["it_assessee_file", ["name", "assessee_name", "pan", "pan", "it_password","current_recurring_fees","frequency","annual_fees","executive_name","last_filed"]],
+            "MCA ROC File": ["mca_roc_file", ["name", "company_name", "cin", "trace_user_id", "trace_password","current_recurring_fees","frequency","annual_fees","executive_name","last_filed"]],
+            "Professional Tax File": ["professional_tax_file", ["name", "assessee_name", "registration_no", "user_id", "trace_password","current_recurring_fees","frequency","annual_fees","executive_name","last_filed"]],
+            "TDS File": ["tds_file", ["name", "deductor_name", "tan_no", "trace_user_id", "trace_password","current_recurring_fees","frequency","annual_fees","executive_name","last_filed"]],
+            "ESI File": ["esi_file", ["name", "assessee_name", "registartion_no", "trace_user_id", "trace_password","current_recurring_fees","frequency","annual_fees","executive_name","last_filed"]],
+            "Provident Fund File": ["provident_fund_file", ["name", "assessee_name", "registartion_no", "trace_user_id", "trace_password","current_recurring_fees","frequency","annual_fees","executive_name","last_filed"]],
+        }
+        serv_freq={"M":"Monthly",
+                   "Q":"Quarterly",
+                   "H":"Half Yearly",
+                   "Y":"Yearly",}
+
+        chargeable_services=frappe.get_all("Customer Chargeable Doctypes")
+        body = """
+                    <br><table class="table table-bordered" style="border-color: #444444; border-collapse: collapse; width: 100%;">
+                        <thead>
+                            <tr style="background-color:#3498DB;color:white;text-align: left;">
+                                <th style="vertical-align: middle;border: solid 2px #bcb9b4; width: 10%;">S. No.</th>
+                                <th style="vertical-align: middle;border: solid 2px #bcb9b4; width: 15%;">Service Type</th>
+                                <th style="vertical-align: middle;border: solid 2px #bcb9b4; width: 15%;">Service ID</th>
+                                <th style="vertical-align: middle;border: solid 2px #bcb9b4; width: 35%;">Company Name</th>                                
+                                <th style="vertical-align: middle;border: solid 2px #bcb9b4; width: 10%;">Frequency</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                    """
+            
+        count = 1
+        executive_list={'lokesh.bwr@gmail.com', 'khushboo.r@lsaoffice.com', 'latha.st@lsaoffice.com', 'vinay.m@lsaoffice.com', 'Shriramu.ms@lsaoffice.com',"vatsal.k@360ithub.com"}
+        executive_list=[]
+        admin_setting_doc = frappe.get_doc("Admin Settings")
+        for i in admin_setting_doc.customer_status_change_mail:
+            executive_list.append(i.user)
+        executive_list = set(executive_list)
+        
+        for chargeable_service in chargeable_services:
+            # print(chargeable_service)
+            chargeable_service_values=frappe.get_all(chargeable_service.name,
+                                            filters={"customer_id":customer_id,
+                                                    "enabled":1},
+                                            fields=["name",master_service_fields[chargeable_service.name][1][1],"executive"]
+                                                )
+            # print(chargeable_service_values)
+            for chargeable_service_value in chargeable_service_values:
+                # print(chargeable_service.name,chargeable_service_value.name)
+                chargeable_service_doc=frappe.get_doc(chargeable_service.name,chargeable_service_value.name)
+                chargeable_service_doc.enabled=0
+                chargeable_service_doc.save()
+                executive_list.add(chargeable_service_value["executive"])
+                body += f"""
+                    <tr>
+                        <td style="border: solid 2px #bcb9b4;">{count}</td>
+                        <td style="border: solid 2px #bcb9b4;">{chargeable_service.name}</td>
+                        <td style="border: solid 2px #bcb9b4;">{chargeable_service_doc.name}</td>
+                        <td style="border: solid 2px #bcb9b4;">{chargeable_service_value[master_service_fields[chargeable_service.name][1][1]]}</td>                      
+                        <td style="border: solid 2px #bcb9b4;">{serv_freq[chargeable_service_doc.frequency]}</td>
+                    </tr>
+                """
+                count += 1
+            
+        body += """
+                    </tbody>
+                </table><br>
+        """
+
+        subject = f"Customer with CID {customer_id} is disabled"
+        message = f"""
+            <p>Dear LSA Team,</p>
+            <p>Customer ID  : {customer_id}<br>
+            Customer Name  : {customer_doc.customer_name}<br>
+            {customer_doc.custom_contact_person}'s account has been Disabled:</p>
+            {body}
+            <br><p>Best regards,<br>LSA Office</p>
+        """
+            
+        frappe.sendmail(
+                # recipients=recipients,  # Use the list of combined email addresses
+                recipients=list(executive_list),
+                subject=subject,
+                message=message
+            )
+        # print(list(executive_list),subject,message)
+        return {"status":True,"message": "Customer disabled successfully","executive_list":list(executive_list)}
+    except Exception as e:
+        frappe.log_error(message=str(e), title="Failed to disable customer")
+        # print(f"{e}")
+        return {"status":False,"message": f"Failed to disable customer {e}"}
+    
+#######################################Srikanth Code Start#####################################################################
+
+ 
+@frappe.whitelist()
+def send_status_update_notification(name, new_status, previous_status, reason, customer_email, modified_by, time_of_change, cust_name):
+    try:
+        # Fetch the fields from "Recurring Service Pricing"
+        rsp_list= frappe.get_all("Recurring Service Pricing", filters={"customer_id": name,"status":"Approved"})
+        
+ 
+        if rsp_list:
+            rsp_docs= frappe.get_doc("Recurring Service Pricing", rsp_list[0].name)
+            # print(rsp_docs)
+            # print("Helloowowoowwo")
+            # Build the HTML content for the message
+            body = """
+                    <br><table class="table table-bordered" style="border-color: #444444; border-collapse: collapse; width: 100%;">
+                        <thead>
+                            <tr style="background-color:#3498DB;color:white;text-align: left;">
+                                <th style="vertical-align: middle;border: solid 2px #bcb9b4; width: 10%;">S. No.</th>
+                                <th style="vertical-align: middle;border: solid 2px #bcb9b4; width: 15%;">Service Type</th>
+                                <th style="vertical-align: middle;border: solid 2px #bcb9b4; width: 15%;">Service ID</th>
+                                <th style="vertical-align: middle;border: solid 2px #bcb9b4; width: 35%;">Company Name</th>                                
+                                <th style="vertical-align: middle;border: solid 2px #bcb9b4; width: 10%;">Frequency</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                    """
+            
+            count = 1
+            for service in rsp_docs.recurring_services:
+                body += f"""
+                    <tr>
+                        <td style="border: solid 2px #bcb9b4;">{count}</td>
+                        <td style="border: solid 2px #bcb9b4;">{service.service_type}</td>
+                        <td style="border: solid 2px #bcb9b4;">{service.service_id}</td>
+                        <td style="border: solid 2px #bcb9b4;">{service.company_name}</td>                      
+                        <td style="border: solid 2px #bcb9b4;">{service.frequency}</td>
+                    </tr>
+                """
+                count += 1
+            
+            body += """
+                        </tbody>
+                    </table><br>
+            """
+ 
+            # Define the subject and message of the email
+            subject = f"CID {name} Customer Status Changed from {previous_status} to {new_status}"
+            message = f"""
+                <p>Dear LSA Team,</p>
+                <p>Customer ID  : {name}<br>
+                Customer Name  : {cust_name}<br>
+                Customer Status Changed from {previous_status} to {new_status}</p>
+                {body}
+                <br><p>Best regards,<br>LSA Office</p>
+            """
+ 
+            # Collect all executive emails
+            executive_emails = set()  # Use a set to handle duplicates
+ 
+            customer_chargeable = frappe.get_all("Customer Chargeable Doctypes")
+            for i in customer_chargeable:
+                master_list = frappe.get_all(i.name, filters={"customer_id": name}, fields=["executive"])
+                for entry in master_list:
+                    if entry["executive"]:  # Check if the executive field is not None or empty
+                        executive_emails.add(entry["executive"])
+ 
+            # Define hardcoded emails
+            status_update_mails=[]
+            admin_setting_doc = frappe.get_doc("Admin Settings")
+            for i in admin_setting_doc.customer_status_change_mail:
+                status_update_mails.append(i.user)
+            status_update_mails = set(status_update_mails)
+
+            # Combine executive emails with hardcoded emails, ensuring no duplicates
+            all_emails = executive_emails.union(status_update_mails)
+ 
+            # Convert the set back to a list
+            # recipients = list(all_emails)
+            recipients = list(all_emails)
+            # print(recipients)
+            # test_emails = ['srikanth.p_cse2019@svec.edu.in']
+            # print(test_emails)
+            # print("Hellooooooo")
+ 
+            # Send the email
+            frappe.sendmail(
+                # recipients=recipients,  # Use the list of combined email addresses
+                recipients=recipients,
+                subject=subject,
+                message=message
+            )
+ 
+            return {"message": "Notification sent successfully!","executive_emails":all_emails}
+        else:
+            frappe.log_error(message=f"No RSP Exist for the customer {name}", title="Failed to send status update notification")
+    except Exception as e:
+        # print(e)
+        frappe.log_error(message=str(e), title="Failed to send status update notification")
+        return {"message": "Failed to send notification"}
+
+#######################################Srikanth Code Start#####################################################################
+
+
