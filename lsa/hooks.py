@@ -156,7 +156,7 @@ scheduler_events = {
             [
             #"lsa.unofficial_whatsapp_scheduler.send_scheduled_whatsapp_message",
             ],
-        "0 0 1 21 * *":
+        "00 1 21 * *":
             [
             "lsa.lsa.doctype.gst_filling_data.gst_filling_data.check_gst_compliance"
             ],

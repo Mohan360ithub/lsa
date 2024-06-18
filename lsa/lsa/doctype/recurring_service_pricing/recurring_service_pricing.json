@@ -170,11 +170,10 @@
   {
    "fetch_from": "customer_id.custom_customer_status_",
    "fieldname": "customer_status",
-   "fieldtype": "Select",
+   "fieldtype": "Data",
    "in_filter": 1,
    "in_standard_filter": 1,
    "label": "Customer Status",
-   "options": "ACTIVE\nHOLD",
    "read_only": 1
   },
   {
@@ -200,7 +199,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-05-21 10:44:54.043818",
+ "modified": "2024-06-18 18:38:45.507116",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Recurring Service Pricing",
