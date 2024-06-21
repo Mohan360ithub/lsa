@@ -12,9 +12,9 @@
   "sales_invoices",
   "si_monthly_plan_amount",
   "collection_section",
-  "table_kjwd",
+  "collection_table",
   "expenses_section",
-  "table_mljv"
+  "expanses_table"
  ],
  "fields": [
   {
@@ -53,25 +53,27 @@
    "label": "Collection"
   },
   {
-   "fieldname": "table_kjwd",
-   "fieldtype": "Table",
-   "options": "Monthly Budget Type"
-  },
-  {
    "fieldname": "expenses_section",
    "fieldtype": "Section Break",
    "label": "Expenses"
   },
   {
-   "fieldname": "table_mljv",
+   "fieldname": "collection_table",
    "fieldtype": "Table",
+   "label": "Collection Table",
+   "options": "Monthly Budget Type"
+  },
+  {
+   "fieldname": "expanses_table",
+   "fieldtype": "Table",
+   "label": "Expanses Table",
    "options": "Monthly Budget Type"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-06-06 12:53:42.020072",
+ "modified": "2024-06-20 18:22:43.257325",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Monthly Budgeting Template",

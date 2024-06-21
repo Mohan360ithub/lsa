@@ -24,9 +24,9 @@
   "column_break_hkjd",
   "monthly_achieved_percentage_si",
   "collection_section",
-  "table_kjwd",
+  "collection_table",
   "expenses_section",
-  "table_mljv"
+  "expanses_table"
  ],
  "fields": [
   {
@@ -55,19 +55,9 @@
    "label": "Collection"
   },
   {
-   "fieldname": "table_kjwd",
-   "fieldtype": "Table",
-   "options": "Monthly Budget Type"
-  },
-  {
    "fieldname": "expenses_section",
    "fieldtype": "Section Break",
    "label": "Expenses"
-  },
-  {
-   "fieldname": "table_mljv",
-   "fieldtype": "Table",
-   "options": "Monthly Budget Type"
   },
   {
    "fieldname": "month",
@@ -101,8 +91,9 @@
   },
   {
    "fieldname": "monthly_achieved_percentage_so",
-   "fieldtype": "Data",
-   "label": "Monthly Achieved Percentage"
+   "fieldtype": "Float",
+   "label": "Monthly Achieved Percentage",
+   "precision": "2"
   },
   {
    "fieldname": "column_break_hhxg",
@@ -110,8 +101,9 @@
   },
   {
    "fieldname": "monthly_achieved_percentage_si",
-   "fieldtype": "Data",
-   "label": "Monthly Achieved Percentage"
+   "fieldtype": "Float",
+   "label": "Monthly Achieved Percentage",
+   "precision": "2"
   },
   {
    "fieldname": "column_break_hkjd",
@@ -126,11 +118,23 @@
    "fieldname": "monthly_actual_amount_si",
    "fieldtype": "Currency",
    "label": "Monthly Actual Amount"
+  },
+  {
+   "fieldname": "collection_table",
+   "fieldtype": "Table",
+   "label": "Collection Table",
+   "options": "Monthly Budget Type"
+  },
+  {
+   "fieldname": "expanses_table",
+   "fieldtype": "Table",
+   "label": "Expanses Table",
+   "options": "Monthly Budget Type"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-06-06 17:15:18.356987",
+ "modified": "2024-06-20 18:19:06.686794",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Monthly Budget",

@@ -34,8 +34,21 @@ def get_sales_orders_for_month(month, year):
         WHERE docstatus = 1 AND posting_date BETWEEN %s AND %s
     """, (start_date, end_date), as_dict=True)
 
-    return {"sales_orders":sales_orders,"sales_invoices":sales_invoices}
+    # Fetch Payment Entries that reference Sales Orders
+    payment_entries = frappe.db.sql("""
+        SELECT pe.name, pe.posting_date, per.reference_name, pe.paid_amount AS amount
+        FROM `tabPayment Entry` pe
+        JOIN `tabPayment Entry Reference` per ON pe.name = per.parent
+        WHERE per.reference_doctype = 'Sales Order'
+          AND pe.docstatus = 1
+          AND pe.posting_date BETWEEN %s AND %s
+    """, (start_date, end_date), as_dict=True)
 
+    return {
+            "sales_orders": sales_orders,
+            "sales_invoices": sales_invoices,
+            "payment_entries": payment_entries
+        }
 
 
 # @frappe.whitelist()
