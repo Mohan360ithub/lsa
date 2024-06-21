@@ -1,0 +1,69 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-06-06 12:20:13.540421",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "type",
+  "sub_type",
+  "account",
+  "monthly_plan_amount",
+  "monthly_actual_amount",
+  "monthly_achieved_percentage"
+ ],
+ "fields": [
+  {
+   "fieldname": "type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Type",
+   "options": "Payment Receipts\nExpenses"
+  },
+  {
+   "fieldname": "sub_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Sub Type",
+   "options": "Monthly Budget Components"
+  },
+  {
+   "fieldname": "monthly_plan_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Monthly Plan Amount"
+  },
+  {
+   "fieldname": "account",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "monthly_actual_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Monthly Actual Amount"
+  },
+  {
+   "fieldname": "monthly_achieved_percentage",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Monthly Achieved Percentage"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2024-06-06 16:41:28.363594",
+ "modified_by": "Administrator",
+ "module": "Lsa",
+ "name": "Monthly Budget Type",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
