@@ -692,12 +692,37 @@ def disable_customer(customer_id):
                 </table><br>
         """
 
+        now = datetime.now()
+        # Format the datetime in DD-MM-YYYY HH:MM AM/PM
+        time_of_change = now.strftime("%d-%m-%Y %I:%M %p")
+        user_full_name = frappe.db.get_value("User", frappe.session.user, "full_name")
+
         subject = f"Customer with CID {customer_id} is disabled"
         message = f"""
-            <p>Dear LSA Team,</p>
-            <p>Customer ID  : {customer_id}<br>
-            Customer Name  : {customer_doc.customer_name}<br>
-            {customer_doc.custom_contact_person}'s account has been Disabled:</p>
+            <p>Dear LSA Team,<br><br> There are some changes in following customer. Please make a note of it. </p>
+            <table style="border-collapse: collapse; width: 60%;">
+                <tr>
+                    <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">Customer ID</td>
+                    <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;"><a href="https://online.lsaoffice.com/app/customer/{customer_doc.name}">{customer_doc.name}</a></td>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">Customer Name</td>
+                    <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;"><a href="https://online.lsaoffice.com/app/customer/{customer_doc.name}">{customer_doc.customer_name}</a></td>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">Customer Status</td>
+                    <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">Disabled</td>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">Modified By</td>
+                    <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">{user_full_name}</td>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">Changed at</td>
+                    <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">{time_of_change}</td>
+                </tr>
+            </table>
+            <br>
             {body}
             <br><p>Best regards,<br>LSA Office</p>
         """
@@ -762,13 +787,42 @@ def send_status_update_notification(name, new_status, previous_status, reason, c
                     </table><br>
             """
  
+            now = datetime.now()
+            # Format the datetime in DD-MM-YYYY HH:MM AM/PM
+            time_of_change = now.strftime("%d-%m-%Y %I:%M %p")
+            user_full_name = frappe.db.get_value("User", frappe.session.user, "full_name")
+ 
             # Define the subject and message of the email
             subject = f"CID {name} Customer Status Changed from {previous_status} to {new_status}"
             message = f"""
-                <p>Dear LSA Team,</p>
-                <p>Customer ID  : {name}<br>
-                Customer Name  : {cust_name}<br>
-                Customer Status Changed from {previous_status} to {new_status}</p>
+                <p>Dear LSA Team,<br><br> There are some changes in the status of following customer. Please make a note of it, before maving forward with our services.</p>
+                <table style="border-collapse: collapse; width: 100%;">
+                    <tr>
+                        <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">Customer ID</td>
+                        <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;"><a href="https://online.lsaoffice.com/app/customer/{name}">{name}</a></td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">Customer Name</td>
+                        <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;"><a href="https://online.lsaoffice.com/app/customer/{name}">{cust_name}</a></td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">Customer Status</td>
+                        <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">Changed from {previous_status} to {new_status}</td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">Modified By</td>
+                        <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">{user_full_name}</td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">Reason</td>
+                        <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">{reason}</td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">Changed at</td>
+                        <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">{time_of_change}</td>
+                    </tr>
+                </table>
+                <br>
                 {body}
                 <br><p>Best regards,<br>LSA Office</p>
             """
@@ -818,5 +872,6 @@ def send_status_update_notification(name, new_status, previous_status, reason, c
         return {"message": "Failed to send notification"}
 
 #######################################Srikanth Code Start#####################################################################
+
 
 

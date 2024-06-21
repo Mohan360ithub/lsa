@@ -6,7 +6,8 @@ from datetime import datetime, timedelta, date
 from hrms.hr.doctype.leave_allocation.leave_allocation import get_previous_allocation
 from hrms.hr.doctype.leave_application.leave_application import (get_leave_balance_on,get_leaves_for_period,)
 from itertools import groupby
-
+from frappe.utils import today
+from frappe.utils import now_datetime
 
 
 
@@ -363,6 +364,62 @@ def get_employees_with_absent():
 
 
 
+@frappe.whitelist()
+def get_employees_present_today():
+    # Get today's date
+    today_date = today()
+    
+    # Fetch all check-ins and check-outs for today, ordered by time
+    checkins = frappe.get_all('Employee Checkin', 
+                              filters={'time': ['>=', today_date]},
+                              fields=['employee', 'employee_name', 'time', 'log_type'],
+                              order_by='time')
+    
+    # Process the logs to get the first IN and the last OUT for each employee
+    employee_logs = {}
+    for checkin in checkins:
+        employee = checkin['employee']
+        if employee not in employee_logs:
+            employee_logs[employee] = {'employee_name': checkin['employee_name'], 'first_in': None, 'last_out': None}
+        
+        if checkin['log_type'] == 'IN' and employee_logs[employee]['first_in'] is None:
+            employee_logs[employee]['first_in'] = checkin['time']
+        employee_logs[employee]['last_log'] = checkin['log_type']
+        if checkin['log_type'] == 'OUT':
+            employee_logs[employee]['last_out'] = checkin['time']
+    
+    # Prepare the final list
+    result = []
+    for employee, logs in employee_logs.items():
+        last_out = logs['last_out'] if logs.get('last_log') == 'OUT' else None
+        result.append({
+            'employee': employee,
+            'employee_name': logs['employee_name'],
+            'first_in': logs['first_in'],
+            'last_out': last_out
+        })
+    
+    return result
 
 
+
+
+@frappe.whitelist()
+def get_notapproved_leave_applications_for_approver():
+    current_date = now_datetime().date()  # Get the current date in YYYY-MM-DD format
+    usr=frappe.session.user
+    leave_applications = frappe.get_all(
+        'Leave Application',
+        filters={
+            'status': 'Open',
+            "leave_approver":usr,
+            # 'to_date': ['>=', current_date]  # Filter to get only to_date greater than or equal to current date
+        },
+        fields=['employee_name','posting_date','from_date', 'to_date', 'total_leave_days','name']
+    )
+ 
+    
+    return leave_applications
+
+###################################################################################
 

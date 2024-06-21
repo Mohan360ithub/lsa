@@ -8,17 +8,21 @@ from frappe import _
 def execute(filters=None):
     columns = [
         {"fieldname": "name", "label": _("ID"), "fieldtype": "Link", "options": "IT Assessee Filing Data", "width": 150},
-        {"fieldname": "filing_status", "label": _("Filing Status"), "fieldtype": "Data", "width": 170},
+        
         {"fieldname": "customer_id", "label": _("CID"), "fieldtype": "Link", "options": "Customer", "width": 100},
+        {"fieldname": "customer_name", "label": _("Customer Name"), "fieldtype": "Data", "width": 100},
+        {"fieldname": "contact_person", "label": _("Contact Person"), "fieldtype": "Data", "width": 100},
         {"fieldname": "assessee_full_name", "label": _("Assessee Full Name"), "fieldtype": "Data", "width": 120},
-        # {"fieldname": "customer_name", "label": _("Customer Name"), "fieldtype": "Data", "width": 100},
+        
         {"fieldname": "customer_status", "label": _("Customer Status"), "fieldtype": "Data", "width": 100},
         {"fieldname": "it_assessee_file", "label": _("PAN"), "fieldtype": "Link", "options": "IT Assessee File", "width": 165},
+        {"fieldname": "filing_status", "label": _("Filing Status"), "fieldtype": "Data", "width": 170},
         # {"fieldname": "pan", "label": _("PAN"), "fieldtype": "Data", "width": 50},
         {"fieldname": "executive", "label": _("Executive"), "fieldtype": "Data", "width": 150},
-        {"fieldname": "created_manually", "label": _("Created Manually"), "fieldtype": "Check", "width": 100},
-        {"fieldname": "ay", "label": _("IT Assessee File Yearly Report"), "fieldtype": "Data", "width": 150},
-        {"fieldname": "filing_notes", "label": _("Filing Notes"), "fieldtype": "Data", "width": 150},
+        {"fieldname": "mobile_no", "label": _("Mobile No"), "fieldtype": "Data", "width": 100},
+        # {"fieldname": "created_manually", "label": _("Created Manually"), "fieldtype": "Check", "width": 100},
+        # {"fieldname": "ay", "label": _("IT Assessee File Yearly Report"), "fieldtype": "Data", "width": 150},
+        # {"fieldname": "filing_notes", "label": _("Filing Notes"), "fieldtype": "Data", "width": 150},
     ]
 
     # Construct additional filters based on the provided filters
@@ -34,7 +38,7 @@ def execute(filters=None):
     data = frappe.get_all(
         "IT Assessee Filing Data",
         filters=additional_filters,
-        fields=["name", "filing_status", "customer_id", "assessee_full_name", "customer_status", "it_assessee_file", "executive", "created_manually", "ay", "filing_notes"],
+        fields=["name", "customer_id","customer_name","contact_person", "assessee_full_name","customer_status", "it_assessee_file","filing_status",  "executive","mobile_no",  ],
         as_list=True
     )
 
@@ -239,4 +243,5 @@ def execute(filters=None):
     """
 
     return columns, data, html_card
+
 

@@ -99,23 +99,34 @@ class GstFillingData(Document):
                     gst_doc.last_filed = ""
                     gst_doc.save()
             if doc.submitted ==1 and old_doc.submitted==0:
-                        gst_filling_data = frappe.get_all(doc.doctype,
-                                            filters={'gst_yearly_filling_summery_id': doc.gst_yearly_filling_summery_id,
-                                                     'non_compliant':1,
-                                                     'name':("not in",[doc.name]),
-                                                     },)
-                        doc.non_compliant=0
-                        if not gst_filling_data :
-                            gst_doc = frappe.get_doc("Gst Yearly Filing Summery", doc.gst_yearly_filling_summery_id)
-                            gst_doc.non_compliant = 0
-                            gst_doc.save()
+                gst_filling_data = frappe.get_all(doc.doctype,
+                                    filters={'gst_yearly_filling_summery_id': doc.gst_yearly_filling_summery_id,
+                                                'non_compliant':1,
+                                                'name':("not in",[doc.name]),
+                                                },)
+                doc.non_compliant=0
+                if not gst_filling_data :
+                    gst_doc = frappe.get_doc("Gst Yearly Filing Summery", doc.gst_yearly_filling_summery_id)
+                    gst_doc.non_compliant = 0
+                    gst_doc.save()
+                
+                gst_yearly_summary_data = frappe.get_all("Gst Yearly Filing Summery",
+                                    filters={'gst_file_id': doc.gstfile,
+                                            'non_compliant':1,
+                                                },)
+                if not gst_yearly_summary_data:
+                    gstfile_doc = frappe.get_doc("Gstfile", doc.gstfile)
+                    gstfile_doc.non_compliant = 1
+                    gstfile_doc.save()
                         
             elif doc.submitted ==0 and old_doc.submitted==1:
                 doc.non_compliant=1
-                if doc.non_compliant==1:
-                    gst_doc = frappe.get_doc("Gst Yearly Filing Summery", doc.gst_yearly_filling_summery_id)
-                    gst_doc.non_compliant = 1
-                    gst_doc.save()
+                gst_doc = frappe.get_doc("Gst Yearly Filing Summery", doc.gst_yearly_filling_summery_id)
+                gst_doc.non_compliant = 1
+                gst_doc.save()
+                gstfile_doc = frappe.get_doc("Gstfile", doc.gstfile)
+                gstfile_doc.non_compliant = 1
+                gstfile_doc.save()
 
 
 
@@ -465,5 +476,6 @@ def custom_save_as_draft(gst_yearly_filling_summary_id, sales_total_taxable, pur
     #     else:
     #         # Increment the field by the current value
     #         setattr(gst_yearly_filing_summery, field_name, getattr(gst_yearly_filing_summery, field_name) + field_value)
+
 
 

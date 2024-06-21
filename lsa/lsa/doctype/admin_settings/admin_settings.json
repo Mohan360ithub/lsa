@@ -9,9 +9,13 @@
   "customer_status_change_notification_tab",
   "employees_to_be_notified_for_customer_status_change_column",
   "customer_status_change_mail",
+  "section_break_xsnt",
+  "employees_to_be_notified_on_new_lead_creation_column",
+  "lead_creation_notification_mails",
   "section_break_dmup",
-  "employees_to_be_notified_for_leave_application_column",
-  "leave_application_mails"
+  "employees_leave_related",
+  "leave_application_mails",
+  "global_leave_approver"
  ],
  "fields": [
   {
@@ -36,14 +40,37 @@
    "fieldtype": "Section Break"
   },
   {
-   "fieldname": "employees_to_be_notified_for_leave_application_column",
-   "fieldtype": "Column Break",
-   "label": "Employees to be notified for Leave Application"
-  },
-  {
    "fieldname": "leave_application_mails",
    "fieldtype": "Table MultiSelect",
    "label": "Leave Application Mails",
+   "options": "Multiselect User",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_xsnt",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "employees_to_be_notified_on_new_lead_creation_column",
+   "fieldtype": "Column Break",
+   "label": "Employees to be notified on new Lead creation"
+  },
+  {
+   "fieldname": "lead_creation_notification_mails",
+   "fieldtype": "Table MultiSelect",
+   "label": "Lead Creation Notification Mails",
+   "options": "Multiselect User",
+   "reqd": 1
+  },
+  {
+   "fieldname": "employees_leave_related",
+   "fieldtype": "Column Break",
+   "label": "Employees Leave Related"
+  },
+  {
+   "fieldname": "global_leave_approver",
+   "fieldtype": "Table MultiSelect",
+   "label": "Global Leave Approver",
    "options": "Multiselect User",
    "reqd": 1
   }
@@ -51,7 +78,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-06-18 12:22:43.456621",
+ "modified": "2024-06-19 16:05:10.056132",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Admin Settings",

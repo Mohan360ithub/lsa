@@ -11,11 +11,17 @@ def lead_notification(lead_name=None,mobile_no=None,source=None,custom_customer_
     try:
         # lead = frappe.get_all("Lead",leads[0].name)
                                
-        email_account = frappe.get_doc("Email Account", "LSA OFFICE")
+        email_account = frappe.get_doc("Email Account", "LSA Info")
         sender_email = email_account.email_id
         your_password= email_account.get_password()
 
-        receiver_email= "lokesh.bwr@gmail.com,chandra@360ithub.com"
+        receiver_email= set()
+
+        admin_setting_doc = frappe.get_doc("Admin Settings")
+        for i in admin_setting_doc.lead_creation_notification_mails:
+            receiver_email.add(i.user)
+
+        receiver_email=",".join(list(receiver_email))
 
         subject = "Lead Creation Notification"
 
@@ -165,7 +171,7 @@ def lead_notification(lead_name=None,mobile_no=None,source=None,custom_customer_
 
 
         # Connect to the SMTP server
-        smtp_server = 'smtp.gmail.com'
+        smtp_server = 'smtp-mail.outlook.com'
         smtp_port = 587
         with smtplib.SMTP(smtp_server, smtp_port) as server:
             server.starttls()
@@ -174,11 +180,16 @@ def lead_notification(lead_name=None,mobile_no=None,source=None,custom_customer_
                 # Send email
                 server.sendmail(sender_email, receiver_email.split(',') , message.as_string())
                 # print ("Email sent successfully!")
+                return {"status":True,"msg":"Successfully send Email notification regarding lead creation: "}
             except Exception as e:
                 # print("Error:",e)
                 frappe.msgprint (f"Failed to send email. Error: {e}")
                 frappe.log_error(f"An error occurred while sending mail on creation of Lead: {e}")
+                return {"status":False,"msg":f"Failed to send Email notification regarding lead creation: {e}"}
     except Exception as er:
         # print("Error: ",er)
         frappe.log_error(f"An error occurred while sending mail on creation of Lead: {er}")
+        return {"status":False,"msg":f"Failed to send Email notification regarding lead creation: {er}"}
+
+
 

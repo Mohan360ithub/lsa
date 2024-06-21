@@ -10,11 +10,15 @@
   "section_break_1rgq",
   "meeting_title",
   "meeting_type",
-  "attendies",
+  "attendeesuser",
+  "absenteesuser",
+  "attendees",
   "absentees",
+  "action_items",
   "column_break_wsgb",
   "project_name",
   "customer",
+  "customer_name",
   "supplier_name",
   "status",
   "meeting_start_time",
@@ -24,11 +28,9 @@
   "meeting_agenda",
   "column_break_grii",
   "discussion_points",
-  "amended_from",
   "out_comes_tab",
   "assigned_to_with_deadlines",
   "attachments",
-  "link_mirp",
   "amended_from"
  ],
  "fields": [
@@ -47,21 +49,15 @@
    "in_list_view": 1,
    "label": "Meeting Title",
    "no_copy": 1,
-   "options": "Minutes of Meeting",
    "print_hide": 1,
-   "read_only": 1,
    "reqd": 1,
    "search_index": 1
   },
   {
    "fieldname": "meeting_type",
    "fieldtype": "Select",
-   "label": "Meeting Type"
-  },
-  {
-   "fieldname": "attendies",
-   "fieldtype": "Small Text",
-   "label": "Attendies"
+   "label": "Meeting Type",
+   "options": "\nStand-Up\nSprint Planning\nReview"
   },
   {
    "fieldname": "absentees",
@@ -99,17 +95,20 @@
   {
    "fieldname": "meeting_start_time",
    "fieldtype": "Datetime",
-   "label": "Meeting Start Time"
+   "label": "Meeting Start Time",
+   "reqd": 1
   },
   {
    "fieldname": "meeting_end_time",
    "fieldtype": "Datetime",
-   "label": "Meeting End Time"
+   "label": "Meeting End Time",
+   "reqd": 1
   },
   {
    "fieldname": "duration",
    "fieldtype": "Data",
-   "label": "Duration"
+   "label": "Duration",
+   "read_only": 1
   },
   {
    "fieldname": "meeting_discussion_tab",
@@ -157,12 +156,6 @@
    "options": "Multi Attachments"
   },
   {
-   "fieldname": "link_mirp",
-   "fieldtype": "Link",
-   "options": "Minutes of Meeting",
-   "search_index": 1
-  },
-  {
    "fieldname": "amended_from",
    "fieldtype": "Link",
    "label": "Amended From",
@@ -171,12 +164,41 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "attendeesuser",
+   "fieldtype": "Table MultiSelect",
+   "label": "Attendees(User)",
+   "options": "Multiselect User",
+   "reqd": 1
+  },
+  {
+   "fieldname": "absenteesuser",
+   "fieldtype": "Table MultiSelect",
+   "label": "Absentees(User)",
+   "options": "Multiselect User"
+  },
+  {
+   "fieldname": "attendees",
+   "fieldtype": "Small Text",
+   "label": "Attendees"
+  },
+  {
+   "fieldname": "action_items",
+   "fieldtype": "Small Text",
+   "label": "Action Items"
+  },
+  {
+   "fetch_from": "customer.customer_name",
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "label": "Customer Name"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-06-18 10:07:02.622680",
+ "modified": "2024-06-20 13:13:16.282861",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Minutes of Meeting",

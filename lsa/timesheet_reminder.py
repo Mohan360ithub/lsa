@@ -21,6 +21,8 @@ def mail_remainder_for_timesheet():
         #current_month = 12
         # print(current_year)
         first_day_of_month = date(current_year, current_month, 1)
+        if current_year == 2024 and current_month == 6:
+            first_day_of_month = date(current_year, current_month, 11)
 
         # Get the last day of the current month
         if current_month == 12:
@@ -45,18 +47,18 @@ def mail_remainder_for_timesheet():
                 attendance_data_emp[at.employee]+=[str(datetime.strptime(str(at.attendance_date), '%Y-%m-%d').strftime('%d-%m-%Y'))]
         del attendance_data
 
-        timesheet_data = frappe.get_all('Timesheet', 
+        timesheet_data = frappe.get_all('Team Timesheet', 
                                          filters={
                                                     'docstatus': 1,
-                                                    'custom_date': ['between', [first_day_of_month, last_day_of_month]],
+                                                    'date': ['between', [first_day_of_month, last_day_of_month]],
                                                 },
-                                        fields=['employee','custom_date'])
+                                        fields=['employee','date'])
         timesheet_data_emp={}
         for ts in timesheet_data:
             if ts.employee not in timesheet_data_emp:
-                timesheet_data_emp[ts.employee]=[str(datetime.strptime(str(ts.custom_date), '%Y-%m-%d').strftime('%d-%m-%Y'))]
+                timesheet_data_emp[ts.employee]=[str(datetime.strptime(str(ts.date), '%Y-%m-%d').strftime('%d-%m-%Y'))]
             else:
-                timesheet_data_emp[ts.employee]+=[str(datetime.strptime(str(ts.custom_date), '%Y-%m-%d').strftime('%d-%m-%Y'))]
+                timesheet_data_emp[ts.employee]+=[str(datetime.strptime(str(ts.date), '%Y-%m-%d').strftime('%d-%m-%Y'))]
         del timesheet_data
 
         mail_emp_date={}
@@ -265,5 +267,78 @@ def nonsubmitted_timesheet_dates():
 
     return mail_emp_date
 
+
+
+@frappe.whitelist()
+def nonsubmitted_timesheet_dates_all_emp():
+    from datetime import datetime, date, timedelta
+
+    # Get all active employees
+    employee_list = frappe.get_all("Employee", 
+                                   filters={"status": "Active"}, 
+                                   fields=["name", "employee_name", "company", "designation", "department"])
+
+    # Get the current year and month
+    current_year = datetime.now().year
+    current_month = datetime.now().month
+    first_day_of_month = date(current_year, current_month, 1)
+    if current_year == 2024 and current_month == 6:
+        first_day_of_month = date(current_year, current_month, 11)
+
+    # Get the last day of the current month
+    if current_month == 12:
+        last_day_of_month = date(current_year, current_month, 31)
+    else:
+        last_day_of_month = date(current_year, current_month + 1, 1) - timedelta(days=1)
+
+    mail_emp_dates = []
+
+    for emp in employee_list:
+        employee = emp.name
+
+        # Retrieve attendance data
+        attendance_data = frappe.get_all('Attendance', 
+                                         filters={
+                                             "employee": employee,
+                                             'docstatus': 1,
+                                             'status': 'Present',
+                                             'attendance_date': ['between', [first_day_of_month, last_day_of_month]]
+                                         },
+                                         fields=['employee', 'attendance_date', 'working_hours'])
+        attendance_data_emp = {}
+        for at in attendance_data:
+            date_str = str(datetime.strptime(str(at.attendance_date), '%Y-%m-%d').strftime('%d-%m-%Y'))
+            attendance_data_emp[date_str] = at.working_hours
+
+        # Retrieve timesheet data
+        timesheet_data = frappe.get_all('Team Timesheet', 
+                                         filters={
+                                             "employee": employee,
+                                             'docstatus': ["in", (0, 1)],
+                                             'date': ['between', [first_day_of_month, last_day_of_month]],
+                                         },
+                                         fields=['employee', 'date', 'docstatus'])
+        timesheet_data_emp = {}
+        for ts in timesheet_data:
+            date_str = str(datetime.strptime(str(ts.date), '%Y-%m-%d').strftime('%d-%m-%Y'))
+            timesheet_data_emp[date_str] = ts.docstatus
+
+        for day, working_hours in attendance_data_emp.items():
+            if day not in timesheet_data_emp:
+                mail_emp_dates.append({
+                    "employee": emp.employee_name,
+                    "date": day,
+                    "working_hours": working_hours,
+                    "status": "Timesheet Not Created"
+                })
+            elif timesheet_data_emp[day] == 0:
+                mail_emp_dates.append({
+                    "employee": emp.employee_name,
+                    "date": day,
+                    "working_hours": working_hours,
+                    "status": "Timesheet Created, Not Submitted"
+                })
+
+    return mail_emp_dates
 
 

@@ -34,19 +34,19 @@ def get_activity(doctype, txt, searchfield, start, page_len, filters):
 def get_masters(doctype, txt, searchfield, start, page_len, filters):
     master = filters.get('master')
     customer_id = filters.get('customer_id')
-    master_customer_map={"Gstfile":"customer_id",
-                         "TDS File":"customer_id",
-			 "Provident Fund File":"customer_id",
-			 "Professional Tax File":"customer_id",
-			 "MCA ROC File":"customer_id",
-			 "IT Assessee File":"customer_id",
-			 "Client Notices":"cid",
-                         "Registration Application":"customer",
+    master_customer_map={"Gstfile":["customer_id","company_name","name"],
+                         "TDS File":["customer_id","deductor_name","name"],
+						 "Provident Fund File":["customer_id","company_name","name"],
+						 "Professional Tax File":["customer_id","company_name","name"],
+						 "MCA ROC File":["customer_id","company_name","name"],
+						 "IT Assessee File":["customer_id","assessee_name","name"],
+						 "Client Notices":["cid","customer_firm_name","name"],
+                         "Registration Application":["customer","entity_name","name"],
 						}
 
     if customer_id:
-        masters = frappe.get_all(master, filters={master_customer_map[master]: customer_id})
-        master_list = [(master.name,) for master in masters]
+        masters = frappe.get_all(master, filters={master_customer_map[master][0]: customer_id},fields=master_customer_map[master])
+        master_list = [(master_i.name,master_i[master_customer_map[master][1]]) for master_i in masters]
         return  master_list
     elif master:
         masters = frappe.get_all(master)
@@ -54,4 +54,5 @@ def get_masters(doctype, txt, searchfield, start, page_len, filters):
         return master_list
     else:
          return []
+
 

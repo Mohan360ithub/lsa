@@ -32,6 +32,7 @@
   "proprietor_name",
   "pan",
   "aadhar_no",
+  "non_compliant",
   "section_break_fpls",
   "mobile",
   "mobile_2",
@@ -508,11 +509,18 @@
    "fieldname": "filing_started_from",
    "fieldtype": "Date",
    "label": "Filing Started From"
+  },
+  {
+   "default": "0",
+   "fieldname": "non_compliant",
+   "fieldtype": "Check",
+   "label": "Non-Compliant",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-03-27 15:46:36.843028",
+ "modified": "2024-06-21 10:06:21.948953",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Gstfile",
