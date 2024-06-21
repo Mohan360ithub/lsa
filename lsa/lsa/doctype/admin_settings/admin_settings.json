@@ -15,7 +15,9 @@
   "section_break_dmup",
   "employees_leave_related",
   "leave_application_mails",
-  "global_leave_approver"
+  "global_leave_approver",
+  "team_ticket_related_section",
+  "team_ticket_cc_mails"
  ],
  "fields": [
   {
@@ -71,14 +73,24 @@
    "fieldname": "global_leave_approver",
    "fieldtype": "Table MultiSelect",
    "label": "Global Leave Approver",
-   "options": "Multiselect User",
-   "reqd": 1
+   "options": "Multiselect User"
+  },
+  {
+   "fieldname": "team_ticket_related_section",
+   "fieldtype": "Section Break",
+   "label": "Team Ticket Related"
+  },
+  {
+   "fieldname": "team_ticket_cc_mails",
+   "fieldtype": "Table MultiSelect",
+   "label": "Team Ticket CC Mails",
+   "options": "Multiselect User"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-06-19 16:05:10.056132",
+ "modified": "2024-06-21 11:32:03.884042",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Admin Settings",

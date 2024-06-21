@@ -102,12 +102,13 @@
    "fieldname": "sub_category",
    "fieldtype": "Link",
    "label": "Sub Category",
-   "options": "Team Ticket Sub Category"
+   "options": "Team Ticket Sub Category",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-06-20 16:16:39.336536",
+ "modified": "2024-06-21 11:38:58.354904",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Team Ticket",
