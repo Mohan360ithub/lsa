@@ -6,7 +6,6 @@ from datetime import datetime, timedelta, date
 from hrms.hr.doctype.leave_allocation.leave_allocation import get_previous_allocation
 from hrms.hr.doctype.leave_application.leave_application import (get_leave_balance_on,get_leaves_for_period,)
 from itertools import groupby
-from frappe.utils import today
 from frappe.utils import now_datetime
 
 
@@ -43,30 +42,50 @@ def checking_user_authentication(user_email=None):
     
 
 
+
 @frappe.whitelist()
 def get_employees_with_birthday_in_current_month():
-    cur_month = frappe.utils.now_datetime().month
+    current_date = now_datetime().date()
+    one_week_before = current_date - timedelta(days=7)
+    one_week_after = current_date + timedelta(days=7)
 
-
-    # Fetch employees with birthdays in the current month
+    # Fetch employees with birthdays and custom anniversary dates
     employees = frappe.get_all("Employee",
         filters={
             "status": "Active",
         },
-        fields=["name", "employee_name", "date_of_birth","custom_anniversary_date"],
+        fields=["name", "employee_name", "date_of_birth", "custom_anniversary_date","date_of_joining"],
     )
-    curr_mon={}
+
+    curr_mon = {}
     for emp in employees:
-        if emp.date_of_birth and emp.date_of_birth.month == cur_month:
-            if emp.date_of_birth in curr_mon:
-                curr_mon[str(emp.date_of_birth)[5:]]+=[(emp.employee_name,"birthday")]
-            else:
-                curr_mon[str(emp.date_of_birth)[5:]]=[(emp.employee_name,"birthday")]
-        if emp.custom_anniversary_date and emp.custom_anniversary_date.month == cur_month:
-            if emp.custom_anniversary_date in curr_mon:
-                curr_mon[str(emp.custom_anniversary_date)[5:]]+=[(emp.employee_name,"anniversary")]
-            else:
-                curr_mon[str(emp.custom_anniversary_date)[5:]]=[(emp.employee_name,"anniversary")]
+        if emp.date_of_birth:
+            dob_this_year = emp.date_of_birth.replace(year=current_date.year)
+            if one_week_before <= dob_this_year <= one_week_after:
+                date_key = emp.date_of_birth.strftime("%m-%d")
+                if date_key in curr_mon:
+                    curr_mon[date_key].append((emp.employee_name, "birthday"))
+                else:
+                    curr_mon[date_key] = [(emp.employee_name, "birthday")]
+
+        if emp.custom_anniversary_date:
+            anniv_this_year = emp.custom_anniversary_date.replace(year=current_date.year)
+            if one_week_before <= anniv_this_year <= one_week_after:
+                date_key = emp.custom_anniversary_date.strftime("%m-%d")
+                if date_key in curr_mon:
+                    curr_mon[date_key].append((emp.employee_name, "anniversary"))
+                else:
+                    curr_mon[date_key] = [(emp.employee_name, "anniversary")]
+        
+        if emp.date_of_joining:
+            anniv_this_year = emp.date_of_joining.replace(year=current_date.year)
+            if one_week_before <= anniv_this_year <= one_week_after:
+                date_key = emp.date_of_joining.strftime("%m-%d")
+                if date_key in curr_mon:
+                    curr_mon[date_key].append((emp.employee_name, "joining"))
+                else:
+                    curr_mon[date_key] = [(emp.employee_name, "joining")]
+
     sorted_curr_mon = {key: curr_mon[key] for key in sorted(curr_mon)}
     return sorted_curr_mon
 
@@ -422,4 +441,5 @@ def get_notapproved_leave_applications_for_approver():
     return leave_applications
 
 ###################################################################################
+
 

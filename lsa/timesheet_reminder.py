@@ -252,18 +252,18 @@ def nonsubmitted_timesheet_dates():
                                          'docstatus': ["in", (0, 1)],
                                          'date': ['between', [first_day_of_month, last_day_of_month]],
                                      },
-                                     fields=['employee', 'date', 'docstatus'])
+                                     fields=['employee', 'date',"total_working_hours", 'docstatus'])
     timesheet_data_emp = {}
     for ts in timesheet_data:
         date_str = str(datetime.strptime(str(ts.date), '%Y-%m-%d').strftime('%d-%m-%Y'))
-        timesheet_data_emp[date_str] = ts.docstatus
+        timesheet_data_emp[date_str] = [ts.docstatus, ts.total_working_hours]
 
     mail_emp_date = []
     for day, working_hours in attendance_data_emp.items():
         if day not in timesheet_data_emp:
-            mail_emp_date.append((day, working_hours, "Timesheet Not Created"))
+            mail_emp_date.append((day, working_hours,0.00, "Timesheet Not Created"))
         elif timesheet_data_emp[day] == 0:
-            mail_emp_date.append((day, working_hours, "Timesheet Created, Not Submitted"))
+            mail_emp_date.append((day, working_hours,timesheet_data_emp[day][1], "Timesheet Created, Not Submitted"))
 
     return mail_emp_date
 
@@ -292,7 +292,7 @@ def nonsubmitted_timesheet_dates_all_emp():
         last_day_of_month = date(current_year, current_month + 1, 1) - timedelta(days=1)
 
     mail_emp_dates = []
-
+    emp_count={}
     for emp in employee_list:
         employee = emp.name
 
@@ -306,6 +306,8 @@ def nonsubmitted_timesheet_dates_all_emp():
                                          },
                                          fields=['employee', 'attendance_date', 'working_hours'])
         attendance_data_emp = {}
+        emp_count[emp.employee_name]=0
+
         for at in attendance_data:
             date_str = str(datetime.strptime(str(at.attendance_date), '%Y-%m-%d').strftime('%d-%m-%Y'))
             attendance_data_emp[date_str] = at.working_hours
@@ -317,28 +319,33 @@ def nonsubmitted_timesheet_dates_all_emp():
                                              'docstatus': ["in", (0, 1)],
                                              'date': ['between', [first_day_of_month, last_day_of_month]],
                                          },
-                                         fields=['employee', 'date', 'docstatus'])
+                                         fields=['employee', 'date',"total_working_hours", 'docstatus'])
         timesheet_data_emp = {}
         for ts in timesheet_data:
             date_str = str(datetime.strptime(str(ts.date), '%Y-%m-%d').strftime('%d-%m-%Y'))
-            timesheet_data_emp[date_str] = ts.docstatus
+            timesheet_data_emp[date_str] = [ts.docstatus, ts.total_working_hours]
 
         for day, working_hours in attendance_data_emp.items():
+            emp_count[emp.employee_name]+=1
             if day not in timesheet_data_emp:
                 mail_emp_dates.append({
                     "employee": emp.employee_name,
                     "date": day,
-                    "working_hours": working_hours,
+                    "checkin_hours": working_hours,
+                    "timesheet_hours": 0.00,
                     "status": "Timesheet Not Created"
                 })
             elif timesheet_data_emp[day] == 0:
                 mail_emp_dates.append({
                     "employee": emp.employee_name,
                     "date": day,
-                    "working_hours": working_hours,
+                    "checkin_hours": working_hours,
+                    "timesheet_hours": timesheet_data_emp[day][1],
                     "status": "Timesheet Created, Not Submitted"
                 })
 
-    return mail_emp_dates
+    return {"timesheet_data":mail_emp_dates,"emp_count":emp_count}
+
+
 
 

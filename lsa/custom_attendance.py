@@ -58,15 +58,18 @@ def checkin_out_for_missed_logs():
 def apply_for_leave(name):
     try:
         leave_application = frappe.get_doc("Leave Application", name)
-        
+
+        cc_recipients=leave_approvers(leave_application.employee)["cc_recipients"]
+
+        recipients = leave_application.custom_employee_mail_id
         subject = "Leave Application Submitted"
         message = f"Dear {leave_application.employee_name},<br><br>Your leave application from {leave_application.from_date} to {leave_application.to_date} has been submitted successfully. If you have any questions, please contact HR."
         
-        recipients = leave_application.custom_employee_mail_id
  
         # Send the email
         frappe.sendmail(
             recipients=recipients,
+            cc=cc_recipients,
             subject=subject,
             message=message
         )
@@ -81,8 +84,8 @@ def cancel_leave(name):
         
         leave_application_doc = frappe.get_doc("Leave Application", name)
         if leave_application_doc!="Cancelled":
-            user=frappe.session.user
-            # frappe.set_user("Administrator")
+
+            cc_recipients=leave_approvers(leave_application_doc.employee)["cc_recipients"]
             
             subject = "Leave Application Cancelled"
             message = f"Dear {leave_application_doc.employee_name},<br><br>Your leave application from {leave_application_doc.from_date} to {leave_application_doc.to_date} has been cancelled. If you have any questions, please contact HR."
@@ -94,11 +97,11 @@ def cancel_leave(name):
             # Send the email
             frappe.sendmail(
                 recipients=recipients,
+                cc=cc_recipients,
                 subject=subject,
                 message=message
             )
             leave_application_doc.save()
-            # frappe.set_user(user)
             
             return {'msg':"Cancelled Succesfully"}
     except Exception as e:
@@ -108,8 +111,59 @@ def cancel_leave(name):
     # Mark the leave application as not applied
     # leave_application.db_set('leave_applied', 0)
 
-    
 #################################### Srikanths Code End ######################################
+
+@frappe.whitelist()
+def leave_action(name,approved_by):
+    try:
+        
+        leave_application_doc = frappe.get_doc("Leave Application", name)
+        if leave_application_doc!="Cancelled":
+            user=frappe.get_doc("User",approved_by)
+
+            cc_recipients=leave_approvers(leave_application_doc.employee)["cc_recipients"]
+            
+            subject = f"Leave Application {leave_application_doc.status}"
+            message = f"Dear {leave_application_doc.employee_name},<br><br>Your leave application from {leave_application_doc.from_date} to {leave_application_doc.to_date} has been {leave_application_doc.status} by {user.full_name}. If you have any questions, please contact HR."
+            
+            recipients = leave_application_doc.custom_employee_mail_id
+ 
+            # Send the email
+            frappe.sendmail(
+                recipients=recipients,
+                cc=cc_recipients,
+                subject=subject,
+                message=message
+            )
+            
+            return {"status":True,'msg':"Submitted Succesfully"}
+    except Exception as e:
+        # frappe.msgprint(f'{e}')
+        return {"status":False,'msg':f'{e}'}
+
+
+@frappe.whitelist()
+def leave_approvers(emp_id):
+    emp_doc = frappe.get_doc("Employee", emp_id)
+    cc_recipients=set()
+    admin_setting_doc = frappe.get_doc("Admin Settings")
+    for i in admin_setting_doc.leave_application_mails:
+        cc_recipients.add(i.user)
+
+    global_leave_approvers=set()
+    admin_setting_doc = frappe.get_doc("Admin Settings")
+    for j in admin_setting_doc.global_leave_approver:
+        global_leave_approvers.add(j.user)
+    
+    if emp_doc.user_id:
+        if emp_doc.reports_to:
+            reporting_manager_doc = frappe.get_doc("Employee", emp_doc.reports_to)
+            if reporting_manager_doc.user_id:
+                cc_recipients.add(reporting_manager_doc.user_id)
+        if emp_doc.leave_approver:
+            cc_recipients.add(emp_doc.leave_approver)
+            global_leave_approvers.add(emp_doc.leave_approver)
+    return {"cc_recipients":list(cc_recipients),"global_leave_approvers":list(global_leave_approvers)}
 
 # #################################### Srikanths Code Modified by Vatsal Start #############################################################
     
@@ -205,4 +259,6 @@ def cancel_leave(name):
 #         return {"status": False, "msg":f"Error Cancelling the Leave: {e}"}
 
 # #################################### Srikanths Code Modified by Vatsal End ##################################################
+
+
 

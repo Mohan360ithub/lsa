@@ -13,6 +13,8 @@
   "contact_person",
   "customer_status",
   "created_manually",
+  "previous_filing_summary",
+  "next_filing_summary",
   "column_break_cibz",
   "gst_file_id",
   "company",
@@ -278,11 +280,25 @@
    "in_standard_filter": 1,
    "label": "Non-Compliant",
    "read_only": 1
+  },
+  {
+   "fieldname": "previous_filing_summary",
+   "fieldtype": "Link",
+   "label": "Previous Filing Summary",
+   "options": "Gst Yearly Filing Summery",
+   "read_only": 1
+  },
+  {
+   "fieldname": "next_filing_summary",
+   "fieldtype": "Link",
+   "label": "Next Filing Summary",
+   "options": "Gst Yearly Filing Summery",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-06-19 12:58:41.340936",
+ "modified": "2024-06-24 15:13:38.959720",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Gst Yearly Filing Summery",

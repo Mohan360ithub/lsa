@@ -41,6 +41,13 @@ def execute(filters=None):
      
     data = customer_services(filters)
     html_card = """
+
+    <div style="width:100%; display: flex; justify-content: flex-end; align-items: center;">
+    <button class="btn btn-sm" style="margin-right: 10px; background-color: #A9A9A9;" onclick="myFunction()">
+        <b style="color: #000000;">Reassign Executives</b>
+    </button>
+    </div>
+
     <script>
         document.addEventListener('click', function(event) {
             // Check if the clicked element is a cell
@@ -66,6 +73,7 @@ def execute(filters=None):
                 });
             }
         });
+        
     </script>
     """
 
@@ -173,7 +181,7 @@ def customer_services(filters):
 
     return data
 
-@frappe.whitelist()
+
 def get_services():
     services = frappe.get_all("Customer Chargeable Doctypes", fields=["name"])
     services = [ser.name for ser in services]
@@ -181,3 +189,22 @@ def get_services():
 
 
 
+@frappe.whitelist()
+def erp_last_checkin(service,new_exe,old_exe=None):
+        
+    if old_exe:
+        service_masters_list = frappe.get_all(service, filters={"executive":old_exe})
+        if not service_masters_list:
+            return {"status":False,"msg":f"No {service} found with {old_exe} as executive"}
+    else:
+        service_masters_list = frappe.get_all(service, filters={"executive":("in",[None])})
+        if not service_masters_list:
+            return {"status":False,"msg":f"No record found in Service Master {service}"}
+    try:
+        for serv in service_masters_list:
+            service_masters_doc = frappe.get_doc(service,serv.name)
+            service_masters_doc.executive=new_exe
+            service_masters_doc.save()
+        return {"status":True,"msg":f"Reassigning of executive for {service} from {old_exe} to {new_exe} done Successfully!"}
+    except Exception as er:
+        return {"status":False,"msg":f"Error reassigning executive for {service} from {old_exe} to {new_exe}: {er}"}

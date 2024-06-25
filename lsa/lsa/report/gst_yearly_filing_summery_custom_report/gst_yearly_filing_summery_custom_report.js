@@ -41,6 +41,12 @@ frappe.query_reports["Gst Yearly Filing Summery custom report"] = {
 		"default":"GST Enabled",
 	},
 	{
+		"fieldname": "non_compliant",
+		"label": __("Compliance Status"),
+		"fieldtype": "Select",
+		"options": [ "","Compliant", "Non-Compliant",],
+	},
+	{
 		"fieldname": "gst_file",
 		"label": __("GSTIN"),
 		"fieldtype": "Link",
@@ -49,4 +55,5 @@ frappe.query_reports["Gst Yearly Filing Summery custom report"] = {
 
 	]
 };
+
 

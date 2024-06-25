@@ -14,6 +14,8 @@ def execute(filters=None):
 	   {"label": "Contact Person", "fieldname": "contact_person", "fieldtype": "Data", "width": 150},
         {"label": "GSTIN", "fieldname": "gstfile", "fieldtype": "Link", "options": "Gstfile", "width": 150},
 		{"label": "GST Type", "fieldname": "gst_type", "fieldtype": "Data", "width": 110},
+		{"label": "Non-Compliant", "fieldname": "non_compliant", "fieldtype": "Check", "width": 50},
+		
         {"label": "FY", "fieldname": "fy", "fieldtype": "Link", "options": "Gst Yearly Summery Report", "width": 100},
         {"label": "Total Sales Taxable", "fieldname": "sales_total_taxable", "fieldtype": "Currency", "width": 130},
 		{"label": "First Month of Filling", "fieldname": "fy_first_month_of_filling", "fieldtype": "Data", "width": 80},
@@ -85,6 +87,12 @@ def get_data(filters):
 	if (filters.get("customer_id")):
 		gst_yearly_filling_summery_filter["cid"]=filters.get("customer_id")
 
+	if (filters.get("non_compliant")):
+		if (filters.get("non_compliant"))=="Non-Compliant":
+			gst_yearly_filling_summery_filter["non_compliant"]=1
+		elif (filters.get("non_compliant"))=="Compliant":
+			gst_yearly_filling_summery_filter["non_compliant"]=0
+
 
 	
 	gst_yearly_filling_summery_s = frappe.get_all("Gst Yearly Filing Summery", 
@@ -92,7 +100,7 @@ def get_data(filters):
 											   fields=["name","gst_yearly_summery_report_id","gstin","gst_type","company","cid",
 														"sales_total_taxable","purchase_total_taxable","tax_paid_amount",
 														"interest_paid_amount","penalty_paid_amount","fy_first_month_of_filling",
-														"fy_last_month_of_filling","contact_person"])
+														"fy_last_month_of_filling","contact_person","non_compliant"])
 	
 	for gst_yearly_filling_summery in gst_yearly_filling_summery_s:
 		
@@ -104,6 +112,7 @@ def get_data(filters):
 				"contact_person": gst_yearly_filling_summery.contact_person,
 				"gstfile": gst_yearly_filling_summery.gstin,
 				"gst_type":gst_yearly_filling_summery.gst_type,
+				"non_compliant":gst_yearly_filling_summery.non_compliant,
 				"fy": gst_yearly_filling_summery.gst_yearly_summery_report_id,
 				"fy_first_month_of_filling": gst_yearly_filling_summery.fy_first_month_of_filling,
 				"fy_last_month_of_filling": gst_yearly_filling_summery.fy_last_month_of_filling,
@@ -142,6 +151,7 @@ def get_data(filters):
 	
 		data=new_data
 	return data
+
 
 
 

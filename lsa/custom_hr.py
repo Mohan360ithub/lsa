@@ -67,6 +67,7 @@ def get_employees_with_absent():
                                      fields=["name", "attendance_date", "employee","working_hours"],
                                      order_by="attendance_date desc")
         absent_data = {}
+        emp_count = {}
         for ab_date in absent_date:
             absent_date_checkin = frappe.get_all("Employee Checkin",
                                      filters={"attendance": ab_date.name},
@@ -76,7 +77,9 @@ def get_employees_with_absent():
             if str(ab_date.attendance_date) not in absent_data:
                 absent_data[str(ab_date.attendance_date)] = []
 
-
+            if employees_dict[ab_date.employee] not in emp_count:
+                emp_count[employees_dict[ab_date.employee]]=0
+            emp_count[employees_dict[ab_date.employee]]+=1
 
             if (ab_date.attendance_date,ab_date.employee) in leave_dict:
                 absent_data[str(ab_date.attendance_date)].append([employees_dict[ab_date.employee], False, absent_date_checkin,ab_date.working_hours,"Applied for leave but not approved"])
@@ -87,14 +90,14 @@ def get_employees_with_absent():
             else:
                 absent_data[str(ab_date.attendance_date)].append([employees_dict[ab_date.employee], False, absent_date_checkin,ab_date.working_hours,"Need to apply for Leave"])
 
-        return absent_data
+        return {"absent_data":absent_data,"emp_count":emp_count}
     return None
 
 
 
 
 
-###########Srikanth's Code####################################################################
+###########Srikanth's Code Start####################################################################
  
 @frappe.whitelist()
 def get_approved_leave_applications():
@@ -105,12 +108,31 @@ def get_approved_leave_applications():
             'status': 'Approved',
             'to_date': ['>=', current_date]  # Filter to get only to_date greater than or equal to current date
         },
-        fields=['employee_name', 'from_date', 'to_date', 'total_leave_days','name']
+        fields=['employee_name',"custom_approved_by", 'from_date', 'to_date', 'total_leave_days','name']
     )
     
     return leave_applications
  
  
+# @frappe.whitelist()
+# def get_notapproved_leave_applications():
+#     current_date = now_datetime().date()  # Get the current date in YYYY-MM-DD format
+#     leave_applications = frappe.get_all(
+#         'Leave Application',
+#         filters={
+#             'status': 'Open'
+#             # 'to_date': ['>=', current_date]  # Filter to get only to_date greater than or equal to current date
+#         },
+#         fields=['employee_name',"leave_approver",'posting_date','from_date', 'to_date', 'total_leave_days','name']
+#     )
+ 
+    
+#     return leave_applications
+
+#########################Srikanth's Code End##########################################################
+
+#################################Vatsal Modified srikanth Code Start#########################################
+
 @frappe.whitelist()
 def get_notapproved_leave_applications():
     current_date = now_datetime().date()  # Get the current date in YYYY-MM-DD format
@@ -120,11 +142,14 @@ def get_notapproved_leave_applications():
             'status': 'Open'
             # 'to_date': ['>=', current_date]  # Filter to get only to_date greater than or equal to current date
         },
-        fields=['employee_name','posting_date','from_date', 'to_date', 'total_leave_days','name']
+        fields=['employee_name',"leave_approver",'posting_date','from_date', 'to_date', 'total_leave_days','name']
     )
  
     
-    return leave_applications
 
-###################################################################################
+    for app in leave_applications:
+        user=frappe.get_doc("User",app.leave_approver)
+        app["leave_approver_name"]=user.full_name
+    return leave_applications
+######################################Vatsal Modified srikanth Code End###########################################################
 

@@ -42,6 +42,12 @@ frappe.query_reports["Gst Filling Data Custom Report"] = {
 			"options": [ "","Enabled", "Disabled",],
 			"default":"Enabled",
 		},
+		{
+			"fieldname": "non_compliant",
+			"label": __("Compliance Status"),
+			"fieldtype": "Select",
+			"options": [ "","Compliant", "Non-Compliant",],
+		},
 	]
 };
 
@@ -121,4 +127,5 @@ function getModifiedMonthFilterOptions(gstType) {
 // // 		}
 // 	]
 // };
+
 

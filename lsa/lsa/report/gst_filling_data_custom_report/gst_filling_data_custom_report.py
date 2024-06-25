@@ -11,6 +11,7 @@ def execute(filters=None):
         {"fieldname": "customer_status", "label": _("Customer Status"), "fieldtype": "Data", "width": 100},
         {"fieldname": "name", "label": _("ID"), "fieldtype": "Link", "options": "Gst Filling Data", "width": 100},
         {"fieldname": "filing_status", "label": _("Filing Status"), "fieldtype": "Data", "width": 170},
+        {"label": "Non-Compliant", "fieldname": "non_compliant", "fieldtype": "Check", "width": 50},
         {"fieldname": "gstfile", "label": _("GSTIN"), "fieldtype": "Link", "options": "Gstfile", "width": 165},
         {"fieldname": "gstfile_enabled", "label": _("Gstfile Enable"), "fieldtype": "Check", "width": 50},
         {"fieldname": "company", "label": _("Company"), "fieldtype": "Data", "width": 220},
@@ -40,6 +41,12 @@ def execute(filters=None):
     else:
         # If mandatory filters are not provided, return empty data
         return columns, [], ""
+    
+    if (filters.get("non_compliant")):
+        if (filters.get("non_compliant"))=="Non-Compliant":
+            additional_filters["non_compliant"]=1
+        elif (filters.get("non_compliant"))=="Compliant":
+            additional_filters["non_compliant"]=0
 
     # Fetch data using Frappe ORM
     data = frappe.get_all(
@@ -47,7 +54,7 @@ def execute(filters=None):
         filters=additional_filters,
         fields=["cid", "customer_status", "name", "filing_status", "gstfile", "gstfile_enabled", "company",
                 "mobile_no_gst", "gst_user_name", "gst_password", "proprietor_name", "executive",
-                "gst_type", "month", "fy", "gst_yearly_filling_summery_id", "filing_notes"],
+                "gst_type", "month", "fy", "gst_yearly_filling_summery_id", "filing_notes","non_compliant"],
     )
 
     if filters.get("customer_status"):
@@ -266,6 +273,7 @@ def execute(filters=None):
 
 
     return columns, data, html_card
+
 
 
 

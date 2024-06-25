@@ -12,6 +12,7 @@
   "column_break_iien",
   "created_by",
   "status",
+  "date",
   "section_break_oeed",
   "description",
   "reference_section",
@@ -35,7 +36,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Type",
-   "options": "\nComplaints\nFeedback\nRequest\nOther",
+   "options": "\nRequest\nFeedback\nComplaints\nOther",
    "reqd": 1
   },
   {
@@ -102,13 +103,20 @@
    "fieldname": "sub_category",
    "fieldtype": "Link",
    "label": "Sub Category",
-   "options": "Team Ticket Sub Category",
-   "reqd": 1
+   "mandatory_depends_on": "type",
+   "options": "Team Ticket Sub Category"
+  },
+  {
+   "default": "Now",
+   "fieldname": "date",
+   "fieldtype": "Datetime",
+   "label": "Date",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-06-21 11:38:58.354904",
+ "modified": "2024-06-24 11:42:56.942487",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Team Ticket",
