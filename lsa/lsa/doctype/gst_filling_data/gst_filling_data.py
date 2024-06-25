@@ -140,7 +140,7 @@ def get_financial_year(date):
     return f"{start_year}-{end_year}"
 
 @frappe.whitelist()
-def check_gst_compliance():
+def check_gst_compliance(manual=None):
     month_dict = {
                     1: "JAN",
                     2: "FEB",
@@ -157,15 +157,22 @@ def check_gst_compliance():
                 }
     today = dt.date.today()
     # today=dt.date(2024, 5, 5)
+    today_day_number = today.day
 
-    one_month_before = today - relativedelta(months=1)
+    one_month_before = dt.date(today.year, today.month-1, 21)
+
+    # one_month_before = today - relativedelta(months=1)
+    # fy = get_financial_year(one_month_before)
+    # month_number = one_month_before.month
+    # month_name=month_dict[month_number]
+    # today_day_number = today.day
+    # one_month_before = today - relativedelta(months=1)
+
     fy = get_financial_year(one_month_before)
     month_number = one_month_before.month
     month_name=month_dict[month_number]
-    today_day_number = today.day
-    print(today_day_number,month_number,fy)
-    if today_day_number == 21:
-    # if True:
+    # print(today_day_number,month_number,fy)
+    if today_day_number >= 21:
         gst_type=["Regular","QRMP"]
         if month_number%3==0:
             gst_type.append("Composition")
@@ -178,7 +185,7 @@ def check_gst_compliance():
                                                     #  'filing_status':("not in",["Filed Summery Shared With Client"]),
                                                      'submitted':0,
                                                      },)
-        print(len(gst_filling_data))
+        # print(len(gst_filling_data))
         for step_4 in gst_filling_data:
             gst_filling = frappe.get_doc("Gst Filling Data", step_4.name)
             gst_filling.non_compliant = 1
@@ -186,7 +193,11 @@ def check_gst_compliance():
             gst_yearly_summary = frappe.get_doc("Gst Yearly Filing Summery", gst_filling.gst_yearly_filling_summery_id)
             gst_yearly_summary.non_compliant = 1
             gst_yearly_summary.save()
-    return len(gst_filling_data)
+    
+
+        return len(gst_filling_data)
+    else:
+        frappe.log_error(message=f"today_day_number: {today_day_number}, month_number: {month_number}, month_name: {month_name}", title="Error in GST Filing Non-compliance Marking")
 
     
 
@@ -243,7 +254,7 @@ def checking_user_authentication(user_email):
         return {"status": status, "value": [roles, doc_perm_records]}
 
     except Exception as e:
-        print(e)
+        # print(e)
         return {"status": "Failed"}
 
 
@@ -476,6 +487,7 @@ def custom_save_as_draft(gst_yearly_filling_summary_id, sales_total_taxable, pur
     #     else:
     #         # Increment the field by the current value
     #         setattr(gst_yearly_filing_summery, field_name, getattr(gst_yearly_filing_summery, field_name) + field_value)
+
 
 
 

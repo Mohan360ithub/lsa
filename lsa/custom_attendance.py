@@ -1,5 +1,5 @@
 import frappe
-from datetime import date,datetime,timedelta
+from datetime import date,datetime,timedelta,time
 
 
 @frappe.whitelist()
@@ -260,5 +260,66 @@ def leave_approvers(emp_id):
 
 # #################################### Srikanths Code Modified by Vatsal End ##################################################
 
+
+
+
+@frappe.whitelist()
+def erp_last_checkin():
+    usr=frappe.session.user
+    emp_list = frappe.get_all("Employee", filters={"user_id":usr})
+    if not emp_list:
+        return {"status":False,"msg":f"No Employee found for {usr} user"}
+    
+    zero_am_time = datetime.combine(date.today(), time(0, 1))
+    checkin_list = frappe.get_all("Employee Checkin",
+                                    filters={"employee":emp_list[0].name},
+                                    fields=["log_type","time"],
+                                    order_by='time desc',
+                                    limit=1)
+    if checkin_list:
+        dict_log={"IN":"OUT","OUT":"IN"}
+        return {"status":True,"type":dict_log[checkin_list[0].log_type],"time":checkin_list[0].time}
+    else:
+        return {"status":False,"msg":"No Checkin-log found for"}
+
+@frappe.whitelist()
+def erp_checkin(location):
+    usr=frappe.session.user
+    emp_list = frappe.get_all("Employee", filters={"user_id":usr})
+    if not emp_list:
+        return {"status":False,"msg":f"No Employee found for {usr} user, you can't create checkin log"}
+    try:
+        zero_am_time = datetime.combine(date.today(), time(0, 1))
+        checkin_list = frappe.get_all("Employee Checkin",
+                                      filters={"employee":emp_list[0].name,"time":(">=",zero_am_time)},
+                                      fields=["log_type"],
+                                      order_by='time asc')
+        if (not checkin_list or checkin_list[-1].log_type=="OUT") and location:
+            log_type="IN"
+            emp_id=emp_list[0].name
+            return create_log(emp_id,location,log_type)
+        elif checkin_list[-1].log_type=="IN":
+            log_type="OUT"
+            emp_id=emp_list[0].name
+            return create_log(emp_id,location,log_type)
+    except Exception as e:
+        # frappe.msgprint(f'{e}')
+        return {"status":False,'msg':f'{e}'}
+
+def create_log(emp_id,location,log_type):
+    try:
+        emp_doc = frappe.get_doc("Employee", emp_id)
+        checkin_log = frappe.new_doc('Employee Checkin')
+        checkin_log.employee = emp_doc.name
+        checkin_log.time = frappe.utils.now_datetime()
+        checkin_log.log_type = log_type
+        checkin_log.location = location
+        checkin_log.shift = emp_doc.default_shift
+        checkin_log.custom_marked_from_erp = 1
+        # checkin_log.insert()
+        return {"status":True,"msg":f"Employee checkin log created Successfully"}
+    except Exception as e:
+        # frappe.msgprint(f'{e}')
+        return {"status":False,'msg':f'{e}'}
 
 
