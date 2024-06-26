@@ -80,6 +80,7 @@ def employee_data(filters):
             absent_msg += f"<br><a href='http://lsa.local:8012/app/attendance/{ab.name}'>{ab.name}</a> for {ab.employee_name}"
         
         frappe.msgprint(absent_msg)
+        return []
 
     emp_filter = {"status":"Active"}
     if filters.get("employee"):

@@ -16,13 +16,13 @@ def execute(filters=None):
         {"label": "Contact Person", "fieldname": "custom_contact_person", "fieldtype": "Data", "width": 125},
         {"label": "Mobile No.", "fieldname": "mobile number", "fieldtype": "Data", "width": 110},
 
-        {"label": "Total Amount", "fieldname": "rounded_total", "fieldtype": "Currency", "width": 100},
-        {"label": "Advance Paid", "fieldname": "advance_paid", "fieldtype": "Currency", "width": 100},
+        # {"label": "Total Amount", "fieldname": "rounded_total", "fieldtype": "Currency", "width": 100},
+        # {"label": "Advance Paid", "fieldname": "advance_paid", "fieldtype": "Currency", "width": 100},
 
         {"label": "SO Balance Amount", "fieldname": "custom_so_balance_amount", "fieldtype": "Currency", "width": 100},
         {"label": "Customer Payment Agree", "fieldname": "custom_customer_tags", "fieldtype": "HTML", "width": 80},
         {"label": "Customer Status", "fieldname": "custom_customer_status_", "fieldtype": "Data", "width": 65},
-        {"label": "Customer Disabled", "fieldname": "custom_customer_disabled_", "fieldtype": "Data", "width": 50},
+        # {"label": "Customer Disabled", "fieldname": "custom_customer_disabled_", "fieldtype": "Data", "width": 50},
         {"label": "Next Follwup Date", "fieldname": "next_followup_date", "fieldtype": "Date", "width": 100},
         {"label": "FollowUp", "fieldname": "followup_button", "fieldtype": "HTML", "width": 60},
         # {"label": "FollowUp Count", "fieldname": "followup_count", "fieldtype": "Int", "width": 20},
@@ -302,6 +302,7 @@ def get_data(filters):
                 data += [data_row]
 
     return data
+
 
 
 

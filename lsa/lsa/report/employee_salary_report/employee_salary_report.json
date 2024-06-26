@@ -10,7 +10,7 @@
  "is_standard": "Yes",
  "letter_head": "LSA",
  "letterhead": null,
- "modified": "2024-06-25 13:16:16.777157",
+ "modified": "2024-06-25 17:03:24.007676",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Employee Salary Report",
@@ -24,19 +24,13 @@
    "role": "HR User"
   },
   {
-   "role": "Employee"
-  },
-  {
    "role": "HR Manager"
   },
   {
-   "role": "Employee Self Service"
+   "role": "LSA CEO Admin"
   },
   {
-   "role": "LSA Employee (A,B,C)"
-  },
-  {
-   "role": "LSA Attendance Co-ordinator"
+   "role": "LSA CEO ADMIN TEAM"
   }
  ]
 }

@@ -1,0 +1,222 @@
+{
+ "actions": [],
+ "autoname": ".####",
+ "creation": "2024-06-25 18:10:35.080246",
+ "default_view": "List",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "task_title",
+  "task_type",
+  "task_priority",
+  "task_status",
+  "column_break_vzjw",
+  "created_by",
+  "task_creation_date_time",
+  "assigned_to",
+  "section_break_yhwq",
+  "task_details",
+  "section_break_cfqh",
+  "expected_end_date_time",
+  "column_break_ydvo",
+  "completion_date_time",
+  "task_due_status",
+  "section_break_dulp",
+  "customer_task",
+  "section_break_wbrz",
+  "cid",
+  "column_break_mska",
+  "customer_name",
+  "column_break_ezsg",
+  "contact_person_name",
+  "column_break_qcno",
+  "mobile_number",
+  "column_break_yafs",
+  "email"
+ ],
+ "fields": [
+  {
+   "fieldname": "task_title",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Task Title",
+   "reqd": 1
+  },
+  {
+   "fieldname": "task_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Task Type",
+   "options": "Team Task Type",
+   "reqd": 1
+  },
+  {
+   "fieldname": "task_priority",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Task Priority",
+   "options": "Low\nNormal\nHigh\nEmergency",
+   "reqd": 1
+  },
+  {
+   "fieldname": "task_status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Task Status",
+   "options": "Pending\nUnder Process\nCompleted\nCancelled\nHold",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_vzjw",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "__user",
+   "fieldname": "created_by",
+   "fieldtype": "Data",
+   "label": "Created By",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "default": "Now",
+   "fieldname": "task_creation_date_time",
+   "fieldtype": "Datetime",
+   "label": "Task Creation Date Time",
+   "read_only": 1
+  },
+  {
+   "fieldname": "assigned_to",
+   "fieldtype": "Link",
+   "label": "Assigned To",
+   "options": "User",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_yhwq",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "task_details",
+   "fieldtype": "Small Text",
+   "label": "Task Details"
+  },
+  {
+   "fieldname": "section_break_cfqh",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "expected_end_date_time",
+   "fieldtype": "Datetime",
+   "label": "Expected End Date Time",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_ydvo",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "completion_date_time",
+   "fieldtype": "Datetime",
+   "label": "Completion Date Time",
+   "read_only": 1
+  },
+  {
+   "fieldname": "task_due_status",
+   "fieldtype": "Select",
+   "label": "Task Due Status",
+   "options": "Open\nOver Due\nHold\nClosed",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_dulp",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "customer_task",
+   "fieldtype": "Check",
+   "label": "Customer Task"
+  },
+  {
+   "fieldname": "section_break_wbrz",
+   "fieldtype": "Section Break"
+  },
+  {
+   "depends_on": "customer_task",
+   "fieldname": "cid",
+   "fieldtype": "Link",
+   "label": "CID",
+   "options": "Customer"
+  },
+  {
+   "fieldname": "column_break_mska",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "customer_task",
+   "fetch_from": "cid.customer_name",
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "label": "Customer Name"
+  },
+  {
+   "fieldname": "column_break_ezsg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "customer_task",
+   "fetch_from": "cid.custom_contact_person",
+   "fieldname": "contact_person_name",
+   "fieldtype": "Data",
+   "label": "Contact Person Name"
+  },
+  {
+   "fieldname": "column_break_qcno",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "customer_task",
+   "fetch_from": "cid.custom_primary_mobile_no",
+   "fieldname": "mobile_number",
+   "fieldtype": "Data",
+   "label": "Mobile Number"
+  },
+  {
+   "fieldname": "column_break_yafs",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "customer_task",
+   "fetch_from": "cid.custom_primary_email",
+   "fieldname": "email",
+   "fieldtype": "Data",
+   "label": "Email"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-06-25 18:10:35.080246",
+ "modified_by": "Administrator",
+ "module": "Lsa",
+ "name": "Team Task",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
