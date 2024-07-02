@@ -109,6 +109,9 @@ def execute(filters=None):
 # Function to retrieve data based on filters
 def get_data(services, filters):
     data = []
+
+    service_masters=frappe.get_all("Customer Chargeable Doctypes")
+    service_masters=[ser.name for ser in service_masters]
     
     # Extract filters
     service_filter = filters.get("service_user")
@@ -245,82 +248,89 @@ def get_data(services, filters):
         service_amount = 0.00
         # Iterate through each service doctype
         # print(customer_services["20130221"])
-        if i.name in customer_services:
-            for service in customer_services[i.name]:
+        if True:
+            for service in service_masters:
                 # Get services for the customer
 
                 description_value = []
                 each_service_amount = 0.00
                 gst_type_gstfile = []
-                # Iterate through each service record
-                for j in customer_services[i.name][service]:
-                    if not(j["description"] is None):
-                        description_list = j["description"].split("-")
-                    else:
-                        description_list=["NA","NA"]
+                master_service_count=0
+                if i.name in customer_services and service in customer_services[i.name]:
+                    # Iterate through each service record
+                    for j in customer_services[i.name][service]:
+                        if not(j["description"] is None):
+                            description_list = j["description"].split("-")
+                        else:
+                            description_list=["NA","NA"]
 
-                    if len(description_list) == 2:
-                        description_value += [f"{description_list[0]}-({description_list[1]})-{j['frequency']}-(Rs {j['current_recurring_fees']})"]
-                    else:
-                        description_value += [f"{description_list[0]}-{j['frequency']}-(Rs {j['current_recurring_fees']})"]
-                    
+                        if len(description_list) == 2:
+                            description_value += [f"{description_list[0]}-({description_list[1]})-{j['frequency']}-(Rs {j['current_recurring_fees']})"]
+                        else:
+                            description_value += [f"{description_list[0]}-{j['frequency']}-(Rs {j['current_recurring_fees']})"]
+                        
+                        if service=="Gstfile":
+                            gst_type_gstfile.append(j["gst_type"])
+                        service_count += 1
+                        if j["annual_fees"]:
+                            each_service_amount += j["annual_fees"]
+
+                        if j["annual_fees"]:
+                            service_amount += j["annual_fees"]
+                        master_service_count+=1
+                
+                
                     if service=="Gstfile":
-                        gst_type_gstfile.append(j["gst_type"])
-                    service_count += 1
-                    if j["annual_fees"]:
-                        each_service_amount += j["annual_fees"]
+                            gst_type_gstfile=[l for l in gst_type_gstfile if not(l is None)]
+                            gst_type_gstfile=", ".join(gst_type_gstfile)
+                            data_row["gst_type"] = gst_type_gstfile
 
-                    if j["annual_fees"]:
-                        service_amount += j["annual_fees"]
-                
-                
-                if service=="Gstfile":
-                        gst_type_gstfile=[l for l in gst_type_gstfile if not(l is None)]
-                        gst_type_gstfile=", ".join(gst_type_gstfile)
-                        data_row["gst_type"] = gst_type_gstfile
-
-                # Set description value for service customer
+                    # Set description value for service customer
 
                 data_row[service + " customer"] = ", \n".join(description_value)
-                data_row[service + " count"] = len(customer_services[i.name][service])
+                data_row[service + " count"] = master_service_count
                 data_row[service + " amount"] = each_service_amount
-
-            service_all=[si.name for si in services]
-
-            for serv in service_all:
-                if serv not in customer_services[i.name]:
-                    data_row[serv + " count"] = 0
-                    data_row[serv + " amount"] = 0.00
-
 
 
             # Set total service count and amount for the customer
             data_row["service_count"] = service_count
             data_row["service_amount"] = service_amount
-            data += [data_row]
             c+=1
+
+        data += [data_row]
     
     # Filter data based on service_user
-    if service_filter == "Customers without Services":
-        filtered_data = [d for d in data if d["service_count"] == 0]
-        data = filtered_data
-    elif service_filter == "Customers with Services":
-        filtered_data = [d for d in data if d["service_count"] != 0]
-        data = filtered_data
-
-    # Filter data based on status and enabled
-    for i in data:
-        if enabled_filter == "All" and status_filter == "All":
-            pass
-        elif enabled_filter == "All":
-            data = [d1 for d1 in data if d1["status"] == status_filter]
-        elif status_filter == "All":
-            data = [d2 for d2 in data if d2["enable"] == enabled_filter]
+    filtered_data=[]
+    for d in data:
+        service=False
+        customer_status=False
+        customer_enabled=False
+        if service_filter and service_filter!="All":
+            if service_filter == "Customers without Services" and d["service_count"] == 0:
+                service=True
+            elif service_filter == "Customers with Services" and d["service_count"] != 0:
+                service=True
         else:
-            data = [d2 for d2 in data if d2["enable"] == enabled_filter]
-            data = [d1 for d1 in data if d1["status"] == status_filter]
+            service=True
+        if status_filter and status_filter!="All":
+            if status_filter==d["status"]:
+                customer_status=True
+        else:
+            customer_status=True
 
-    return data
+        if enabled_filter and enabled_filter!="All":
+            if enabled_filter==d["enable"]:
+                customer_enabled=True
+        else:
+            customer_enabled=True
+        
+        if service and customer_status and customer_enabled:
+            filtered_data.append(d)
+
+    # print(len(filtered_data))
+    return filtered_data
+
+
 
 
 

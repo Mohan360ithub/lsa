@@ -143,6 +143,9 @@ doc_events = {
 
 scheduler_events = {
     "cron":{
+    	"0 1 * * *": [
+            "lsa.lsa.doctype.team_task.team_task.check_overdue_tasks"
+        ],
         "* * * * *":
             [
             #"lsa.pankaj1.cron",

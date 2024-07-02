@@ -3,6 +3,11 @@ import requests
 from frappe import _
 from frappe.utils import today
 from datetime import datetime
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.base import MIMEBase
+from email import encoders
 
 
 @frappe.whitelist()
@@ -622,7 +627,7 @@ def update_linked_doctypes(doc, method):
 
 
 @frappe.whitelist()
-def disable_customer(customer_id):
+def disable_customer(customer_id,disabled):
     try:
         customer_doc=frappe.get_doc("Customer",customer_id)
         master_service_fields = {
@@ -655,7 +660,7 @@ def disable_customer(customer_id):
                     """
             
         count = 1
-        executive_list={'lokesh.bwr@gmail.com', 'khushboo.r@lsaoffice.com', 'latha.st@lsaoffice.com', 'vinay.m@lsaoffice.com', 'Shriramu.ms@lsaoffice.com',"vatsal.k@360ithub.com"}
+        # executive_list={'lokesh.bwr@gmail.com', 'khushboo.r@lsaoffice.com', 'latha.st@lsaoffice.com', 'vinay.m@lsaoffice.com', 'Shriramu.ms@lsaoffice.com',"vatsal.k@360ithub.com"}
         executive_list=[]
         admin_setting_doc = frappe.get_doc("Admin Settings")
         for i in admin_setting_doc.customer_status_change_mail:
@@ -691,6 +696,9 @@ def disable_customer(customer_id):
                     </tbody>
                 </table><br>
         """
+        disabled_status ="Disabled"
+        if disabled=="0":
+            disabled_status="Enabled"
 
         now = datetime.now()
         # Format the datetime in DD-MM-YYYY HH:MM AM/PM
@@ -698,7 +706,7 @@ def disable_customer(customer_id):
         user_full_name = frappe.db.get_value("User", frappe.session.user, "full_name")
 
         subject = f"Customer with CID {customer_id} is disabled"
-        message = f"""
+        html_message = f"""
             <p>Dear LSA Team,<br><br> There are some changes in following customer. Please make a note of it. </p>
             <table style="border-collapse: collapse; width: 60%;">
                 <tr>
@@ -711,7 +719,7 @@ def disable_customer(customer_id):
                 </tr>
                 <tr>
                     <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">Customer Status</td>
-                    <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">Disabled</td>
+                    <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">{disabled_status}</td>
                 </tr>
                 <tr>
                     <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">Modified By</td>
@@ -727,14 +735,39 @@ def disable_customer(customer_id):
             <br><p>Best regards,<br>LSA Office</p>
         """
             
-        frappe.sendmail(
-                # recipients=recipients,  # Use the list of combined email addresses
-                recipients=list(executive_list),
-                subject=subject,
-                message=message
-            )
-        # print(list(executive_list),subject,message)
-        return {"status":True,"message": "Customer disabled successfully","executive_list":list(executive_list)}
+        # frappe.sendmail(
+        #         # recipients=recipients,  # Use the list of combined email addresses
+        #         recipients=list(executive_list),
+        #         subject=subject,
+        #         message=message
+        #     )
+        email_account = frappe.get_doc("Email Account", "LSA Info")
+        sender_email = email_account.email_id
+        sender_password = email_account.get_password()
+
+        # executive_list=["vatsal.k@360ithub.com","laxmi.s@lsaoffice.com"]
+        message = MIMEMultipart()
+        message['From'] = sender_email
+        message['To'] = ",".join(list(executive_list))
+        # message['Cc'] = cc_email
+        message['Subject'] = subject
+        message.attach(MIMEText(html_message, 'html'))
+
+
+        # Connect to the SMTP server and send the email
+        smtp_server = 'smtp-mail.outlook.com'
+        smtp_port = 587
+        with smtplib.SMTP(smtp_server, smtp_port) as server:
+            server.starttls()
+            server.login(sender_email, sender_password)
+            try:
+                # Send email
+                server.sendmail(sender_email, list(executive_list) , message.as_string())
+                return {"status":True,"message": "Customer disabled successfully","executive_list":list(executive_list),"disabled":disabled,"disabled_status":disabled_status}
+            except Exception as er:
+                print(f"Failed to send email. Error: {e}")
+                return {"status":False,"message": f"Failed to disable customer {er}"}
+
     except Exception as e:
         frappe.log_error(message=str(e), title="Failed to disable customer")
         # print(f"{e}")
@@ -744,12 +777,25 @@ def disable_customer(customer_id):
 
  
 @frappe.whitelist()
-def send_status_update_notification(name, new_status, previous_status, reason, customer_email, modified_by, time_of_change, cust_name):
+def send_status_update_notification(cid, new_status, reason):
     try:
         # Fetch the fields from "Recurring Service Pricing"
-        rsp_list= frappe.get_all("Recurring Service Pricing", filters={"customer_id": name,"status":"Approved"})
+        rsp_list= frappe.get_all("Recurring Service Pricing", filters={"customer_id": cid,"status":"Approved"})
+
+        ###########modified by Vatsal start############################
+        customer_doc= frappe.get_doc("Customer",cid)
+        old_status=customer_doc.custom_customer_status_
+        customer_doc.custom_customer_status_= new_status
         
- 
+        new_status_update_record = customer_doc.append('custom_customer_status_history', {})
+        new_status_update_record.modified_by1 = frappe.session.user
+        new_status_update_record.previous_status = old_status
+        new_status_update_record.status_changed_to = new_status
+        new_status_update_record.reason = reason
+        new_status_update_record.time_of_change = datetime.now()
+
+        customer_doc.save()
+        ###########modified by Vatsal End############################
         if rsp_list:
             rsp_docs= frappe.get_doc("Recurring Service Pricing", rsp_list[0].name)
             # print(rsp_docs)
@@ -793,21 +839,21 @@ def send_status_update_notification(name, new_status, previous_status, reason, c
             user_full_name = frappe.db.get_value("User", frappe.session.user, "full_name")
  
             # Define the subject and message of the email
-            subject = f"CID {name} Customer Status Changed from {previous_status} to {new_status}"
-            message = f"""
+            subject = f"CID {customer_doc.name} Customer Status Changed from {old_status} to {new_status}"
+            html_message = f"""
                 <p>Dear LSA Team,<br><br> There are some changes in the status of following customer. Please make a note of it, before maving forward with our services.</p>
                 <table style="border-collapse: collapse; width: 100%;">
                     <tr>
                         <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">Customer ID</td>
-                        <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;"><a href="https://online.lsaoffice.com/app/customer/{name}">{name}</a></td>
+                        <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;"><a href="https://online.lsaoffice.com/app/customer/{customer_doc.name}">{customer_doc.name}</a></td>
                     </tr>
                     <tr>
                         <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">Customer Name</td>
-                        <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;"><a href="https://online.lsaoffice.com/app/customer/{name}">{cust_name}</a></td>
+                        <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;"><a href="https://online.lsaoffice.com/app/customer/{customer_doc.name}">{customer_doc.customer_name}</a></td>
                     </tr>
                     <tr>
                         <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">Customer Status</td>
-                        <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">Changed from {previous_status} to {new_status}</td>
+                        <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">Changed from {old_status} to {new_status}</td>
                     </tr>
                     <tr>
                         <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">Modified By</td>
@@ -832,7 +878,7 @@ def send_status_update_notification(name, new_status, previous_status, reason, c
  
             customer_chargeable = frappe.get_all("Customer Chargeable Doctypes")
             for i in customer_chargeable:
-                master_list = frappe.get_all(i.name, filters={"customer_id": name}, fields=["executive"])
+                master_list = frappe.get_all(i.name, filters={"customer_id": customer_doc.name}, fields=["executive"])
                 for entry in master_list:
                     if entry["executive"]:  # Check if the executive field is not None or empty
                         executive_emails.add(entry["executive"])
@@ -846,9 +892,8 @@ def send_status_update_notification(name, new_status, previous_status, reason, c
 
             # Combine executive emails with hardcoded emails, ensuring no duplicates
             all_emails = executive_emails.union(status_update_mails)
- 
+            # all_emails.add("vatsal.k@360ithub.com")
             # Convert the set back to a list
-            # recipients = list(all_emails)
             recipients = list(all_emails)
             # print(recipients)
             # test_emails = ['srikanth.p_cse2019@svec.edu.in']
@@ -856,22 +901,50 @@ def send_status_update_notification(name, new_status, previous_status, reason, c
             # print("Hellooooooo")
  
             # Send the email
-            frappe.sendmail(
-                # recipients=recipients,  # Use the list of combined email addresses
-                recipients=recipients,
-                subject=subject,
-                message=message
-            )
- 
-            return {"message": "Notification sent successfully!","executive_emails":all_emails}
+            # frappe.sendmail(
+            #     # recipients=recipients,  # Use the list of combined email addresses
+            #     recipients=recipients,
+            #     subject=subject,
+            #     message=message
+            # )
+             ###########modified by Vatsal start############################
+            # recipients = ["mohan@360ithub.com", "vatsal.k@360ithub.com"]
+            email_account = frappe.get_doc("Email Account", "LSA Info")
+            sender_email = email_account.email_id
+            sender_password = email_account.get_password()
+
+            message = MIMEMultipart()
+            message['From'] = sender_email
+            message['To'] = ",".join(recipients)
+            # message['Cc'] = cc_email
+            message['Subject'] = subject
+            message.attach(MIMEText(html_message, 'html'))
+
+
+            # Connect to the SMTP server and send the email
+            smtp_server = 'smtp-mail.outlook.com'
+            smtp_port = 587
+            with smtplib.SMTP(smtp_server, smtp_port) as server:
+                server.starttls()
+                server.login(sender_email, sender_password)
+                try:
+                    # Send email
+                    server.sendmail(sender_email, recipients , message.as_string())
+                    return {"status":True,"message": "Notification sent successfully!","executive_emails":all_emails}
+                except Exception as er:
+                    print(f"Failed to send email. Error: {e}")
+                    return {"status":False,"message": f"Failed to send notification:{er}"}
+             ###########modified by Vatsal end############################
         else:
-            frappe.log_error(message=f"No RSP Exist for the customer {name}", title="Failed to send status update notification")
+            frappe.log_error(message=f"No RSP Exist for the customer {customer_doc.name}", title="Failed to send status update notification")
+            return {"status":False,"message": f"Failed to send notification:No RSP Exist for the customer {customer_doc.name}"}
     except Exception as e:
         # print(e)
         frappe.log_error(message=str(e), title="Failed to send status update notification")
-        return {"message": "Failed to send notification"}
+        return {"status":False,"message": f"Failed to send notification:{e}"}
 
 #######################################Srikanth Code Start#####################################################################
+
 
 
 

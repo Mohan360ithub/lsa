@@ -337,3 +337,67 @@ def update_payment_entry_linked_doc(doc, method):
             # print(e)
             frappe.logger().error(f"Error Triggering status change for Payment Entry {doc.name}: {e}")
 
+
+
+@frappe.whitelist()
+def get_unreconciled_bnk_transactions():
+    try:
+        current_date = datetime.now()
+        first_day_of_current_month = datetime(current_date.year, current_date.month, 1)
+
+        # last_day_of_previous_month = first_day_of_current_month - timedelta(days=1)
+
+                # Get the employee document
+        bnk_tran_list = frappe.get_all('Bank Transaction', 
+                                      filters={"unallocated_amount":(">",0.00),
+                                               "docstatus":1,
+                                               "date":("<",first_day_of_current_month)},
+                                      fields=["date","bank_account","deposit","withdrawal"]
+                                      )
+        bnk_tran_map={}
+        for bnk_tran in bnk_tran_list:
+            if bnk_tran.bank_account not in bnk_tran_map:
+                bnk_tran_map[bnk_tran.bank_account]={"count":1,
+                                                     "deposit":bnk_tran.deposit,
+                                                     "withdrawal":bnk_tran.withdrawal,
+                                                     "count_this_month":0,
+                                                     "deposit_this_month":0,
+                                                     "withdrawal_this_month":0}
+            else:
+                bnk_tran_map[bnk_tran.bank_account]["count"]+=1
+                bnk_tran_map[bnk_tran.bank_account]["deposit"]+=bnk_tran.deposit
+                bnk_tran_map[bnk_tran.bank_account]["withdrawal"]+=bnk_tran.withdrawal
+
+
+        bnk_tran_list_current_month = frappe.get_all('Bank Transaction', 
+                                filters={"unallocated_amount":(">",0.00),
+                                        "docstatus":1,
+                                        "date":(">=",first_day_of_current_month)},
+                                fields=["date","bank_account","deposit","withdrawal"]
+                                )
+        for bnk_tran_this_month in bnk_tran_list_current_month:
+            if bnk_tran_this_month.bank_account not in bnk_tran_map:
+                bnk_tran_map[bnk_tran_this_month.bank_account]={"count":0,
+                                                                "deposit":0,
+                                                                "withdrawal":0,
+                                                                "count_this_month":1,
+                                                                "deposit_this_month":bnk_tran_this_month.deposit,
+                                                                "withdrawal_this_month":bnk_tran_this_month.withdrawal}
+            else:
+                bnk_tran_map[bnk_tran_this_month.bank_account]["count_this_month"]+=1
+                bnk_tran_map[bnk_tran_this_month.bank_account]["deposit_this_month"]+=bnk_tran_this_month.deposit
+                bnk_tran_map[bnk_tran_this_month.bank_account]["withdrawal_this_month"]+=bnk_tran_this_month.withdrawal
+
+        return {
+            "status": True,
+            "bnk_tran_map": bnk_tran_map
+        }
+
+    except Exception as e:
+        # Log the error
+        frappe.log_error(message=str(e), title="Failed to get bank transactions details")
+        
+        return {
+            "status": False,
+            "msg": f"Failed to get bank transactions details: {str(e)}"
+        }

@@ -281,6 +281,7 @@ def get_data(filters):
                             if next_followup_date == "" or this_followup_date >= next_followup_date:
                                 next_followup_date = this_followup_date
                 data_row["next_followup_date"] = next_followup_date
+
             customer_filter=[0,1]
             if filters.get("customer_enabled"):
                 if filters.get("customer_enabled")=="Customer Enabled":
@@ -288,9 +289,16 @@ def get_data(filters):
                 elif filters.get("customer_enabled")=="Customer Disabled":
                     customer_filter=[1]
 
+            customer_status_filter="ACTIVE,ON NOTICE,HOLD"
+            if filters.get("custom_customer_status_"):
+                customer_status_filter=filters.get("custom_customer_status_")
+                
+
             if filters.get("custom_payment_status"):
                 # if payment_status in filters.get("custom_payment_status") and cu_s[so.customer]["disabled"]==0:
-                if payment_status in filters.get("custom_payment_status") and cu_s[so.customer]["disabled"] in customer_filter:
+                if payment_status in filters.get("custom_payment_status") and \
+                    cu_s[so.customer]["disabled"] in customer_filter and \
+                    cu_s[so.customer]["custom_customer_status_"] in customer_status_filter :
                     if filters.get("sales_invoice"):
                         if filters.get("sales_invoice") =="Yes" and data_row["si_status"] == "Yes":
                             data += [data_row]
@@ -302,6 +310,7 @@ def get_data(filters):
                 data += [data_row]
 
     return data
+
 
 
 

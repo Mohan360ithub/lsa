@@ -102,6 +102,23 @@ def get_employee_for_user():
     return None
 
 
+# @frappe.whitelist()
+# def get_leave_data():
+#     today = datetime.strptime(frappe.utils.nowdate(), "%Y-%m-%d")
+#     year = today.year
+#     from_date = datetime(year, 1, 1)
+#     to_date = datetime(year, 12, 31 )
+
+#     # leave_types = get_leave_types()
+#     leave_types = ['Leave Without Pay', 'Compensatory Off',  'Privilege Leave', 'Sick Leave', 'Special Leave']
+
+#     active_employees = get_employee_for_user()
+
+#     precision = cint(frappe.db.get_single_value("System Settings", "float_precision"))
+#     # consolidate_leave_types = len(active_employees) > 1 and filters.consolidate_leave_types
+#     row = None
+
+
 @frappe.whitelist()
 def get_leave_data():
     today = datetime.strptime(frappe.utils.nowdate(), "%Y-%m-%d")
@@ -109,14 +126,18 @@ def get_leave_data():
     from_date = datetime(year, 1, 1)
     to_date = datetime(year, 12, 31 )
 
-    # leave_types = get_leave_types()
-    leave_types = ['Leave Without Pay', 'Compensatory Off',  'Privilege Leave', 'Sick Leave', 'Special Leave']
-
     active_employees = get_employee_for_user()
+    return get_employee_leave_data(active_employees,to_date,from_date)
 
+
+def get_employee_leave_data(active_employees,to_date,from_date):
+    
     precision = cint(frappe.db.get_single_value("System Settings", "float_precision"))
     # consolidate_leave_types = len(active_employees) > 1 and filters.consolidate_leave_types
+    leave_types = ['Leave Without Pay', 'Compensatory Off',  'Privilege Leave', 'Sick Leave', 'Special Leave']
     row = None
+
+    data = []
 
     data = []
     if active_employees:
@@ -442,4 +463,154 @@ def get_notapproved_leave_applications_for_approver():
 
 ###################################################################################
 
+
+@frappe.whitelist()
+def update_appraisal(employee, updated_ctc, from_date, remark, sal_structure,appraisal_cycle):
+    # try:
+        # Get the employee document
+        employee_doc = frappe.get_doc('Employee', employee)
+        
+        new_appraisal_record = employee_doc.append('custom_appraisal_table', {})
+        new_appraisal_record.from_date = from_date
+        new_appraisal_record.date = date.today()
+        new_appraisal_record.ctc = updated_ctc
+        new_appraisal_record.old_ctc = employee_doc.ctc
+        new_appraisal_record.remark = remark
+        new_appraisal_record.created_by = frappe.session.user
+        new_appraisal_record.appraisal_cycle = appraisal_cycle
+        new_appraisal_record.salary_structure = sal_structure
+        if employee_doc.ctc:
+            new_appraisal_record.increment = round((float(updated_ctc) - employee_doc.ctc) / employee_doc.ctc * 100, 1)
+        
+        
+        appraisal_cycle_validation = frappe.get_all('Appraisal Cycle',
+                                                    filters={"name":appraisal_cycle,
+                                                    "start_date":("<=",from_date),
+                                                    "end_date":(">=",from_date),},
+                                                    fields=["name","start_date","end_date"])
+        appraisal_cycle_validation = [ap_cy.name for ap_cy in appraisal_cycle_validation]
+        if appraisal_cycle not in appraisal_cycle_validation:
+             frappe.throw("Invalid from date {from_date} for Appraisal cycle {appraisal_cycle}")
+             
+
+        appraisal_assignment = frappe.get_all('Appraisal',
+                                              filters={"employee":employee_doc.name,
+                                                       "docstatus":0},
+                                                )
+        if appraisal_assignment:
+             return {
+                    "status": False,
+                    "msg": "An Open Appraisal already present for the Employee"
+                }
+            # Log the appraisal details
+        appraisal_assignment = frappe.get_doc({
+            'doctype': 'Appraisal',
+            'employee': employee_doc.name,
+            'appraisal_cycle': appraisal_cycle,
+            "company":"LOKESH SANKHALA AND ASSOCIATES",
+            "appraisal_template":"LSA Appraisal Template",
+        })
+        appraisal_assignment.insert()
+        employee_doc.save()
+    
+        return {
+            "status": True,
+            "msg": "Appraisal created, pending for Approval"
+        }
+
+    # except Exception as e:
+    #     # Log the error
+    #     frappe.log_error(message=str(e), title="Failed to add Appraisal record")
+        
+    #     return {
+    #         "status": False,
+    #         "msg": f"Failed to add Appraisal record: {str(e)}"
+    #     }
+
+@frappe.whitelist()
+def appraisal_submission(emp_id):
+    # try:
+        employee_doc = frappe.get_doc('Employee', emp_id)
+        from_date=None
+        sal_structure=None
+        old_app=None
+        new_app=None
+        new_ctc=None
+        for ap in employee_doc.custom_appraisal_table:
+            if not ap.approved_by:
+                new_app=ap
+                sal_structure=ap.salary_structure
+                from_date=ap.from_date
+                new_ctc=ap.ctc
+            if ap.approved_by and not ap.to_date:
+                old_app=ap
+            # print(ap.ctc,ap.approved_by,ap.to_date)
+        if not new_app:
+             frappe.throw("Add an Appraisal record in employee before revising CTC")
+        to_date = from_date - timedelta(days=1)
+        print(new_app.appraisal_cycle)
+
+
+        appraisal_list=frappe.get_all("Appraisal",
+                                      filters={"appraisal_cycle":new_app.appraisal_cycle,
+                                               "employee":employee_doc.name,
+                                               "docstatus":1})
+        print(appraisal_list)
+        if appraisal_list:
+            frappe.throw("Already Approved Appraisal existsfor the appraisal cycle")
+            return  {
+                        "status": False,
+                        "msg": f"Already Approved Appraisal existsfor the appraisal cycle"
+                    }
+        
+        appraisal_list=frappe.get_all("Appraisal",
+                                      filters={"appraisal_cycle":new_app.appraisal_cycle,
+                                               "employee":employee_doc.name,
+                                               "docstatus":0})
+        print(appraisal_list)
+        if not appraisal_list:
+            frappe.throw("Open Appraisal for employee doesnot exists, create Appraisal first")
+            return  {
+                        "status": False,
+                        "msg": f"Open Appraisal for employee doesnot exists, create Appraisal first"
+                    }
+        appraisal_doc=frappe.get_doc("Appraisal",appraisal_list[0].name)
+        appraisal_doc.submit()
+
+        # Assign the salary structure
+        salary_structure_assignment = frappe.get_doc({
+            'doctype': 'Salary Structure Assignment',
+            'employee': employee_doc.employee,
+            'salary_structure': sal_structure,
+            'from_date': from_date,
+            "base":round(new_ctc/12,2),
+            "company":"LOKESH SANKHALA AND ASSOCIATES",
+        })
+        salary_structure_assignment.insert()
+        salary_structure_assignment.submit()
+
+        if old_app:
+            old_app.to_date=to_date
+
+        new_app.approved_by=frappe.session.user
+
+
+        employee_doc.ctc = round(float(new_ctc),2)
+        employee_doc.custom_monthly_salary = round(float(new_ctc)/12,2)
+        employee_doc.save()
+        # print("Executing w/o exception")
+
+        return {
+                "status": True,
+                "msg": "Appraisal Submitted and CTC has been revised"
+            }
+
+    # except Exception as e:
+    #     # Log the error
+    #     frappe.log_error(message=str(e), title="Failed to submit appraisal and assign salary structure")
+    #     print("Executing with exception",e)
+        # return {
+        #     "status": False,
+        #     "msg": f"Failed to submit appraisal and assign salary structure: {str(e)}"
+        # }
 

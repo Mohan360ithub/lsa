@@ -17,7 +17,10 @@
   "leave_application_mails",
   "global_leave_approver",
   "team_ticket_related_section",
-  "team_ticket_cc_mails"
+  "team_ticket_cc_mails",
+  "appraisal_settings_section",
+  "appraisal_creation",
+  "appraisal_approval"
  ],
  "fields": [
   {
@@ -85,12 +88,29 @@
    "fieldtype": "Table MultiSelect",
    "label": "Team Ticket CC Mails",
    "options": "Multiselect User"
+  },
+  {
+   "fieldname": "appraisal_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Appraisal Settings"
+  },
+  {
+   "fieldname": "appraisal_creation",
+   "fieldtype": "Table MultiSelect",
+   "label": "Appraisal Creation",
+   "options": "Multiselect User"
+  },
+  {
+   "fieldname": "appraisal_approval",
+   "fieldtype": "Table MultiSelect",
+   "label": "Appraisal Approval",
+   "options": "Multiselect User"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-06-21 11:32:03.884042",
+ "modified": "2024-07-02 15:08:48.737901",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Admin Settings",

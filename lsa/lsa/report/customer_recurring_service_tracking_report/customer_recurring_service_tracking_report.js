@@ -3,6 +3,13 @@
 
 frappe.query_reports["Customer Recurring Service Tracking Report"] = {
     "filters": [
+   		{
+			fieldname: "enabled",
+			label: __("Enabled"),
+			fieldtype: "Select",
+			options:["All","Yes","No"],
+			default: "Yes",
+		},
 		{
 			fieldname: "service_user",
 			label: __("Customer with/without Services"),
@@ -14,15 +21,9 @@ frappe.query_reports["Customer Recurring Service Tracking Report"] = {
 			fieldname: "status",
 			label: __("Status"),
 			fieldtype: "Select",
-			options:["All","ACTIVE","HOLD"],
+			options:["All","ACTIVE","ON NOTICE","HOLD"],
 			default: "All",
 		},		
-		{
-			fieldname: "enabled",
-			label: __("Enabled"),
-			fieldtype: "Select",
-			options:["All","Yes","No"],
-			default: "Yes",
-		},		   
+				   
     ]
 };

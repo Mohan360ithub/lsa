@@ -27,14 +27,15 @@ def check_overdue_tasks():
     overdue_tasks = frappe.get_all('Team Task',
                                     filters={
                                         # 'completion_date_time': ('<', now),
-                                        'expected_end_date_time': ('>', now),
+                                        'expected_end_date_time': ('<', now), #### Less than 25 < 26
                                         'task_status': ['in', ['Pending', 'Under Process']]  # Corrected syntax for 'in' operator
                                     },
                                     fields=['name'])
     print(overdue_tasks)
     for task in overdue_tasks:
         doc = frappe.get_doc('Team Task', task['name'])  # Access 'name' key from task dictionary
-        print('dddddddddddddd',doc)
+        #print('dddddddddddddd',doc)
         # if doc.task_due_status != 'Over Due':
         doc.task_due_status = 'Over Due'
         doc.save()
+

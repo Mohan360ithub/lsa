@@ -14,13 +14,6 @@
   "created_by",
   "task_creation_date_time",
   "assigned_to",
-  "section_break_yhwq",
-  "task_details",
-  "section_break_cfqh",
-  "expected_end_date_time",
-  "column_break_ydvo",
-  "completion_date_time",
-  "task_due_status",
   "section_break_dulp",
   "customer_task",
   "section_break_wbrz",
@@ -32,7 +25,14 @@
   "column_break_qcno",
   "mobile_number",
   "column_break_yafs",
-  "email"
+  "email",
+  "section_break_yhwq",
+  "task_details",
+  "section_break_cfqh",
+  "expected_end_date_time",
+  "column_break_ydvo",
+  "completion_date_time",
+  "task_due_status"
  ],
  "fields": [
   {
@@ -196,7 +196,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-06-25 18:10:35.080246",
+ "modified": "2024-06-29 18:07:28.062653",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Team Task",

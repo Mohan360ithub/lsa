@@ -21,11 +21,11 @@ def get_employees_with_absent():
             employees_dict[emp.name] = emp.employee_name
         
         today = date.today()
-        # today = datetime.strptime("2024-05-15", "%Y-%m-%d")
 
-
-        # Calculate the start date of the current month
-        start_date = date(today.year, today.month, 1)
+        if today.month == 1:
+            start_date = date(today.year - 1, 12, 1)
+        else:
+            start_date = date(today.year, today.month - 1, 1)
 
         # Calculate the end date of the current month
         if today.month == 12:
@@ -152,4 +152,5 @@ def get_notapproved_leave_applications():
         app["leave_approver_name"]=user.full_name
     return leave_applications
 ######################################Vatsal Modified srikanth Code End###########################################################
+
 
