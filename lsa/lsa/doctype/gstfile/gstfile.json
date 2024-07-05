@@ -516,13 +516,12 @@
    "fieldtype": "Check",
    "in_filter": 1,
    "in_standard_filter": 1,
-   "label": "Non-Compliant",
-   "read_only": 1
+   "label": "Non-Compliant"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-06-24 11:31:33.465654",
+ "modified": "2024-07-03 16:00:22.538579",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Gstfile",

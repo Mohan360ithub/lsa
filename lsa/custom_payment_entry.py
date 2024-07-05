@@ -11,7 +11,7 @@ from email.mime.base import MIMEBase
 from email import encoders
 
 
-########################################Single Sales Order template with PDF###########################################################
+########################################Single PE template with PDF###########################################################
 
 @frappe.whitelist(allow_guest=True)
 def whatsapp_pe_template(docname,ref_date,customer,new_mobile=None):
@@ -19,7 +19,7 @@ def whatsapp_pe_template(docname,ref_date,customer,new_mobile=None):
     if not new_mobile:
         customer_doc = frappe.get_doc('Customer', customer)
         new_mobile = customer_doc.custom_primary_mobile_no
-        new_mobile="9098543046"
+        #new_mobile="9098543046"
 
     whatsapp_demo = frappe.get_all('WhatsApp Instance',filters={'module':'Accounts','connection_status':1,'active':1})
     if whatsapp_demo:
@@ -133,7 +133,7 @@ def pe_mail(pe_id, customer, customer_name=None, recipient=None, subject=None):
     if not recipient:
         customer_doc = frappe.get_doc('Customer', customer)
         recipient = customer_doc.custom_primary_email
-        recipient="360ithub.developers@gmail.com"
+        #recipient="vatsal.k@360ithub.com"
         customer_name = customer_doc.customer_name
 
     if not subject:
@@ -351,7 +351,8 @@ def get_unreconciled_bnk_transactions():
         bnk_tran_list = frappe.get_all('Bank Transaction', 
                                       filters={"unallocated_amount":(">",0.00),
                                                "docstatus":1,
-                                               "date":("<",first_day_of_current_month)},
+                                            #    "date":("<",first_day_of_current_month),
+                                               },
                                       fields=["date","bank_account","deposit","withdrawal"]
                                       )
         bnk_tran_map={}

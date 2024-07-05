@@ -10,6 +10,7 @@ from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
 from frappe.utils.print_format import download_pdf
+from lsa.custom_mail import single_mail
 
 
 
@@ -962,13 +963,27 @@ def check_and_send_email(recipients, subject, message):
         return {"status":False,"msg":f"Error sending mail: {e}"}
  
 def send_email(recipients, subject, message):
-    frappe.sendmail(
-        recipients=recipients.split(','),
-        subject=subject,
-        message=message,
-    )
-    frappe.db.commit()
- 
+    # frappe.sendmail(
+    #     recipients=recipients.split(','),
+    #     subject=subject,
+    #     message=message,
+    # )
+    # frappe.db.commit()
+    ########################################################## modified by Vatsal #################################################
+    recipients=recipients.split(',')
+    resp=single_mail("LSA Accounts",recipients,subject,message)
+    if not resp["status"]:
+        msg=resp['msg']
+        print(f"Failed to send notification: {msg}")
+        frappe.log_error(message=f"Failed to send mail for service master {subject}", title=f"Failed to send mail for service master {subject}")
+        return {"status":False,"msg": f"Failed to send mail for service master {subject}"}
+    
+    return {"status":True,"msg": "Mail sent successfully!"}
+
+    ########################################################## modified by Vatsal #################################################
+
+
 
 #################################################################Srikanth Code End####################################################
+
 

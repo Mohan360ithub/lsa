@@ -335,7 +335,6 @@ def render_payment_success_page(final_amount,razorpay_payment_link_id):
         </head>
         <body>
             <h1>Payment Successful</h1>
-            <p>Transaction: {razorpay_payment_link_id}</p>
             <p>Amount: {final_amount}</p>
             
             <!-- Add any additional information you want to display -->
@@ -489,9 +488,14 @@ def create_it_assessee_manual_record(yearly_report, current_form_name):
 
 
 
-
 @frappe.whitelist()
-def fetch_services(c_id=None):
+def fetch_services(c_id=None,frequency=None):
+    freq_dict={ "All":"M,Q,Y","Monthly":"M","Quarterly":"Q","Yearly":"Y"}
+    
+    all_services = frappe.get_all("Customer Chargeable Doctypes")
+    master_service_filter={'customer_id': c_id,
+                           "enabled":1,
+                           "frequency":("in",freq_dict[frequency])}
     all_services = frappe.get_all("Customer Chargeable Doctypes")
     c_services=[]
     for service in all_services:
@@ -500,8 +504,8 @@ def fetch_services(c_id=None):
             # print(service["name"])
         c_services_n= (frappe.get_all(
             service["name"], 
-            filters={'customer_id': c_id,"enabled":1},
-            fields=["name","service_name","hsn_code","description","customer_id","current_recurring_fees"]))
+            filters = master_service_filter,
+            fields = ["name","service_name","hsn_code","description","customer_id","current_recurring_fees"]))
         c_services+=list(c_services_n)
             # for c_service in c_services_n:
             #   pass
@@ -958,6 +962,7 @@ accounts@lsaoffice.com'''
 
 
 ####################################################################################################################
+
 
 
 

@@ -4,6 +4,7 @@
 import frappe
 from frappe.model.document import Document
 from datetime import datetime
+from lsa.custom_mail import single_mail
 
 
 class TeamTicket(Document):
@@ -29,8 +30,6 @@ class TeamTicket(Document):
 		for i in admin_setting_doc.team_ticket_cc_mails:
 			ticket_manager_list.add(i.user)
 		ticket_manager_list = list(ticket_manager_list)
-
-		
 		ticket_notification(doc,ticket_executive_list,ticket_manager_list,sub_category_doc.sub_category)
 
 
@@ -71,17 +70,25 @@ def ticket_notification(doc,ticket_executive_list,ticket_manager_list,sub_catego
             <p>Best regards,<br>LSA Office</p>
         """
 
-        frappe.sendmail(
-            # recipients=recipients,  # Use the list of combined email addresses
-            recipients=ticket_executive_list,
-			cc=ticket_manager_list,
-            subject=subject,
-            message=message
-        )
+        # frappe.sendmail(
+        #     # recipients=recipients,  # Use the list of combined email addresses
+        #     recipients=ticket_executive_list,
+		# 	cc=ticket_manager_list,
+        #     subject=subject,
+        #     message=message
+        # )
+        resp=single_mail("LSA Accounts",ticket_executive_list,subject,message,ticket_manager_list)
+        if not resp["status"]:
+            msg=resp['msg']
+            print(f"Failed to send Team Ticket notification: {msg}")
+            frappe.log_error(message=f"Failed to send mail for Team Ticket notification {doc.name}", title=f"Failed to send mail for Team Ticket notification {doc.name}")
+            return {"status":False,"msg": f"Failed to send mail for to send Team Ticket notification {doc.name}"}
+        
         # print(list(executive_list), subject, message)
         return {"status": True, "message": "Notified for Ticket Successfully"}
     except Exception as e:
         frappe.log_error(message=str(e), title="Failed to notified for Ticket raised")
         # print(f"{e}")
         return {"status": False, "message": f"Failed to notified for Ticket raised {e}"}
+
 

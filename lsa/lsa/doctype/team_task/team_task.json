@@ -98,7 +98,7 @@
   },
   {
    "fieldname": "task_details",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "label": "Task Details"
   },
   {
@@ -196,7 +196,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-06-29 18:07:28.062653",
+ "modified": "2024-07-04 13:27:56.600402",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Team Task",

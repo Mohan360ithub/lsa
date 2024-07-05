@@ -36,7 +36,7 @@ frappe.query_reports["Sales Order Custom Report(With Sales Invoice)"] = {
 			label: __("Customer Status"),
 			fieldtype: "MultiSelect",  // Change fieldtype to "MultiSelect" for multi-select filter
 			options: ["ACTIVE","ON NOTICE","HOLD"],
-			default: "ACTIVE,ON NOTICE",
+			//default: "ACTIVE,ON NOTICE",
 		},
 		{
 			fieldname: "sales_invoice",

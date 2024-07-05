@@ -1,6 +1,6 @@
 import frappe
 from datetime import date,datetime,timedelta,time
-
+from lsa.custom_mail import single_mail
 
 @frappe.whitelist()
 def checkin_out_for_missed_logs():
@@ -61,22 +61,36 @@ def apply_for_leave(name):
 
         cc_recipients=leave_approvers(leave_application.employee)["cc_recipients"]
 
-        recipients = leave_application.custom_employee_mail_id
+        recipient = leave_application.custom_employee_mail_id
         subject = "Leave Application Submitted"
         message = f"Dear {leave_application.employee_name},<br><br>Your leave application from {leave_application.from_date} to {leave_application.to_date} has been submitted successfully. If you have any questions, please contact HR."
         
  
         # Send the email
-        frappe.sendmail(
-            recipients=recipients,
-            cc=cc_recipients,
-            subject=subject,
-            message=message
-        )
+        # frappe.sendmail(
+        #     recipient=recipient,
+        #     cc=cc_recipients,
+        #     subject=subject,
+        #     message=message
+        # )
+
+
+        ########################################################## modified by Vatsal #################################################
+        recipients=[recipient]
+        resp=single_mail("LSA HR",recipients,subject,message,cc_recipients)
+        if not resp["status"]:
+            msg=resp['msg']
+            print(f"Failed to send notification: {msg}")
+            frappe.log_error(message=f"Failed to send notification for leave application {leave_application.name} {msg}", title="Failed to send leave application notification")
+            return {"status":False,"msg": f"Failed to send notification: {msg}"}
+        
+        return {"status":True,"msg": "Mail sent successfully!"}
+
+        ########################################################## modified by Vatsal #################################################
     except Exception as e:
-        frappe.msgprint(f'{e}')
-    # Mark the leave application as applied
-    # leave_application.db_set('leave_applied', 1)
+        print(f"Failed to send notification: {e}")
+        frappe.log_error(message=f"Failed to send notification for leave application {e}", title="Failed to send leave application notification")
+        return {"status":False,"msg": f"Failed to send notification: {e}"}
  
 @frappe.whitelist()
 def cancel_leave(name):
@@ -90,26 +104,38 @@ def cancel_leave(name):
             subject = "Leave Application Cancelled"
             message = f"Dear {leave_application_doc.employee_name},<br><br>Your leave application from {leave_application_doc.from_date} to {leave_application_doc.to_date} has been cancelled. If you have any questions, please contact HR."
             
-            recipients = leave_application_doc.custom_employee_mail_id
+            recipient = leave_application_doc.custom_employee_mail_id
             
             leave_application_doc.status='Cancelled'
  
             # Send the email
-            frappe.sendmail(
-                recipients=recipients,
-                cc=cc_recipients,
-                subject=subject,
-                message=message
-            )
+            # frappe.sendmail(
+            #     recipient=recipient,
+            #     cc=cc_recipients,
+            #     subject=subject,
+            #     message=message
+            # )
+
+            ########################################################## modified by Vatsal #################################################
+            recipients=[recipient]
+            resp=single_mail("LSA HR",recipients,subject,message,cc_recipients)
+            if not resp["status"]:
+                msg=resp['msg']
+                print(f"Failed to send notification: {msg}")
+                frappe.log_error(message=f"Failed to send notification for leave cancellation {leave_application_doc.name} {msg}", title="Failed to send leave cancellation notification")
+                return {"status":False,"msg": f"Failed to send notification: {msg}"}
+            
+            
+
+            ########################################################## modified by Vatsal #################################################
             leave_application_doc.save()
             
-            return {'msg':"Cancelled Succesfully"}
+            return {"status":True,"msg": "Leave cancellation mail sent successfully!"}
     except Exception as e:
-        frappe.msgprint(f'{e}')
-        return {'msg':f'{e}'}
+        print(f"Failed to send notification: {e}")
+        frappe.log_error(message=f"Failed to send notification for leave cancellation {e}", title="Failed to send leave application notification")
+        return {"status":False,'msg':f'Failed to send notification for leave cancellation: {e}'}
  
-    # Mark the leave application as not applied
-    # leave_application.db_set('leave_applied', 0)
 
 #################################### Srikanths Code End ######################################
 
@@ -126,20 +152,31 @@ def leave_action(name,approved_by):
             subject = f"Leave Application {leave_application_doc.status}"
             message = f"Dear {leave_application_doc.employee_name},<br><br>Your leave application from {leave_application_doc.from_date} to {leave_application_doc.to_date} has been {leave_application_doc.status} by {user.full_name}. If you have any questions, please contact HR."
             
-            recipients = leave_application_doc.custom_employee_mail_id
+            recipient = leave_application_doc.custom_employee_mail_id
  
             # Send the email
-            frappe.sendmail(
-                recipients=recipients,
-                cc=cc_recipients,
-                subject=subject,
-                message=message
-            )
+            # frappe.sendmail(
+            #     recipient=recipient,
+            #     cc=cc_recipients,
+            #     subject=subject,
+            #     message=message
+            # )
+            ########################################################## modified by Vatsal #################################################
+            recipients=[recipient]
+            resp=single_mail("LSA HR",recipients,subject,message,cc_recipients)
+            if not resp["status"]:
+                msg=resp['msg']
+                print(f"Failed to send notification: {msg}")
+                frappe.log_error(message=f"Failed to send notification for leave action {leave_application_doc.name} {msg}", title="Failed to send leave action notification")
+                return {"status":False,"msg": f"Failed to send notification: {msg}"}
+            ########################################################## modified by Vatsal #################################################
+
             
-            return {"status":True,'msg':"Submitted Succesfully"}
+            return {"status":True,"msg": "Leave Action mail sent successfully!"}
     except Exception as e:
-        # frappe.msgprint(f'{e}')
-        return {"status":False,'msg':f'{e}'}
+        print(f"Failed to send notification: {e}")
+        frappe.log_error(message=f"Failed to send notification for leave action {e}", title="Failed to send leave action notification")
+        return {"status":False,'msg':f'Failed to send notification for leave action: {e}'}
 
 
 @frappe.whitelist()
@@ -321,5 +358,6 @@ def create_log(emp_id,location,log_type):
     except Exception as e:
         # frappe.msgprint(f'{e}')
         return {"status":False,'msg':f'{e}'}
+
 
 

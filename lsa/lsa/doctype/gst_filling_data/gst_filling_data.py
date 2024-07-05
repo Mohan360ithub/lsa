@@ -116,7 +116,7 @@ class GstFillingData(Document):
                                                 },)
                 if not gst_yearly_summary_data:
                     gstfile_doc = frappe.get_doc("Gstfile", doc.gstfile)
-                    gstfile_doc.non_compliant = 1
+                    gstfile_doc.non_compliant = 0
                     gstfile_doc.save()
                         
             elif doc.submitted ==0 and old_doc.submitted==1:

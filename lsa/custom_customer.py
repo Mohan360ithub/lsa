@@ -765,7 +765,7 @@ def disable_customer(customer_id,disabled):
                 server.sendmail(sender_email, list(executive_list) , message.as_string())
                 return {"status":True,"message": "Customer disabled successfully","executive_list":list(executive_list),"disabled":disabled,"disabled_status":disabled_status}
             except Exception as er:
-                print(f"Failed to send email. Error: {e}")
+                print(f"Failed to send email. Error: {er}")
                 return {"status":False,"message": f"Failed to disable customer {er}"}
 
     except Exception as e:
