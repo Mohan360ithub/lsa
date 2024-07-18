@@ -24,7 +24,7 @@ def execute(filters=None):
         {"label": "Executive Name", "fieldname": "executive_name", "fieldtype": "Data", "width": 100, },
         
         {"label": "Service Name", "fieldname": "service_name", "fieldtype": "Data", "width": 100, },
-        {"label": "File ID", "fieldname": "file_id", "fieldtype": "Data", "width": 100, },
+        {"label": "File ID", "fieldname": "file_id", "fieldtype": "HTML", "width": 100, },
         {"label": "File Type", "fieldname": "file_type", "fieldtype": "Data", "width": 100, },
         
         {"label": "Go To file", "fieldname": "go_to_file", "fieldtype": "HTML", "width": 90, },
@@ -134,8 +134,11 @@ def customer_services(filters):
                                     fields=master_service_fields[service.name][1],
                                     filters=advance_filter
                                     )
+        slug_service="-".join([se.lower() for se in service.name.split(" ")])
         if not(service_name) or service_name==service.name:
             for customer_service in customer_services:
+                file_link=f'<a href = "https://online.lsaoffice.com/app/{slug_service}/{customer_service[master_service_fields[service.name][1][0]]}"> {customer_service[master_service_fields[service.name][1][0]]} </a>'
+                
                 cid=customer_service["customer_id"]
                 data_row = {
                     "customer_id": cid,
@@ -151,7 +154,7 @@ def customer_services(filters):
                     "custom_customer_status_":custome_map[cid]["custom_customer_status_"],
 
                     "service_name":service.name,
-                    "file_id":customer_service[master_service_fields[service.name][1][0]],
+                    "file_id":file_link,
                     "contact_name":customer_service[master_service_fields[service.name][1][2]],
                     "user_name":customer_service[master_service_fields[service.name][1][4]],
                     "password":customer_service[master_service_fields[service.name][1][5]],
@@ -201,10 +204,23 @@ def erp_last_checkin(service,new_exe,old_exe=None):
         if not service_masters_list:
             return {"status":False,"msg":f"No record found in Service Master {service}"}
     try:
+        
         for serv in service_masters_list:
+            
             service_masters_doc = frappe.get_doc(service,serv.name)
             service_masters_doc.executive=new_exe
             service_masters_doc.save()
+
+            service_assignment_doc = frappe.new_doc('Service Executive Assignment')
+            service_assignment_doc.customer_id = service_masters_doc.customer_id
+            service_assignment_doc.service_master = service
+            service_assignment_doc.service_id = serv.name
+            service_assignment_doc.old_executive = old_exe
+            service_assignment_doc.new_executive = new_exe
+            service_assignment_doc.assigned_by = frappe.session.user
+            service_assignment_doc.insert()
+            frappe.db.commit()
+
         return {"status":True,"msg":f"Reassigning of executive for {service} from {old_exe} to {new_exe} done Successfully!"}
     except Exception as er:
         return {"status":False,"msg":f"Error reassigning executive for {service} from {old_exe} to {new_exe}: {er}"}

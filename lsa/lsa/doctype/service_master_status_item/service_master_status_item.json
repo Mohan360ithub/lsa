@@ -1,0 +1,56 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-07-10 12:44:06.207035",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "modified_by1",
+  "previous_status",
+  "status_changed_to",
+  "reason",
+  "time_of_change"
+ ],
+ "fields": [
+  {
+   "fieldname": "modified_by1",
+   "fieldtype": "Data",
+   "label": "Modified By"
+  },
+  {
+   "fieldname": "previous_status",
+   "fieldtype": "Data",
+   "label": "Previous Status"
+  },
+  {
+   "fieldname": "status_changed_to",
+   "fieldtype": "Data",
+   "label": "Status Changed To"
+  },
+  {
+   "fieldname": "reason",
+   "fieldtype": "Small Text",
+   "label": "Reason"
+  },
+  {
+   "default": "Now",
+   "fieldname": "time_of_change",
+   "fieldtype": "Datetime",
+   "label": "Time Of Change"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2024-07-10 12:44:06.207035",
+ "modified_by": "Administrator",
+ "module": "Lsa",
+ "name": "Service Master Status Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

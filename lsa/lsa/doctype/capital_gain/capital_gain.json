@@ -1,0 +1,73 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-07-15 15:35:37.553816",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "property_address",
+  "date_of_sale",
+  "sale_amount",
+  "column_break_vybn",
+  "date_of_purchase",
+  "purchase_amount",
+  "holding_period_in_days",
+  "capital_gain_amount"
+ ],
+ "fields": [
+  {
+   "fieldname": "property_address",
+   "fieldtype": "Data",
+   "label": "Property Address"
+  },
+  {
+   "fieldname": "date_of_sale",
+   "fieldtype": "Date",
+   "label": "Date Of Sale"
+  },
+  {
+   "fieldname": "sale_amount",
+   "fieldtype": "Currency",
+   "label": "Sale Amount"
+  },
+  {
+   "fieldname": "column_break_vybn",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "date_of_purchase",
+   "fieldtype": "Date",
+   "label": "Date Of Purchase"
+  },
+  {
+   "fieldname": "purchase_amount",
+   "fieldtype": "Currency",
+   "label": "Purchase Amount"
+  },
+  {
+   "fieldname": "holding_period_in_days",
+   "fieldtype": "Data",
+   "label": "Holding Period In Days"
+  },
+  {
+   "fieldname": "capital_gain_amount",
+   "fieldtype": "Currency",
+   "label": "Capital Gain Amount",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2024-07-15 15:35:37.553816",
+ "modified_by": "Administrator",
+ "module": "Lsa",
+ "name": "Capital Gain",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

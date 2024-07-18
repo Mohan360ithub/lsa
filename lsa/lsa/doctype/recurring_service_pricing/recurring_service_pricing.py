@@ -926,7 +926,7 @@ import frappe
 def check_user_permission(service_master):
     try:
         # Print the current user for debugging
-        print(frappe.session.user)
+        # print(frappe.session.user)
         
         # Get all Department Manager documents
         department_managers = frappe.get_all(
@@ -934,16 +934,26 @@ def check_user_permission(service_master):
             filters={"master_file": service_master},
             fields=["department_head"]
         )
- 
-        # Check if the department_head matches the current user
-        if department_managers and frappe.session.user in [department_managers[0].department_head,"Administrator"] :
-            # Conditions met
-            return {"status":True,"msg":"Authorised User"}
-        elif frappe.session.user in ["Administrator"] :
-            # Conditions met
-            return {"status":True,"msg":"Authorised User"}
+
+        user_roles = frappe.get_all('Has Role', filters={'parent': frappe.session.user}, fields=['role'])
         
-        return {"status":False,"msg":"Unauthorised User"}
+
+        enable_status=False
+        mail_status=False
+        for role in user_roles:
+            if role.get('role') =="Customer Onboarding Officer":
+                enable_status=True
+                break
+        
+        # Check if the department_head matches the current user
+        if department_managers and frappe.session.user in [department_managers[0].department_head] :
+            mail_status=True
+        
+        if frappe.session.user in ["Administrator"] :
+            mail_status=True
+            enable_status=True
+        
+        return {"status":True,"enable_status":enable_status,"mail_status":mail_status,"msg":"User Authentication"}
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), "Failed to check user permission")
         return {"status":False,"msg":f"Error authenticating user{e}"}
@@ -985,5 +995,40 @@ def send_email(recipients, subject, message):
 
 
 #################################################################Srikanth Code End####################################################
+
+
+
+@frappe.whitelist()
+def disable_service_file(doctype,file_id,reason):
+    try:
+    
+        service_masters_doc = frappe.get_doc(doctype,file_id)
+        old_status=service_masters_doc.enabled
+        new_status=None
+        if old_status==1:
+            old_status="Enabled"
+            new_status="Disabled"
+            service_masters_doc.enabled=0
+        else:
+            old_status="Disabled"
+            new_status="Enabled"
+            service_masters_doc.enabled=1
+
+
+        service_masters_doc.append('service_status_history', {
+            'previous_status': old_status,  # Item name
+            'status_changed_to': new_status,
+            'reason': reason,
+            'modified_by1': frappe.session.user,  # Quantity of the item
+            "time_of_change":datetime.now(),
+        })
+
+        service_masters_doc.save()
+        frappe.db.commit()
+        return {"status":True,"msg": f"Service {new_status} successfully"}
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), "Failed to change service status")
+        return {"status":False,"msg":f"Error changing service status: {e}"}
+
 
 

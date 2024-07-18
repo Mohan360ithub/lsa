@@ -198,7 +198,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-06-20 13:13:16.282861",
+ "modified": "2024-07-15 17:20:52.843854",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Minutes of Meeting",
@@ -220,5 +220,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "track_changes": 1
 }

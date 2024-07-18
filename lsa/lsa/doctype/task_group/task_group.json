@@ -65,7 +65,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-06-13 12:03:15.216244",
+ "modified": "2024-07-15 17:21:36.840579",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Task Group",
@@ -90,5 +90,6 @@
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],
- "title_field": "activity"
+ "title_field": "activity",
+ "track_changes": 1
 }

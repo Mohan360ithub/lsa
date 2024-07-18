@@ -10,8 +10,6 @@ from email.mime.base import MIMEBase
 from email import encoders
 
 
-
-
 @frappe.whitelist()
 def sync_sales_orders_followup(so_id=None):
     try:
@@ -144,11 +142,16 @@ def create_razorpay_payment_link_sales_order(amount, invoice_name,customer,custo
         return
     
     # Your Razorpay API key and secret
-    razorpay_api = frappe.get_doc('Razorpay Api')
-    razorpay_api_url = razorpay_api.razorpay_api_url
-    razorpay_key_id = razorpay_api.razorpay_api_key
-    razorpay_key_secret = razorpay_api.get_password('razorpay_secret')
-
+    # razorpay_api = frappe.get_doc('Razorpay Api')
+    # razorpay_api_url = razorpay_api.razorpay_api_url
+    # razorpay_key_id = razorpay_api.razorpay_api_key
+    # razorpay_key_secret = razorpay_api.get_password('razorpay_secret')
+    
+    admin_settings = frappe.get_doc('Admin Settings')
+    razorpay_base_url = admin_settings.razorpay_base_url
+    razorpay_key_id = admin_settings.razorpay_api_key
+    razorpay_key_secret = admin_settings.get_password('razorpay_secret')
+    razorpay_api_url=razorpay_base_url+"payment_links"
 
     # Convert the amount to an integer (representing paise)
     amount_in_paise = int(float(amount) * 100)
@@ -1030,6 +1033,64 @@ def fetch_service_history(customer_id=None,so_id=None):
         return {"status":True,"services_bill_history":services_bill_history}
     # except Exception as e:
     #     return {"status":False,"msg":f"Error Fetching Past Bills History: {e}"}
+
+
+
+
+@frappe.whitelist()
+def so_payment_status(so_id):
+    try:
+        so_doc = frappe.get_doc('Sales Order', so_id)
+
+        if so_doc.docstatus==2:
+            return {"status":True,"payment_status":"Cleared","msg":f"Sales Order {so_id} is Cancelled"}
+        rounded_total = so_doc.rounded_total
+        payment_status="Unpaid"
+        advance_paid_amount=0
+        balance_amount=so_doc.rounded_total
+
+        so_pe_list = frappe.get_all('Payment Entry Reference',
+                                 filters={
+                                            "reference_doctype":"Sales Order",
+                                            'reference_name':so_doc.name,
+                                            'docstatus':1
+                                        },
+                                fields=["name","allocated_amount","parent"])
+
+        sales_invoice = frappe.get_all('Sales Invoice Item',
+                                        filters={
+                                           'sales_order':so_doc.name,
+                                           'docstatus':("in",[0,1])},
+                                        fields=["parent"])
+        si_list = [ si.parent for si in sales_invoice]
+        si_pe_list=[]
+        if sales_invoice:
+            si_pe_list = frappe.get_all('Payment Entry Reference',
+                                 filters={
+                                            "reference_doctype":"Sales Invoice",
+                                            'reference_name':("in",si_list),
+                                            'docstatus':1
+                                        },
+                                fields=["name","allocated_amount","parent"])
+            # print(si_list)
+
+        pe_list=so_pe_list+si_pe_list
+
+        if pe_list:
+            for pe in pe_list:
+                advance_paid_amount+=pe.allocated_amount
+                balance_amount-=pe.allocated_amount
+
+        if balance_amount<=0:
+            payment_status="Cleared"
+        elif advance_paid_amount>0:
+            payment_status="Partially Paid"
+
+
+        return {"status":True,"payment_status":payment_status,"advance_paid_amount":advance_paid_amount,"balance_amount":balance_amount,"rounded_total":rounded_total}
+    except Exception as e:
+        frappe.log_error(message=str(e), title=f"Failed to get payment status for Sales Order {so_id}")
+        return {"status":False,"msg": f"Failed to get payment status for Sales Order {so_id}: {e}"}
 
 
 

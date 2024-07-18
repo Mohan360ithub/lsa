@@ -3,6 +3,7 @@
 
 import frappe
 from frappe import _
+from lsa.custom_whatsapp_api import validate_whatsapp_instance,send_custom_whatsapp_message
 
 
 def execute(filters=None):
@@ -143,9 +144,19 @@ def execute(filters=None):
             "filed_summery_shared_count": filed_summery_shared_count,
             "not_filed_summery_shared_count": executive_count-filed_summery_shared_count
         }
+    
+
+    response_user_validation=valiadting_user_for_bulk_wa_msg()
+    bulk_wa_button=''
+    if response_user_validation["status"]:
+        bulk_wa_button='''<div style="width:100%; display: flex; justify-content: flex-end; align-items: center;">
+        <button class="btn btn-sm" style="margin-right: 10px; background-color: #A9A9A9;" onclick="bulk_wa_txt_message()">
+            <b style="color: #000000;">Send Custom WA Bulk Message</b>
+        </button>
+        </div>'''
 
     # Create HTML card with counts for different filing statuses
-    html_card = f"""
+    html_card = f"""{bulk_wa_button}
     <div class="frappe-card" style="margin-bottom: 10px;">
         <div class="frappe-card-head" data-toggle="collapse" data-target="#collapsible-content">
             <strong>Filing Status Counts</strong>
@@ -276,5 +287,117 @@ def execute(filters=None):
 
 
 
+def valiadting_user_for_bulk_wa_msg():
+    user = frappe.session.user
+    if user=="Administrator":
+        return {"status": True, "msg": "User has the required role."}
+    
+    admin_setting_doc = frappe.get_doc("Admin Settings")
+    auhenticated_users=[]
+    for i in admin_setting_doc.bulk_custom_wa_message_for_filing:
+        auhenticated_users.append(i.user)
+    
+    if user not in auhenticated_users :
+        return {"status": False, "msg": "User does not have the required role to send Bulk WhatsApp messages."}
+    return {"status": True, "msg": "User has the required role."}
+
+@frappe.whitelist()
+def send_bulk_wa_for_filtered_gst_customer( message,
+                                            customer_status,
+                                            fy,
+                                            gst_type,
+                                            month, 
+                                            non_compliant=None,
+                                            customer_enable_status=None,
+                                            customer_id=None,
+                                            gst_step_4_status=None,):
+
+
+    gst_step_4_filter={
+                        "customer_status":("in",customer_status),
+                        "month":month,
+                        "fy":fy,
+                        "gst_type":gst_type,
+                        "gstfile_enabled":1,
+                    }
+    
+    if gst_step_4_status:
+        gst_step_4_filter["filing_status"]=("in",gst_step_4_status)
+    if non_compliant:
+        if non_compliant=="Non-Compliant":
+            gst_step_4_filter["non_compliant"]=1
+        else:
+            gst_step_4_filter["non_compliant"]=0
+    if customer_id:
+        gst_step_4_filter["cid"]=customer_id
+
+    customer_diable_filter_list=[]
+    if customer_enable_status:
+        if customer_enable_status=="Enabled":
+            enable_status=0
+        else:
+            enable_status=1    
+        customer_diable_filter_dict=frappe.get_all("Customer",
+                                        filters={"disabled":enable_status},)
+        customer_diable_filter_list=[ cus.name for cus in customer_diable_filter_dict]
+
+    gst_step_4_list=frappe.get_all("Gst Filling Data",
+                                    filters=gst_step_4_filter,
+                                    fields=["mobile_no_gst","name","cid"])
+    # count=1
+    if gst_step_4_list:
+        try:
+            whatsapp_instance="Operations"
+
+            resp_instance_validation=validate_whatsapp_instance(whatsapp_instance)
+
+            if not resp_instance_validation["status"]:
+                frappe.log_error(f"An error occurred while validating Whatsapp instance{whatsapp_instance}.",f"{resp_instance_validation['msg']}")
+                return {"status":False,"msg":f"An error occurred while validating Whatsapp instance{whatsapp_instance}."}
+            
+            whatsapp_instance_doc=resp_instance_validation["whatsapp_instance_doc"]
+            credits=whatsapp_instance_doc.remaining_credits
+            # print(len(it_step_2_list),credits)
+            
+            if len(gst_step_4_list)<int(credits):
+                new_whatsapp_log = frappe.new_doc('WhatsApp Message Log')
+                for step_4 in gst_step_4_list:
+                    # print(count)
+                    # count+=1
+                    if customer_diable_filter_list and step_4.cid not in customer_diable_filter_list:
+                        continue
+                    resp_wa_send_message=send_custom_whatsapp_message(resp_instance_validation["whatsapp_instance_doc"],step_4.mobile_no_gst,message)
+                    if resp_wa_send_message["status"]:
+                        message_id=resp_wa_send_message["message_id"]
+                        new_whatsapp_log.append("details", {
+                                                                "type": "Gst Filling Data",
+                                                                "document_id": step_4.name,
+                                                                "mobile_number": step_4.mobile_no_gst,
+                                                                "customer": step_4.cid,
+                                                                "message_id": message_id,
+                                                                "sent_successfully":1,
+                                                            })
+                    else:
+                        new_whatsapp_log.append("details", {
+                                                                "type": "Gst Filling Data",
+                                                                "document_id": step_4.name,
+                                                                "mobile_number": step_4.mobile_no_gst,
+                                                                "customer": step_4.cid,
+                                                                "message_id": message_id
+                                                            })
+                        frappe.log_error(f"An error occurred while sending the WhatsApp message. For Gst Filling Data {step_4.name} to {step_4.mobile_no_gst}",f"{resp_wa_send_message['msg']}")
+                
+                new_whatsapp_log.send_date = frappe.utils.now_datetime()
+                new_whatsapp_log.sender = frappe.session.user
+                new_whatsapp_log.type = "Custom"
+                new_whatsapp_log.message = message
+                new_whatsapp_log.insert()
+                return {"status":True,"msg":f"Successfully send bulk messages for Gst Filling Data, remaining WhatsApp instance credits are {int(credits)-len(gst_step_4_list)}"}
+            else:
+                return {"status":False,"msg":f"Not enough credits available in Whatsapp Instance({credits}) to send bulk messages for GST Filing Data({len(gst_step_4_list)})."}
+        except Exception as er:
+            frappe.log_error(f"An Exception error occurred while sending bulk WhatsApp messages for Gst Filling Data.",f"{er}")
+            return {"status":False,"msg":f"An Exception error occurred while sending bulk WhatsApp messages for Gst Filling Data."}
+    return {"status":False,"msg":f"No Gst Filling Data record found for the filters set."}
 
 

@@ -17,7 +17,7 @@
   "section_break_dulp",
   "customer_task",
   "section_break_wbrz",
-  "cid",
+  "customer_id",
   "column_break_mska",
   "customer_name",
   "column_break_ezsg",
@@ -143,19 +143,12 @@
    "fieldtype": "Section Break"
   },
   {
-   "depends_on": "customer_task",
-   "fieldname": "cid",
-   "fieldtype": "Link",
-   "label": "CID",
-   "options": "Customer"
-  },
-  {
    "fieldname": "column_break_mska",
    "fieldtype": "Column Break"
   },
   {
    "depends_on": "customer_task",
-   "fetch_from": "cid.customer_name",
+   "fetch_from": "customer_id.customer_name",
    "fieldname": "customer_name",
    "fieldtype": "Data",
    "label": "Customer Name"
@@ -166,7 +159,7 @@
   },
   {
    "depends_on": "customer_task",
-   "fetch_from": "cid.custom_contact_person",
+   "fetch_from": "customer_id.custom_contact_person",
    "fieldname": "contact_person_name",
    "fieldtype": "Data",
    "label": "Contact Person Name"
@@ -177,7 +170,7 @@
   },
   {
    "depends_on": "customer_task",
-   "fetch_from": "cid.custom_primary_mobile_no",
+   "fetch_from": "customer_id.custom_primary_mobile_no",
    "fieldname": "mobile_number",
    "fieldtype": "Data",
    "label": "Mobile Number"
@@ -188,15 +181,22 @@
   },
   {
    "depends_on": "customer_task",
-   "fetch_from": "cid.custom_primary_email",
+   "fetch_from": "customer_id.custom_primary_email",
    "fieldname": "email",
    "fieldtype": "Data",
    "label": "Email"
+  },
+  {
+   "depends_on": "customer_task",
+   "fieldname": "customer_id",
+   "fieldtype": "Link",
+   "label": "Customer ID",
+   "options": "Customer"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-07-04 13:27:56.600402",
+ "modified": "2024-07-12 10:08:35.774341",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Team Task",
@@ -218,5 +218,7 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "title_field": "task_title",
+ "track_changes": 1
 }

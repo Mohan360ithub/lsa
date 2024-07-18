@@ -8,6 +8,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
+from lsa.custom_sales_order import so_payment_status
 
 
 @frappe.whitelist()
@@ -391,6 +392,7 @@ def checking_user_authentication(user_email=None):
     try:
         status = False
         wa_status=False
+        dis_status=False
         user_roles = frappe.get_all('Has Role', filters={'parent': user_email}, fields=['role'])
 
         if user_email=="pankajsankhla90@gmail.com":
@@ -400,15 +402,18 @@ def checking_user_authentication(user_email=None):
         roles = [role.get('role') for role in user_roles]
         doc_perm_roles = ["LSA Accounts Manager","LSA Account Executive"]
         doc_wa_perm_roles=["GST Front Desk Team","Lsa Front Desk CRM Executive(A,B)"]
+        doc_dis_perm_roles=["Customer Onboarding Officer"]
 
         for role in roles:
             if role in doc_perm_roles:
                 status = True
             if role in doc_wa_perm_roles:
                 wa_status = True
+            if role in doc_dis_perm_roles:
+                dis_status = True
         
 
-        return {"status": status, "value": [roles],"wa_status":wa_status}
+        return {"status": status, "value": [roles],"wa_status":wa_status,"dis_status":dis_status}
 
     except Exception as e:
         #print(e)
@@ -626,10 +631,33 @@ def update_linked_doctypes(doc, method):
             frappe.logger().error(f"Error Triggering status Change for Customer {doc.name}: {e}")
 
 
+
 @frappe.whitelist()
-def disable_customer(customer_id,disabled):
+def disable_customer(customer_id,reason):
     try:
+    # if True:
         customer_doc=frappe.get_doc("Customer",customer_id)
+
+        old_status=customer_doc.disabled
+        new_status=None
+        if old_status==0:
+            old_status="Enabled"
+            new_status="Disabled"
+            customer_doc.disabled=1
+        else:
+            old_status="Disabled"
+            new_status="Enabled"
+            customer_doc.disabled=0
+        
+        new_status_update_record = customer_doc.append('custom_customer_disable_history', {})
+        new_status_update_record.modified_by1 = frappe.session.user
+        new_status_update_record.previous_status = old_status
+        new_status_update_record.status_changed_to = new_status
+        new_status_update_record.reason = reason
+        new_status_update_record.time_of_change = datetime.now()
+
+        
+
         master_service_fields = {
             "Gstfile": ["gst_file", ["name", "company_name", "gst_number", "gst_user_name", "gst_password","current_recurring_fees","frequency","annual_fees","executive_name","last_filed"]],
             "IT Assessee File": ["it_assessee_file", ["name", "assessee_name", "pan", "pan", "it_password","current_recurring_fees","frequency","annual_fees","executive_name","last_filed"]],
@@ -639,12 +667,44 @@ def disable_customer(customer_id,disabled):
             "ESI File": ["esi_file", ["name", "assessee_name", "registartion_no", "trace_user_id", "trace_password","current_recurring_fees","frequency","annual_fees","executive_name","last_filed"]],
             "Provident Fund File": ["provident_fund_file", ["name", "assessee_name", "registartion_no", "trace_user_id", "trace_password","current_recurring_fees","frequency","annual_fees","executive_name","last_filed"]],
         }
+
+        chargeable_services=frappe.get_all("Customer Chargeable Doctypes")
+        for chargeable_service in chargeable_services:
+            # print(chargeable_service)
+            chargeable_service_enable_values=frappe.get_all(chargeable_service.name,
+                                            filters={"customer_id":customer_id,
+                                                    "enabled":1,
+                                                    },
+                                                )
+            if chargeable_service_enable_values and new_status!="Enabled":
+                # continue
+                frappe.throw(f"You can't disable customer having active service {chargeable_service.name}: {chargeable_service_enable_values[0].name}")
+                # pass
+
+
+
+        customer_so=frappe.get_all("Sales Order",
+                                   filters={
+                                       "docstatus":("not in",[2]),
+                                       "customer":customer_id,
+                                   })
+        for so in customer_so:
+            resp=so_payment_status(so.name)
+            try:
+                if  resp["payment_status"]!="Cleared" and new_status!="Enabled":
+                    # continue
+                    frappe.throw(f"You can't disable customer having pending payment for Sales Order: {so.name} {resp['payment_status']}")
+            except Exception as eso:
+                frappe.logger().error(f"Error to fetch payment status for Sales Order {so.name}: {eso} {resp}")
+                return {"status":False,"message": f"Error to fetch payment status for Sales Order {so.name}: {eso} {resp}"}
+        customer_doc.save()
+
         serv_freq={"M":"Monthly",
                    "Q":"Quarterly",
                    "H":"Half Yearly",
                    "Y":"Yearly",}
 
-        chargeable_services=frappe.get_all("Customer Chargeable Doctypes")
+        
         body = """
                     <br><table class="table table-bordered" style="border-color: #444444; border-collapse: collapse; width: 100%;">
                         <thead>
@@ -671,23 +731,24 @@ def disable_customer(customer_id,disabled):
             # print(chargeable_service)
             chargeable_service_values=frappe.get_all(chargeable_service.name,
                                             filters={"customer_id":customer_id,
-                                                    "enabled":1},
-                                            fields=["name",master_service_fields[chargeable_service.name][1][1],"executive"]
+                                                    # "enabled":1,
+                                                    },
+                                            fields=["name",master_service_fields[chargeable_service.name][1][1],"executive","frequency"]
                                                 )
             # print(chargeable_service_values)
             for chargeable_service_value in chargeable_service_values:
                 # print(chargeable_service.name,chargeable_service_value.name)
-                chargeable_service_doc=frappe.get_doc(chargeable_service.name,chargeable_service_value.name)
-                chargeable_service_doc.enabled=0
-                chargeable_service_doc.save()
+                # chargeable_service_doc=frappe.get_doc(chargeable_service.name,chargeable_service_value.name)
+                # chargeable_service_doc.enabled=0
+                # chargeable_service_doc.save()
                 executive_list.add(chargeable_service_value["executive"])
                 body += f"""
                     <tr>
                         <td style="border: solid 2px #bcb9b4;">{count}</td>
                         <td style="border: solid 2px #bcb9b4;">{chargeable_service.name}</td>
-                        <td style="border: solid 2px #bcb9b4;">{chargeable_service_doc.name}</td>
+                        <td style="border: solid 2px #bcb9b4;">{chargeable_service_value.name}</td>
                         <td style="border: solid 2px #bcb9b4;">{chargeable_service_value[master_service_fields[chargeable_service.name][1][1]]}</td>                      
-                        <td style="border: solid 2px #bcb9b4;">{serv_freq[chargeable_service_doc.frequency]}</td>
+                        <td style="border: solid 2px #bcb9b4;">{serv_freq[chargeable_service_value.frequency]}</td>
                     </tr>
                 """
                 count += 1
@@ -696,16 +757,14 @@ def disable_customer(customer_id,disabled):
                     </tbody>
                 </table><br>
         """
-        disabled_status ="Disabled"
-        if disabled=="0":
-            disabled_status="Enabled"
+        
 
         now = datetime.now()
         # Format the datetime in DD-MM-YYYY HH:MM AM/PM
         time_of_change = now.strftime("%d-%m-%Y %I:%M %p")
         user_full_name = frappe.db.get_value("User", frappe.session.user, "full_name")
 
-        subject = f"Customer with CID {customer_id} is disabled"
+        subject = f"Customer with CID {customer_id} is {new_status}"
         html_message = f"""
             <p>Dear LSA Team,<br><br> There are some changes in following customer. Please make a note of it. </p>
             <table style="border-collapse: collapse; width: 60%;">
@@ -719,7 +778,7 @@ def disable_customer(customer_id,disabled):
                 </tr>
                 <tr>
                     <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">Customer Status</td>
-                    <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">{disabled_status}</td>
+                    <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">{new_status}</td>
                 </tr>
                 <tr>
                     <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">Modified By</td>
@@ -763,15 +822,15 @@ def disable_customer(customer_id,disabled):
             try:
                 # Send email
                 server.sendmail(sender_email, list(executive_list) , message.as_string())
-                return {"status":True,"message": "Customer disabled successfully","executive_list":list(executive_list),"disabled":disabled,"disabled_status":disabled_status}
+                return {"status":True,"message": f"Customer {new_status} successfully","executive_list":list(executive_list)}
             except Exception as er:
                 print(f"Failed to send email. Error: {er}")
-                return {"status":False,"message": f"Failed to disable customer {er}"}
+                return {"status":False,"message": f"Failed to {new_status} customer {er}"}
 
     except Exception as e:
-        frappe.log_error(message=str(e), title="Failed to disable customer")
+        frappe.log_error(message=str(e), title=f"Failed to {new_status} customer")
         # print(f"{e}")
-        return {"status":False,"message": f"Failed to disable customer {e}"}
+        return {"status":False,"message": f"Failed to {new_status} customer {e}"}
     
 #######################################Srikanth Code Start#####################################################################
 
@@ -944,6 +1003,10 @@ def send_status_update_notification(cid, new_status, reason):
         return {"status":False,"message": f"Failed to send notification:{e}"}
 
 #######################################Srikanth Code Start#####################################################################
+
+
+
+
 
 
 

@@ -20,7 +20,13 @@
   "team_ticket_cc_mails",
   "appraisal_settings_section",
   "appraisal_creation",
-  "appraisal_approval"
+  "appraisal_approval",
+  "razorpay_settings_section",
+  "razorpay_base_url",
+  "razorpay_api_key",
+  "razorpay_secret",
+  "service_masters_filing_settings_section",
+  "bulk_custom_wa_message_for_filing"
  ],
  "fields": [
   {
@@ -105,12 +111,49 @@
    "fieldtype": "Table MultiSelect",
    "label": "Appraisal Approval",
    "options": "Multiselect User"
+  },
+  {
+   "fieldname": "razorpay_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Razorpay settings"
+  },
+  {
+   "fieldname": "razorpay_api_key",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Razorpay Api Key",
+   "reqd": 1
+  },
+  {
+   "fieldname": "razorpay_secret",
+   "fieldtype": "Password",
+   "in_list_view": 1,
+   "label": "Razorpay Secret",
+   "reqd": 1
+  },
+  {
+   "fieldname": "razorpay_base_url",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Razorpay Base URL",
+   "reqd": 1
+  },
+  {
+   "fieldname": "service_masters_filing_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Service Masters Filing Settings"
+  },
+  {
+   "fieldname": "bulk_custom_wa_message_for_filing",
+   "fieldtype": "Table MultiSelect",
+   "label": "Bulk Custom WA Message for Filing",
+   "options": "Multiselect User"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-07-02 15:08:48.737901",
+ "modified": "2024-07-18 16:08:04.810132",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Admin Settings",
@@ -129,5 +172,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "track_changes": 1
 }

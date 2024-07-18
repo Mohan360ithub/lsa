@@ -1,0 +1,94 @@
+{
+ "actions": [],
+ "creation": "2024-07-17 18:14:48.328789",
+ "default_view": "List",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "group_name",
+  "primary_contact_person",
+  "column_break_srkv",
+  "contact_number",
+  "email",
+  "is_primary",
+  "section_break_uput",
+  "customer_html_data"
+ ],
+ "fields": [
+  {
+   "fieldname": "group_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Group Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "primary_contact_person",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Primary Contact Person",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_srkv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "contact_number",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Contact Number",
+   "length": 10,
+   "reqd": 1
+  },
+  {
+   "fieldname": "email",
+   "fieldtype": "Data",
+   "label": "Email"
+  },
+  {
+   "fieldname": "is_primary",
+   "fieldtype": "Link",
+   "label": "Is Primary",
+   "options": "Customer"
+  },
+  {
+   "fieldname": "section_break_uput",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "customer_html_data",
+   "fieldtype": "HTML",
+   "label": "Customer HTML Data"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-07-18 12:54:27.599428",
+ "modified_by": "Administrator",
+ "module": "Lsa",
+ "name": "Client Group",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "search_fields": "group_name,contact_number,primary_contact_person",
+ "show_title_field_in_link": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "group_name",
+ "track_changes": 1
+}

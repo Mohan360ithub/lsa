@@ -116,7 +116,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-06-10 18:44:31.832259",
+ "modified": "2024-07-15 17:21:27.168103",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Team Timesheet",
@@ -143,5 +143,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "track_changes": 1
 }

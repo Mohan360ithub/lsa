@@ -12,16 +12,22 @@ class PaymentLinkLog(Document):
 def cancel_link(p_id=None):
     if p_id:
         payment_link = frappe.get_doc('Payment Link Log',p_id)
-        razorpay_api_cancel = frappe.get_doc('Razorpay Api to cancel link')
+        # razorpay_api_cancel = frappe.get_doc('Razorpay Api to cancel link')
 
-        razorpay_api_key = razorpay_api_cancel.razorpay_api_key
-        razorpay_api_secret = razorpay_api_cancel.razorpay_secret
-        razorpay_api_key = razorpay_api_cancel.razorpay_api_key
-        razorpay_api_secret = razorpay_api_cancel.razorpay_secret
+        # razorpay_api_key = razorpay_api_cancel.razorpay_api_key
+        # razorpay_api_secret = razorpay_api_cancel.razorpay_secret
+        # razorpay_api_key = razorpay_api_cancel.razorpay_api_key
+        # razorpay_api_secret = razorpay_api_cancel.razorpay_secret
+
+        admin_settings = frappe.get_doc('Admin Settings')
+        razorpay_base_url = admin_settings.razorpay_base_url
+        razorpay_key_id = admin_settings.razorpay_api_key
+        razorpay_key_secret = admin_settings.get_password('razorpay_secret')
+        razorpay_api_url=razorpay_base_url+"payment_links/"+payment_link.link_id+"/cancel"
 
         # Razorpay API endpoint for canceling a payment link
-        api_url = razorpay_api_cancel.razorpay_url
-        new_api_url = api_url.replace("link_id", payment_link.link_id)
+        # api_url = razorpay_api_cancel.razorpay_url
+        # new_api_url = api_url.replace("link_id", payment_link.link_id)
 
         # # Set up headers with your API key and secret
         # headers = {
@@ -31,8 +37,8 @@ def cancel_link(p_id=None):
         try:
             # Make a POST request to cancel the payment link
             # # response = requests.post(new_api_url, headers=headers)
-            response = requests.post(new_api_url, 
-                                        auth=(razorpay_api_key, razorpay_api_secret))
+            response = requests.post(razorpay_api_url, 
+                                        auth=(razorpay_key_id, razorpay_key_secret))
 
             # Check if the request was successful (HTTP status code 200)
             # client = razorpay.Client(auth=(razorpay_api_key, razorpay_api_secret))
@@ -55,6 +61,7 @@ def cancel_link(p_id=None):
 
         except requests.exceptions.RequestException as e:
             return "Error in Payment Link Log"
+
 
 
 

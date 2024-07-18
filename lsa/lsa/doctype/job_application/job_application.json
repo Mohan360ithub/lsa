@@ -93,7 +93,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-05-16 15:49:58.988661",
+ "modified": "2024-07-15 17:22:33.589621",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Job Application",
@@ -115,5 +115,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "track_changes": 1
 }

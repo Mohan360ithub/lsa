@@ -1,0 +1,66 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-07-15 15:34:26.715474",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "address",
+  "rental_income",
+  "standard_deduction",
+  "property_tax",
+  "interest_on_home_loan",
+  "net_rental_income"
+ ],
+ "fields": [
+  {
+   "fieldname": "address",
+   "fieldtype": "Data",
+   "label": "Address"
+  },
+  {
+   "fieldname": "rental_income",
+   "fieldtype": "Currency",
+   "label": "Rental Income"
+  },
+  {
+   "default": "30",
+   "fieldname": "standard_deduction",
+   "fieldtype": "Int",
+   "label": "Standard Deduction",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "property_tax",
+   "fieldtype": "Int",
+   "label": "Property Tax"
+  },
+  {
+   "default": "0",
+   "fieldname": "interest_on_home_loan",
+   "fieldtype": "Int",
+   "label": "Interest on Home Loan"
+  },
+  {
+   "fieldname": "net_rental_income",
+   "fieldtype": "Currency",
+   "label": "Net Rental Income",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2024-07-15 15:34:26.715474",
+ "modified_by": "Administrator",
+ "module": "Lsa",
+ "name": "House Property",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

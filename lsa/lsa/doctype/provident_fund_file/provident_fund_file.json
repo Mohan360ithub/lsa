@@ -36,6 +36,8 @@
   "executive_name",
   "section_break_deyf",
   "other_info",
+  "section_break_lgzm",
+  "service_status_history",
   "crediential_details_tab",
   "user_id",
   "security_que_1",
@@ -422,11 +424,22 @@
    "fieldtype": "Data",
    "label": "Last Filed",
    "read_only": 1
+  },
+  {
+   "fieldname": "section_break_lgzm",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "service_status_history",
+   "fieldtype": "Table",
+   "label": "Service Status History",
+   "options": "Service Master Status Item",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-02-27 12:13:40.873690",
+ "modified": "2024-07-10 12:49:52.671140",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Provident Fund File",

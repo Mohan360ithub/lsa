@@ -35,7 +35,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-05-15 17:35:42.693538",
+ "modified": "2024-07-15 17:21:52.440018",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "S3 360 Dev Test",
@@ -54,5 +54,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "track_changes": 1
 }

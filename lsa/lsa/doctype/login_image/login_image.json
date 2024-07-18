@@ -18,7 +18,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-03-05 13:18:16.945298",
+ "modified": "2024-07-15 17:23:26.079431",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Login Image",
@@ -37,5 +37,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "track_changes": 1
 }

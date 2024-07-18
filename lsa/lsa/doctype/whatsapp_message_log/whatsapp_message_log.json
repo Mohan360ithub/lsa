@@ -42,7 +42,8 @@
    "fieldname": "send_date",
    "fieldtype": "Datetime",
    "in_list_view": 1,
-   "label": "Send Date"
+   "label": "Send Date",
+   "read_only": 1
   },
   {
    "fieldname": "total_amount",
@@ -66,7 +67,8 @@
    "fieldname": "sender",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Sender"
+   "label": "Sender",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_iksv",
@@ -107,18 +109,20 @@
   {
    "fieldname": "message",
    "fieldtype": "Small Text",
-   "label": "Message"
+   "label": "Message",
+   "read_only": 1
   },
   {
    "fieldname": "message_type",
    "fieldtype": "Select",
    "label": "Message Type",
-   "options": "Template\nCustom"
+   "options": "Template\nCustom",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-04-30 15:52:37.772748",
+ "modified": "2024-07-18 14:54:56.027474",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "WhatsApp Message Log",

@@ -20,7 +20,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-02-23 15:31:55.155252",
+ "modified": "2024-07-15 17:23:32.139916",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "State",
@@ -43,5 +43,6 @@
  "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "track_changes": 1
 }

@@ -52,6 +52,8 @@
   "assessee",
   "assessee_name",
   "assessee_pan",
+  "section_break_lanp",
+  "service_status_history",
   "credentials_tab",
   "gst_column",
   "gst_user_name",
@@ -137,7 +139,8 @@
    "in_filter": 1,
    "in_standard_filter": 1,
    "label": "Enabled",
-   "permlevel": 1
+   "permlevel": 1,
+   "read_only": 1
   },
   {
    "fieldname": "gst_number",
@@ -516,12 +519,24 @@
    "fieldtype": "Check",
    "in_filter": 1,
    "in_standard_filter": 1,
-   "label": "Non-Compliant"
+   "label": "Non-Compliant",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_lanp",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "service_status_history",
+   "fieldtype": "Table",
+   "label": "Service Status History",
+   "options": "Service Master Status Item",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-07-03 16:00:22.538579",
+ "modified": "2024-07-16 16:14:11.688984",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Gstfile",

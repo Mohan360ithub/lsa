@@ -48,11 +48,16 @@ class GstFillingData(Document):
                                 latest_file_date = gst_file.modified
                                 latest_file_mon = gst_file.month
 
+                year = str(int(latest_file_fy.split("-")[0]))
+                if latest_file_mon.lower() in ["jan", "feb", "mar"]:
+                    year = str(int(latest_file_fy.split("-")[1]))
+                    
                 date_object = datetime.strptime(str(latest_file_date).split(" ")[0], '%Y-%m-%d')
                 formatted_date = date_object.strftime('%b-%Y')
-
+                formatted_date="-".join([ele.upper() for ele in formatted_date.split("-")])
+                # print(latest_file_mon,fy_y_o,formatted_date)
                 gst_doc = frappe.get_doc("Gstfile", doc.gstfile)
-                gst_doc.last_filed = "for " + latest_file_mon + " in " + formatted_date
+                gst_doc.last_filed = "for " + latest_file_mon +"-"+year+ " in " + formatted_date
                 gst_doc.save()
 
             elif doc.filing_status != "Filed Summery Shared With Client" and old_doc.filing_status == "Filed Summery Shared With Client":
@@ -87,12 +92,16 @@ class GstFillingData(Document):
                                     latest_file_date = gst_file.modified
                                     latest_file_mon = gst_file.month
 
+                year = str(int(latest_file_fy.split("-")[0]))
+                if latest_file_mon.lower() in ["jan", "feb", "mar"]:
+                    year = str(int(latest_file_fy.split("-")[1]))
+                
                 if latest_file_date:
                     date_object = datetime.strptime(str(latest_file_date).split(" ")[0], '%Y-%m-%d')
                     formatted_date = date_object.strftime('%b-%Y')
-
+                    formatted_date="-".join([ele.upper() for ele in formatted_date.split("-")])
                     gst_doc = frappe.get_doc("Gstfile", doc.gstfile)
-                    gst_doc.last_filed = "for " + latest_file_mon + " in " + formatted_date
+                    gst_doc.last_filed = "for " + latest_file_mon +"-"+year+ " in " + formatted_date
                     gst_doc.save()
                 else:
                     gst_doc = frappe.get_doc("Gstfile", doc.gstfile)
@@ -487,6 +496,7 @@ def custom_save_as_draft(gst_yearly_filling_summary_id, sales_total_taxable, pur
     #     else:
     #         # Increment the field by the current value
     #         setattr(gst_yearly_filing_summery, field_name, getattr(gst_yearly_filing_summery, field_name) + field_value)
+
 
 
 

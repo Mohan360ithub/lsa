@@ -3,12 +3,12 @@
 
 import frappe
 from frappe import _
-
+from lsa.custom_whatsapp_api import validate_whatsapp_instance,send_custom_whatsapp_message
 
 def execute(filters=None):
     columns = [
         {"fieldname": "name", "label": _("ID"), "fieldtype": "Link", "options": "IT Assessee Filing Data", "width": 150},
-        
+        {"fieldname": "can_be_filed", "label": _("Can Be Filed"), "fieldtype": "Data",  "width": 50},
         {"fieldname": "customer_id", "label": _("CID"), "fieldtype": "Link", "options": "Customer", "width": 100},
         {"fieldname": "customer_name", "label": _("Customer Name"), "fieldtype": "Data", "width": 100},
         {"fieldname": "contact_person", "label": _("Contact Person"), "fieldtype": "Data", "width": 100},
@@ -38,7 +38,7 @@ def execute(filters=None):
     data = frappe.get_all(
         "IT Assessee Filing Data",
         filters=additional_filters,
-        fields=["name", "customer_id","customer_name","contact_person", "assessee_full_name","customer_status", "it_assessee_file","filing_status",  "executive","mobile_no",  ],
+        fields=["name", "can_be_filed", "customer_id","customer_name","contact_person", "assessee_full_name","customer_status", "it_assessee_file","filing_status",  "executive","mobile_no",  ],
         as_list=True
     )
 
@@ -146,7 +146,16 @@ def execute(filters=None):
         for executive in executive_counts.keys()
     ])
 
-    html_card = f"""
+    response_user_validation=valiadting_user_for_bulk_wa_msg()
+    bulk_wa_button=''
+    if response_user_validation["status"]:
+        bulk_wa_button='''<div style="width:100%; display: flex; justify-content: flex-end; align-items: center;">
+        <button class="btn btn-sm" style="margin-right: 10px; background-color: #A9A9A9;" onclick="bulk_wa_txt_message()">
+            <b style="color: #000000;">Send Custom WA Bulk Message</b>
+        </button>
+        </div>'''
+
+    html_card = f"""{bulk_wa_button}
     <div class="frappe-card" style="margin-bottom: 10px;">
         <div class="frappe-card-head" data-toggle="collapse" data-target="#collapsible-content">
             <strong>Filing Status Counts</strong>
@@ -244,4 +253,107 @@ def execute(filters=None):
 
     return columns, data, html_card
 
+
+
+
+def valiadting_user_for_bulk_wa_msg():
+    user = frappe.session.user
+    if user=="Administrator":
+        return {"status": True, "msg": "User has the required role."}
+    
+    admin_setting_doc = frappe.get_doc("Admin Settings")
+    auhenticated_users=[]
+    for i in admin_setting_doc.bulk_custom_wa_message_for_filing:
+        auhenticated_users.append(i.user)
+    
+    if user not in auhenticated_users :
+        return {"status": False, "msg": "User does not have the required role to send Bulk WhatsApp messages."}
+    return {"status": True, "msg": "User has the required role."}
+
+@frappe.whitelist()
+def send_bulk_wa_for_filtered_it_customer(  message,
+                                            customer_status,
+                                            ay,
+                                            it_step_2_status=None,):
+
+    it_step_2_filter={
+                        "customer_status":("in",customer_status),
+                        "ay":ay,
+                    }
+    
+    if it_step_2_status:
+        it_step_2_filter["filing_status"]=("in",it_step_2_status)
+
+
+    customer_diable_filter_dict=frappe.get_all("Customer",
+                                    filters={"disabled":0},)
+    customer_diable_filter_list=[ cus.name for cus in customer_diable_filter_dict]
+
+    it_step_2_list=frappe.get_all("IT Assessee Filing Data",
+                                    filters=it_step_2_filter,
+                                    fields=["mobile_no","name","customer_id"])
+    count=1
+    if it_step_2_list:
+        try:
+            whatsapp_instance="Operations"
+
+            resp_instance_validation=validate_whatsapp_instance(whatsapp_instance)
+
+            if not resp_instance_validation["status"]:
+                frappe.log_error(f"An error occurred while validating Whatsapp instance{whatsapp_instance} for Bulk WhatsApp message for IT Assessee Filling Data.",f"{resp_instance_validation['msg']}")
+                return {"status":False,"msg":f"An error occurred while validating Whatsapp instance{whatsapp_instance}."}
+            
+            whatsapp_instance_doc=resp_instance_validation["whatsapp_instance_doc"]
+            credits=whatsapp_instance_doc.remaining_credits
+            # print(len(it_step_2_list),credits)
+            
+            if len(it_step_2_list)<int(credits):
+                new_whatsapp_log = frappe.new_doc('WhatsApp Message Log')
+                for step_2 in it_step_2_list:
+                    # print(count)
+                    count+=1
+                    if customer_diable_filter_list and step_2.customer_id not in customer_diable_filter_list:
+                        new_whatsapp_log.append("details", {
+                                                                "type": "IT Assessee Filing Data",
+                                                                "document_id": step_2.name,
+                                                                "mobile_number": step_2.mobile_no,
+                                                                "customer": step_2.customer_id,
+                                                                "message_id": None
+                                                            })
+                        frappe.log_error(f"Stopped sending Bulk WhatsApp message for IT Assessee Filling Data {step_2.name} to {step_2.mobile_no}",f"Customer is disaled")
+                        continue
+                    resp_wa_send_message=send_custom_whatsapp_message(resp_instance_validation["whatsapp_instance_doc"],step_2.mobile_no,message)
+                    if resp_wa_send_message["status"]:
+                        message_id=resp_wa_send_message["message_id"]
+                        new_whatsapp_log.append("details", {
+                                                                "type": "IT Assessee Filing Data",
+                                                                "document_id": step_2.name,
+                                                                "mobile_number": step_2.mobile_no,
+                                                                "customer": step_2.customer_id,
+                                                                "message_id": message_id,
+                                                                "sent_successfully":1,
+                                                            })
+                    else:
+                        new_whatsapp_log.append("details", {
+                                                                "type": "IT Assessee Filing Data",
+                                                                "document_id": step_2.name,
+                                                                "mobile_number": step_2.mobile_no,
+                                                                "customer": step_2.customer_id,
+                                                                "message_id": message_id
+                                                            })
+                        frappe.log_error(f"An error occurred while sending Bulk WhatsApp message. For IT Assessee Filling Data {step_2.name} to {step_2.mobile_no}",f"{resp_wa_send_message['msg']}")
+                
+                new_whatsapp_log.send_date = frappe.utils.now_datetime()
+                new_whatsapp_log.sender = frappe.session.user
+                new_whatsapp_log.type = "Custom"
+                new_whatsapp_log.message = message
+                new_whatsapp_log.insert()
+                return {"status":True,"msg":f"Successfully send bulk messages for IT Assessee Filing Data, remaining WhatsApp instance credits are {int(credits)-len(it_step_2_list)}"}
+            else:
+                return {"status":False,"msg":f"Not enough credits available in Whatsapp Instance({credits}) to send bulk messages for IT Assessee Filing Data({len(it_step_2_list)})."}
+        except Exception as er:
+            # print("Error",er)
+            frappe.log_error(f"An Exception error occurred while sending Bulk WhatsApp messages for IT Assessee Filing Data.",f"{er}")
+            return {"status":False,"msg":f"An Exception error occurred while sending bulk WhatsApp messages for IT Assessee Filing Data."}
+    return {"status":False,"msg":f"No IT Assessee Filing Data record found for the filters set."}
 

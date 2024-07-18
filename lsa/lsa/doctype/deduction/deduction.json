@@ -1,0 +1,44 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-07-15 15:36:57.377416",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "deduction_list",
+  "deduction_amount",
+  "description"
+ ],
+ "fields": [
+  {
+   "fieldname": "deduction_list",
+   "fieldtype": "Select",
+   "label": "Deduction List",
+   "options": "Test 1\nTest 2\nTest 3\nTest 4"
+  },
+  {
+   "fieldname": "deduction_amount",
+   "fieldtype": "Currency",
+   "label": "Deduction Amount"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2024-07-15 15:36:57.377416",
+ "modified_by": "Administrator",
+ "module": "Lsa",
+ "name": "Deduction",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

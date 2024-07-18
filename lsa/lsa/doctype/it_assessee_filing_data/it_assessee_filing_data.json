@@ -11,6 +11,7 @@
   "section_break_hj5q",
   "amended_from",
   "ay",
+  "can_be_filed",
   "it_assessee_file",
   "pan",
   "assessee_full_name",
@@ -23,7 +24,32 @@
   "customer_status",
   "mobile_no",
   "created_manually",
-  "filing_notes"
+  "filing_notes",
+  "income_and_deduction_tab",
+  "salary",
+  "house_property",
+  "business_income",
+  "capital_gain",
+  "others_income",
+  "deduction",
+  "column_break_fmnw",
+  "total_salary",
+  "total_income_from_house_property",
+  "total_business_income",
+  "total_income_from_capital_gain",
+  "total_income_from_other_sources",
+  "total_deduction_from_other_sources",
+  "section_break_hook",
+  "salary_details",
+  "house_properties",
+  "business_incomes",
+  "capital_gains",
+  "others_incomes",
+  "deductions",
+  "section_break_vdbn",
+  "total_income_and_deduction",
+  "loan_details_tab",
+  "emi_details"
  ],
  "fields": [
   {
@@ -130,12 +156,183 @@
    "fieldname": "mobile_no",
    "fieldtype": "Data",
    "label": "Mobile No"
+  },
+  {
+   "fieldname": "income_and_deduction_tab",
+   "fieldtype": "Tab Break",
+   "label": "Income and Deduction"
+  },
+  {
+   "fieldname": "loan_details_tab",
+   "fieldtype": "Tab Break",
+   "label": "Loan Details"
+  },
+  {
+   "default": "0",
+   "fieldname": "salary",
+   "fieldtype": "Check",
+   "label": "Salary"
+  },
+  {
+   "default": "0",
+   "fieldname": "house_property",
+   "fieldtype": "Check",
+   "label": "House Property"
+  },
+  {
+   "default": "0",
+   "fieldname": "business_income",
+   "fieldtype": "Check",
+   "label": "Business Income"
+  },
+  {
+   "default": "0",
+   "fieldname": "capital_gain",
+   "fieldtype": "Check",
+   "label": "Capital Gain"
+  },
+  {
+   "default": "0",
+   "fieldname": "others_income",
+   "fieldtype": "Check",
+   "label": "Others Income"
+  },
+  {
+   "default": "0",
+   "fieldname": "deduction",
+   "fieldtype": "Check",
+   "label": "Deduction"
+  },
+  {
+   "fieldname": "column_break_fmnw",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "depends_on": "salary",
+   "fieldname": "total_salary",
+   "fieldtype": "Currency",
+   "label": "Total Salary",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "house_property",
+   "fieldname": "total_income_from_house_property",
+   "fieldtype": "Currency",
+   "label": "Total Income from House Property",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "business_income",
+   "fieldname": "total_business_income",
+   "fieldtype": "Currency",
+   "label": "Total Business Income",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "capital_gain",
+   "fieldname": "total_income_from_capital_gain",
+   "fieldtype": "Currency",
+   "label": "Total Income From Capital Gain",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "others_income",
+   "fieldname": "total_income_from_other_sources",
+   "fieldtype": "Currency",
+   "label": "Total Income From Other Sources",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "deduction",
+   "fieldname": "total_deduction_from_other_sources",
+   "fieldtype": "Currency",
+   "label": "Total Deduction From Other Sources",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_hook",
+   "fieldtype": "Section Break"
+  },
+  {
+   "depends_on": "salary",
+   "fieldname": "salary_details",
+   "fieldtype": "Table",
+   "label": "Salary Details",
+   "options": "Salary"
+  },
+  {
+   "depends_on": "house_property",
+   "fieldname": "house_properties",
+   "fieldtype": "Table",
+   "label": "House Properties",
+   "options": "House Property"
+  },
+  {
+   "depends_on": "business_income",
+   "fieldname": "business_incomes",
+   "fieldtype": "Table",
+   "label": "Business Incomes",
+   "options": "Income"
+  },
+  {
+   "depends_on": "capital_gain",
+   "fieldname": "capital_gains",
+   "fieldtype": "Table",
+   "label": "Capital Gains",
+   "options": "Capital Gain"
+  },
+  {
+   "depends_on": "others_income",
+   "fieldname": "others_incomes",
+   "fieldtype": "Table",
+   "label": "Others Incomes",
+   "options": "Others Income"
+  },
+  {
+   "depends_on": "deduction",
+   "fieldname": "deductions",
+   "fieldtype": "Table",
+   "label": "Deductions",
+   "options": "Deduction"
+  },
+  {
+   "fieldname": "total_income_and_deduction",
+   "fieldtype": "Table",
+   "label": "Total Income and Deduction",
+   "options": "Total Income And Deduction",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_vdbn",
+   "fieldtype": "Section Break",
+   "label": "Total Income and Deduction"
+  },
+  {
+   "default": "NO",
+   "fieldname": "can_be_filed",
+   "fieldtype": "Select",
+   "label": "Can be filed",
+   "options": "YES\nNO",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "emi_details",
+   "fieldtype": "Table",
+   "label": "EMI Details",
+   "options": "Loan Details Tab EMI"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-06-19 18:27:53.704124",
+ "modified": "2024-07-18 15:36:02.838063",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "IT Assessee Filing Data",

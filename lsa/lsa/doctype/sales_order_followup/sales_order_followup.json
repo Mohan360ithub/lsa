@@ -17,7 +17,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-05-04 17:51:30.123099",
+ "modified": "2024-07-15 17:21:47.713529",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Sales order Followup",
@@ -38,5 +38,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "track_changes": 1
 }

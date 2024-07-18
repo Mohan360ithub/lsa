@@ -38,6 +38,8 @@
   "aadhaar_number",
   "assessee_type",
   "it_assessee_file_search",
+  "section_break_kcui",
+  "service_status_history",
   "bank_details_tab",
   "bank_name",
   "bank_branch",
@@ -96,7 +98,8 @@
    "fieldtype": "Check",
    "in_filter": 1,
    "in_standard_filter": 1,
-   "label": "Enabled"
+   "label": "Enabled",
+   "read_only": 1
   },
   {
    "fieldname": "section_break_uyye",
@@ -401,11 +404,22 @@
    "hidden": 1,
    "label": "IT Assessee File Search",
    "options": "IT Assessee File"
+  },
+  {
+   "fieldname": "section_break_kcui",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "service_status_history",
+   "fieldtype": "Table",
+   "label": "Service Status History",
+   "options": "Service Master Status Item",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-05-17 11:56:47.182584",
+ "modified": "2024-07-10 13:07:00.331523",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "IT Assessee File",

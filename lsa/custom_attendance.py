@@ -55,17 +55,70 @@ def checkin_out_for_missed_logs():
     
 ################## NEw code for sending mail for applied and cancelled leave ############################
 @frappe.whitelist()
-def apply_for_leave(name):
+def apply_for_leave(doc,method):
     try:
-        leave_application = frappe.get_doc("Leave Application", name)
+        leave_application = frappe.get_doc("Leave Application", doc.name)
+        leave_application.custom_applied_for_leave = 1
+        leave_application.save()
+        emp_doc = frappe.get_doc("Employee", leave_application.employee)
+        mgr_doc = frappe.get_doc("Employee", emp_doc.reports_to)
 
         cc_recipients=leave_approvers(leave_application.employee)["cc_recipients"]
 
-        recipient = leave_application.custom_employee_mail_id
+        recipients = [leave_application.custom_employee_mail_id]
+        if emp_doc.personal_email:
+            recipients.append(emp_doc.personal_email)
+
+
+        ########################################################## modified by Vatsal start #################################################
         subject = "Leave Application Submitted"
-        message = f"Dear {leave_application.employee_name},<br><br>Your leave application from {leave_application.from_date} to {leave_application.to_date} has been submitted successfully. If you have any questions, please contact HR."
-        
- 
+
+        message = f"""
+        <p>Dear {leave_application.employee_name},</p>
+        <p>Your leave application has been submitted successfully with the following details:</p><br>
+        <table style="border-collapse: collapse; width: 100%;">
+            <tr>
+                <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">Employee</td>
+                <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">{leave_application.employee_name}</td>
+            </tr>
+            <tr>
+                <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">Leave Type</td>
+                <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">{leave_application.leave_type}</td>
+            </tr>
+            <tr>
+                <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">From Date</td>
+                <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">{leave_application.from_date}</td>
+            </tr>
+            <tr>
+                <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">To Date</td>
+                <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">{leave_application.to_date}</td>
+            </tr>
+            <tr>
+                <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">Total Leave Days</td>
+                <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">{leave_application.total_leave_days}</td>
+            </tr>
+            <tr>
+                <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">Reason</td>
+                <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">{leave_application.description}</td>
+            </tr>
+            <tr>
+                <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">Leave Approver</td>
+                <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">{leave_application.leave_approver}</td>
+            </tr>
+            <tr>
+                <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">Report To</td>
+                <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">{mgr_doc.employee_name}</td>
+            </tr>
+            <tr>
+                <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">Department</td>
+                <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">{leave_application.department}</td>
+            </tr>
+        </table>
+        <br>
+        <p>If you have any questions, please contact HR.</p>
+        <br>
+        <p>Best regards,<br>HR Department<br>LSA Office</p>
+        """
         # Send the email
         # frappe.sendmail(
         #     recipient=recipient,
@@ -75,8 +128,9 @@ def apply_for_leave(name):
         # )
 
 
-        ########################################################## modified by Vatsal #################################################
-        recipients=[recipient]
+
+        # recipients=["vatsal.k@360ithub.com"]
+        # cc_recipients=[]
         resp=single_mail("LSA HR",recipients,subject,message,cc_recipients)
         if not resp["status"]:
             msg=resp['msg']
@@ -86,7 +140,7 @@ def apply_for_leave(name):
         
         return {"status":True,"msg": "Mail sent successfully!"}
 
-        ########################################################## modified by Vatsal #################################################
+        ########################################################## modified by Vatsal end #################################################
     except Exception as e:
         print(f"Failed to send notification: {e}")
         frappe.log_error(message=f"Failed to send notification for leave application {e}", title="Failed to send leave application notification")
@@ -97,14 +151,65 @@ def cancel_leave(name):
     try:
         
         leave_application_doc = frappe.get_doc("Leave Application", name)
+        emp_doc = frappe.get_doc("Employee", leave_application_doc.employee)
+        mgr_doc = frappe.get_doc("Employee", emp_doc.reports_to)
         if leave_application_doc!="Cancelled":
+            recipients = [leave_application_doc.custom_employee_mail_id]
+            if emp_doc.personal_email:
+                recipients.append(emp_doc.personal_email)
 
             cc_recipients=leave_approvers(leave_application_doc.employee)["cc_recipients"]
             
             subject = "Leave Application Cancelled"
-            message = f"Dear {leave_application_doc.employee_name},<br><br>Your leave application from {leave_application_doc.from_date} to {leave_application_doc.to_date} has been cancelled. If you have any questions, please contact HR."
+            ########################################################## modified by Vatsal start #################################################
             
-            recipient = leave_application_doc.custom_employee_mail_id
+            message = f"""
+                        <p>Dear {leave_application_doc.employee_name},</p>
+                        <p>Your leave application has been cancelled successfully with the following details:</p><br>
+                        <table style="border-collapse: collapse; width: 100%;">
+                            <tr>
+                                <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">Employee</td>
+                                <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">{leave_application_doc.employee_name} </td>
+                            </tr>
+                            <tr>
+                                <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">Leave Type</td>
+                                <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">{leave_application_doc.leave_type}</td>
+                            </tr>
+                            <tr>
+                                <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">From Date</td>
+                                <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">{leave_application_doc.from_date}</td>
+                            </tr>
+                            <tr>
+                                <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">To Date</td>
+                                <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">{leave_application_doc.to_date}</td>
+                            </tr>
+                            <tr>
+                                <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">Total Leave Days</td>
+                                <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">{leave_application_doc.total_leave_days}</td>
+                            </tr>
+                            <tr>
+                                <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">Reason</td>
+                                <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">{leave_application_doc.description}</td>
+                            </tr>
+                            <tr>
+                                <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">Leave Approver</td>
+                                <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">{leave_application_doc.leave_approver}</td>
+                            </tr>
+                            <tr>
+                                <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">Report To</td>
+                                <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">{mgr_doc.employee_name}</td>
+                            </tr>
+                            <tr>
+                                <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">Department</td>
+                                <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">{leave_application_doc.department}</td>
+                            </tr>
+                        </table>
+                        <br>
+                        <p>If you have any questions, please contact HR.</p>
+                        <br>
+                        <p>Best regards,<br>HR Department<br>LSA Office</p>
+                        """
+            
             
             leave_application_doc.status='Cancelled'
  
@@ -116,8 +221,8 @@ def cancel_leave(name):
             #     message=message
             # )
 
-            ########################################################## modified by Vatsal #################################################
-            recipients=[recipient]
+            # recipients=["vatsal.k@360ithub.com"]
+            # cc_recipients=[]
             resp=single_mail("LSA HR",recipients,subject,message,cc_recipients)
             if not resp["status"]:
                 msg=resp['msg']
@@ -127,7 +232,7 @@ def cancel_leave(name):
             
             
 
-            ########################################################## modified by Vatsal #################################################
+            ########################################################## modified by Vatsal end #################################################
             leave_application_doc.save()
             
             return {"status":True,"msg": "Leave cancellation mail sent successfully!"}
@@ -144,15 +249,67 @@ def leave_action(name,approved_by):
     try:
         
         leave_application_doc = frappe.get_doc("Leave Application", name)
+        emp_doc = frappe.get_doc("Employee", leave_application_doc.employee)
+        mgr_doc = frappe.get_doc("Employee", emp_doc.reports_to)
+
         if leave_application_doc!="Cancelled":
-            user=frappe.get_doc("User",approved_by)
+            # user=frappe.get_doc("User",approved_by)
+            recipients = [leave_application_doc.custom_employee_mail_id]
+            if emp_doc.personal_email:
+                recipients.append(emp_doc.personal_email)
 
             cc_recipients=leave_approvers(leave_application_doc.employee)["cc_recipients"]
             
             subject = f"Leave Application {leave_application_doc.status}"
-            message = f"Dear {leave_application_doc.employee_name},<br><br>Your leave application from {leave_application_doc.from_date} to {leave_application_doc.to_date} has been {leave_application_doc.status} by {user.full_name}. If you have any questions, please contact HR."
+
+            ########################################################## modified by Vatsal start #################################################
+            message = f"""
+            <p>Dear {leave_application_doc.employee_name},</p>
+            <p>Your leave application has been {leave_application_doc.status} successfully with the following details:</p><br>
+            <table style="border-collapse: collapse; width: 100%;">
+                <tr>
+                    <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">Employee</td>
+                    <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">{leave_application_doc.employee_name} </td>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">Leave Type</td>
+                    <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">{leave_application_doc.leave_type}</td>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">From Date</td>
+                    <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">{leave_application_doc.from_date}</td>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">To Date</td>
+                    <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">{leave_application_doc.to_date}</td>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">Total Leave Days</td>
+                    <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">{leave_application_doc.total_leave_days}</td>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">Reason</td>
+                    <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">{leave_application_doc.description}</td>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">Leave Approver</td>
+                    <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">{leave_application_doc.leave_approver}</td>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">Report To</td>
+                    <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">{mgr_doc.employee_name}</td>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">Department</td>
+                    <td style="border: 1px solid #f0f0f0; padding: 8px; text-align: left;">{leave_application_doc.department}</td>
+                </tr>
+            </table>
+            <br>
+            <p>If you have any questions, please contact HR.</p>
+            <br>
+            <p>Best regards,<br>HR Department<br>LSA Office</p>
+            """
             
-            recipient = leave_application_doc.custom_employee_mail_id
  
             # Send the email
             # frappe.sendmail(
@@ -161,15 +318,16 @@ def leave_action(name,approved_by):
             #     subject=subject,
             #     message=message
             # )
-            ########################################################## modified by Vatsal #################################################
-            recipients=[recipient]
+            
+            # recipients=["vatsal.k@360ithub.com"]
+            # cc_recipients=[]
             resp=single_mail("LSA HR",recipients,subject,message,cc_recipients)
             if not resp["status"]:
                 msg=resp['msg']
                 print(f"Failed to send notification: {msg}")
                 frappe.log_error(message=f"Failed to send notification for leave action {leave_application_doc.name} {msg}", title="Failed to send leave action notification")
                 return {"status":False,"msg": f"Failed to send notification: {msg}"}
-            ########################################################## modified by Vatsal #################################################
+            ########################################################## modified by Vatsal end #################################################
 
             
             return {"status":True,"msg": "Leave Action mail sent successfully!"}
@@ -302,22 +460,23 @@ def leave_approvers(emp_id):
 
 @frappe.whitelist()
 def erp_last_checkin():
-    usr=frappe.session.user
-    emp_list = frappe.get_all("Employee", filters={"user_id":usr})
+    usr = frappe.session.user
+    emp_list = frappe.get_all("Employee", filters={"user_id": usr})
     if not emp_list:
-        return {"status":False,"msg":f"No Employee found for {usr} user"}
-    
-    zero_am_time = datetime.combine(date.today(), time(0, 1))
-    checkin_list = frappe.get_all("Employee Checkin",
-                                    filters={"employee":emp_list[0].name},
-                                    fields=["log_type","time"],
-                                    order_by='time desc',
-                                    limit=1)
+        return {"status": False, "msg": f"No Employee found for {usr} user"}
+
+    checkin_list = frappe.get_all(
+        "Employee Checkin",
+        filters={"employee": emp_list[0].name},
+        fields=["log_type", "time"],
+        order_by='time desc',
+        limit=1
+    )
     if checkin_list:
-        dict_log={"IN":"OUT","OUT":"IN"}
-        return {"status":True,"type":dict_log[checkin_list[0].log_type],"time":checkin_list[0].time}
+        return {"status": True, "type": checkin_list[0].log_type, "time": checkin_list[0].time}
     else:
-        return {"status":False,"msg":"No Checkin-log found for"}
+        return {"status": False, "msg": "No Checkin-log found"}
+
 
 @frappe.whitelist()
 def erp_checkin(location):
@@ -358,6 +517,8 @@ def create_log(emp_id,location,log_type):
     except Exception as e:
         # frappe.msgprint(f'{e}')
         return {"status":False,'msg':f'{e}'}
+
+
 
 
 

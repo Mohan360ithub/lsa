@@ -45,6 +45,8 @@
   "paid_up_capital",
   "section_break_deyf",
   "other_info",
+  "section_break_jegl",
+  "service_status_history",
   "director_tab",
   "table_rufo",
   "crediential_details_tab",
@@ -373,7 +375,8 @@
    "default": "1",
    "fieldname": "enabled",
    "fieldtype": "Check",
-   "label": "Enabled"
+   "label": "Enabled",
+   "read_only": 1
   },
   {
    "fieldname": "frequency",
@@ -420,11 +423,22 @@
    "hidden": 1,
    "label": "MCA ROC File Search",
    "options": "MCA ROC File"
+  },
+  {
+   "fieldname": "section_break_jegl",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "service_status_history",
+   "fieldtype": "Table",
+   "label": "Service Status History",
+   "options": "Service Master Status Item",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-03-27 15:48:23.942575",
+ "modified": "2024-07-10 13:02:13.116543",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "MCA ROC File",

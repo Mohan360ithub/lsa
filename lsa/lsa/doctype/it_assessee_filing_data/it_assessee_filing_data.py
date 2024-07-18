@@ -67,4 +67,47 @@ def create_it_assessee_filing_data(yearly_report, current_form_name):
         frappe.msgprint(f"Error: {e}")
         return False
 
+################################# Srikanth code Start ################################################################
 
+@frappe.whitelist()
+def get_gst_yearly_filing_data(candidate_id,ay):
+    # Modify the query to filter based on candidate_id
+    gst_data = frappe.get_all('Gst Yearly Filing Summery',
+                              filters={'cid': candidate_id,'gst_yearly_summery_report_id':ay},
+                              fields=['gstin', 'fy_last_month_of_filling', 'sales_total_taxable', 'company'])
+    return gst_data
+
+
+################################# Srikanth code End ################################################################
+
+@frappe.whitelist()
+def it_filing_can_be_filed(fy,doc_ids,customer_id):
+    try:
+        # print('Hii it_filing_can_be_filed method called',fy,'  --  ',doc_id)
+        it_filing_data = frappe.get_all('IT Assessee Filing Data',
+                                        filters={
+                                            "ay":fy,
+                                            "customer_id":customer_id
+                                            })
+        for itr_filing in it_filing_data:
+            if itr_filing.name in doc_ids:
+                frappe.db.set_value('IT Assessee Filing Data', itr_filing.name, 'can_be_filed', "YES")
+            else:
+                frappe.db.set_value('IT Assessee Filing Data', itr_filing.name, 'can_be_filed', "NO")
+        frappe.db.commit()
+        return {"status":True,"msg":"IT Filing status updated successfully"}
+    except Exception as e:
+        frappe.error_log(f"{e}")
+        return {"status":False,"msg":f"IT Filing status update failed: {e}"}
+
+@frappe.whitelist()
+def authenticate_user():
+    user=frappe.session.user
+    
+    user_roles = frappe.get_roles(user)
+    
+    # Check if the user has the "Onboarding Officer" role
+    if "Customer Onboarding Officer" in user_roles:
+        return {"status": True, "message": "User is an Onboarding Officer."}
+    else:
+        return {"status": False, "message": "User does not have the Onboarding Officer role."}
