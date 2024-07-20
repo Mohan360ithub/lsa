@@ -222,14 +222,29 @@ def create_razorpay_payment_link_sales_order(amount, invoice_name,customer,custo
         doc.custom_razorpay_payment_url = short_url
         doc.save()
 
+        added_gateway_charges="No"
+        if actual_amount!=amount:
+            added_gateway_charges="Yes"
+            
+        accept_partial="No"
+        if response_json["accept_partial"]:
+            accept_partial="Yes"
+
         new_payment_link = frappe.get_doc({
             "doctype": "Payment Link Log",
             "customer_id": customer,
             "sales_order":invoice_name,
-            "total_amount":amount,
+            "sales_order_amount":actual_amount,
+            "link_total_amount":amount,
             "link_short_url":short_url,
             "link_id":link_id,
             "live_link":1,
+            "added_gateway_charges":added_gateway_charges,
+            "gateway_charges":float(amount)-float(actual_amount),
+            "balance_amount":amount,
+            "received_amount":0,
+            "allow_partial_amount":accept_partial,
+            "payment_status":"Created",
 
         })
         new_payment_link.insert()
@@ -1091,6 +1106,7 @@ def so_payment_status(so_id):
     except Exception as e:
         frappe.log_error(message=str(e), title=f"Failed to get payment status for Sales Order {so_id}")
         return {"status":False,"msg": f"Failed to get payment status for Sales Order {so_id}: {e}"}
+
 
 
 

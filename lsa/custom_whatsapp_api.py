@@ -163,13 +163,12 @@ def send_custom_whatsapp_message(whatsapp_instance_doc, mobile_number, message):
     
     try:
         message_id=""
-        # response = requests.post(url, params=params)
-        # response.raise_for_status()
-        # response_data = response.json()
-        # message_id = response_data['data']['messageIDs'][0]
+        response = requests.post(url, params=params)
+        response.raise_for_status()
+        response_data = response.json()
+        message_id = response_data['data']['messageIDs'][0]
 
-        # if response_data.get('status') == 'success':
-        if True:
+        if response_data.get('status') == 'success':
             
             return {"status": True, "msg": "WhatsApp message sent successfully", "message_id": message_id}
         else:
