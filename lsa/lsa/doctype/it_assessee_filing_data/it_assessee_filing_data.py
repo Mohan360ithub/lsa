@@ -49,12 +49,16 @@ class ITAssesseeFilingData(Document):
 def create_it_assessee_filing_data(yearly_report, current_form_name):
     try:
         existing_doc=frappe.get_all("IT Assessee Filing Data",
-                                    filters={"it_assessee_file":current_form_name})
+                                    filters={"it_assessee_file":current_form_name,
+                                             "ay":yearly_report})
         if not(existing_doc):
+            it_master_doc=frappe.get_doc("IT Assessee File",current_form_name)
             filing_data_doc = frappe.new_doc('IT Assessee Filing Data')
             filing_data_doc.ay = yearly_report
             filing_data_doc.it_assessee_file = current_form_name
             filing_data_doc.created_manually=1
+            filing_data_doc.customer_id=it_master_doc.customer_id
+            filing_data_doc.it_enabled=it_master_doc.enabled
             filing_data_doc.save()
 
             return "IT Assessee Filing Data created successfully."
@@ -81,7 +85,7 @@ def get_gst_yearly_filing_data(candidate_id,ay):
 ################################# Srikanth code End ################################################################
 
 @frappe.whitelist()
-def it_filing_can_be_filed(fy,doc_ids,customer_id):
+def it_filing_can_be_filed(fy,customer_id,doc_ids=None):
     try:
         # print('Hii it_filing_can_be_filed method called',fy,'  --  ',doc_id)
         it_filing_data = frappe.get_all('IT Assessee Filing Data',
@@ -90,7 +94,7 @@ def it_filing_can_be_filed(fy,doc_ids,customer_id):
                                             "customer_id":customer_id
                                             })
         for itr_filing in it_filing_data:
-            if itr_filing.name in doc_ids:
+            if doc_ids and itr_filing.name in doc_ids:
                 frappe.db.set_value('IT Assessee Filing Data', itr_filing.name, 'can_be_filed', "YES")
             else:
                 frappe.db.set_value('IT Assessee Filing Data', itr_filing.name, 'can_be_filed', "NO")
@@ -107,7 +111,11 @@ def authenticate_user():
     user_roles = frappe.get_roles(user)
     
     # Check if the user has the "Onboarding Officer" role
-    if "Customer Onboarding Officer" in user_roles:
+    if "Customer Onboarding Officer" in user_roles or "Lsa Front Desk CRM Executive(A,B)" in user_roles:
         return {"status": True, "message": "User is an Onboarding Officer."}
     else:
         return {"status": False, "message": "User does not have the Onboarding Officer role."}
+
+
+
+

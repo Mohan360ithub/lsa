@@ -9,6 +9,7 @@
   "section_break_jiec",
   "submitted",
   "cid",
+  "customer_id",
   "gstfile",
   "company",
   "customer_status",
@@ -96,11 +97,10 @@
    "fetch_from": "gstfile.customer_id",
    "fieldname": "cid",
    "fieldtype": "Link",
-   "in_standard_filter": 1,
+   "hidden": 1,
    "label": "CID",
    "options": "Customer",
-   "read_only": 1,
-   "reqd": 1
+   "read_only": 1
   },
   {
    "fieldname": "sales_total_taxable",
@@ -237,7 +237,7 @@
    "fieldtype": "Section Break"
   },
   {
-   "fetch_from": "cid.custom_customer_status_",
+   "fetch_from": "customer_id.custom_customer_status_",
    "fieldname": "customer_status",
    "fieldtype": "Data",
    "label": "Customer Status ",
@@ -335,7 +335,7 @@
    "read_only": 1
   },
   {
-   "fetch_from": "cid.custom_contact_person",
+   "fetch_from": "customer_id.custom_contact_person",
    "fieldname": "contact_person",
    "fieldtype": "Data",
    "label": "Contact Person"
@@ -346,14 +346,22 @@
    "fieldtype": "Check",
    "in_filter": 1,
    "in_standard_filter": 1,
-   "label": "Non-Compliant",
-   "read_only": 1
+   "label": "Non-Compliant"
+  },
+  {
+   "fetch_from": "gstfile.customer_id",
+   "fieldname": "customer_id",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Customer ID",
+   "options": "Customer",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-06-19 12:58:33.593731",
+ "modified": "2024-08-03 12:34:50.418209",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Gst Filling Data",

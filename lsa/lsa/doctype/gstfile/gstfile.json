@@ -68,6 +68,16 @@
   "vat_password",
   "tally_user_name",
   "tally_password",
+  "attachments_tab",
+  "file_type",
+  "column_break_mnek",
+  "file_name",
+  "column_break_prua",
+  "attachment_notes",
+  "column_break_wkjp",
+  "attachment",
+  "section_break_vseb",
+  "attachment_html",
   "accounts_tab",
   "service_name",
   "hsn_code",
@@ -420,7 +430,6 @@
    "report_hide": 1
   },
   {
-   "default": "1",
    "fieldname": "current_recurring_fees",
    "fieldtype": "Currency",
    "label": "Current Recurring Fees",
@@ -530,13 +539,62 @@
    "fieldname": "service_status_history",
    "fieldtype": "Table",
    "label": "Service Status History",
-   "options": "Service Master Status Item",
-   "read_only": 1
+   "options": "Service Master Status Item"
+  },
+  {
+   "fieldname": "attachments_tab",
+   "fieldtype": "Tab Break",
+   "label": "Attachments"
+  },
+  {
+   "fieldname": "file_type",
+   "fieldtype": "Select",
+   "label": "File Type",
+   "permlevel": 4
+  },
+  {
+   "fieldname": "column_break_mnek",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "file_name",
+   "fieldtype": "Data",
+   "label": "File Name",
+   "permlevel": 4
+  },
+  {
+   "fieldname": "column_break_prua",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "attachment_notes",
+   "fieldtype": "Small Text",
+   "label": "Attachment Notes",
+   "permlevel": 4
+  },
+  {
+   "fieldname": "column_break_wkjp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "attachment",
+   "fieldtype": "Attach",
+   "label": "Attachment",
+   "permlevel": 4
+  },
+  {
+   "fieldname": "section_break_vseb",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "attachment_html",
+   "fieldtype": "HTML",
+   "label": "Attachment HTML"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-07-16 16:14:11.688984",
+ "modified": "2024-08-02 17:16:28.048509",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Gstfile",

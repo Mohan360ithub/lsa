@@ -9,7 +9,7 @@ class TDSREPORT(Document):
 	def on_submit(self):
             try:
                 # Fetch records from Gstfile with filter gst_type = 'regular'
-                tds_file = frappe.get_all("TDS File", filters={"enabled": 1}, fields=["name"])
+                tds_file = frappe.get_all("TDS File", filters={"enabled": 1}, fields=["name","customer_id"])
                 # print(tds_file)
 
                 # Create new records in TDS QTRLY FILING
@@ -20,6 +20,7 @@ class TDSREPORT(Document):
                         "tds_file": record.name,
                         "tds_report": self.name,
                         "fy": self.fy,
+                        "customer_id": record.customer_id,
                         # Set other fields as needed
                         # "some_other_field": "Some Value"
                     })
@@ -33,3 +34,4 @@ class TDSREPORT(Document):
             except Exception as e:
                 frappe.log_error(frappe.get_traceback(), "Error in fetch_and_insert_records")
                 return {"success": False, "error_message": str(e)}
+

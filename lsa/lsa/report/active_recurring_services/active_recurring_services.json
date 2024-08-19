@@ -6,11 +6,11 @@
  "docstatus": 0,
  "doctype": "Report",
  "filters": [],
- "idx": 0,
+ "idx": 94,
  "is_standard": "Yes",
  "letter_head": "LSA",
  "letterhead": null,
- "modified": "2024-02-09 11:10:56.069588",
+ "modified": "2024-07-30 17:53:50.513186",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Active recurring services",
@@ -21,43 +21,10 @@
  "report_type": "Script Report",
  "roles": [
   {
-   "role": "Sales User"
-  },
-  {
-   "role": "Sales Manager"
-  },
-  {
-   "role": "Stock User"
-  },
-  {
-   "role": "Sales Master Manager"
-  },
-  {
-   "role": "Accounts Manager"
-  },
-  {
-   "role": "Accounts User"
-  },
-  {
-   "role": "Stock Manager"
-  },
-  {
-   "role": "Employee Self Service"
-  },
-  {
    "role": "LSA Account Executive"
   },
   {
-   "role": "LSA Employee"
-  },
-  {
-   "role": "LSA GST Ops Manager"
-  },
-  {
-   "role": "Lsa IT Ops Manager"
-  },
-  {
-   "role": "LSA Ops Executive"
+   "role": "LSA CEO Admin"
   }
  ]
 }

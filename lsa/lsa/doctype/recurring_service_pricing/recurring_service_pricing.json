@@ -30,7 +30,17 @@
   "section_break_nvah",
   "next_price_revision",
   "previous_price_revision",
-  "gst_type"
+  "gst_type",
+  "attachments_tab",
+  "file_type",
+  "column_break_kniu",
+  "file_name",
+  "column_break_twlt",
+  "attachment_notes",
+  "column_break_kxsb",
+  "attachment",
+  "section_break_umam",
+  "attachment_html"
  ],
  "fields": [
   {
@@ -195,11 +205,61 @@
    "fieldtype": "Data",
    "label": "GST Type",
    "read_only": 1
+  },
+  {
+   "fieldname": "attachments_tab",
+   "fieldtype": "Tab Break",
+   "label": "Attachments"
+  },
+  {
+   "fieldname": "file_type",
+   "fieldtype": "Select",
+   "label": "File Type",
+   "permlevel": 4
+  },
+  {
+   "fieldname": "column_break_kniu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "file_name",
+   "fieldtype": "Data",
+   "label": "File Name",
+   "permlevel": 4
+  },
+  {
+   "fieldname": "column_break_twlt",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "attachment_notes",
+   "fieldtype": "Small Text",
+   "label": "Attachment Notes",
+   "permlevel": 4
+  },
+  {
+   "fieldname": "column_break_kxsb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "attachment",
+   "fieldtype": "Attach",
+   "label": "Attachment",
+   "permlevel": 4
+  },
+  {
+   "fieldname": "section_break_umam",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "attachment_html",
+   "fieldtype": "HTML",
+   "label": "Attachment HTML"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-06-18 18:38:45.507116",
+ "modified": "2024-07-26 18:17:29.456673",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Recurring Service Pricing",

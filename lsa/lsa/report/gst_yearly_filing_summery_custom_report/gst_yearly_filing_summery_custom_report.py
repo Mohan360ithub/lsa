@@ -85,7 +85,7 @@ def get_data(filters):
 		gst_yearly_filling_summery_filter["gst_yearly_summery_report_id"]=filters.get("gst_yearly_summery_report_id")
 	
 	if (filters.get("customer_id")):
-		gst_yearly_filling_summery_filter["cid"]=filters.get("customer_id")
+		gst_yearly_filling_summery_filter["customer_id"]=filters.get("customer_id")
 
 	if (filters.get("non_compliant")):
 		if (filters.get("non_compliant"))=="Non-Compliant":
@@ -97,7 +97,7 @@ def get_data(filters):
 	
 	gst_yearly_filling_summery_s = frappe.get_all("Gst Yearly Filing Summery", 
 											   filters=gst_yearly_filling_summery_filter,
-											   fields=["name","gst_yearly_summery_report_id","gstin","gst_type","company","cid",
+											   fields=["name","gst_yearly_summery_report_id","gstin","gst_type","company","customer_id",
 														"sales_total_taxable","purchase_total_taxable","tax_paid_amount",
 														"interest_paid_amount","penalty_paid_amount","fy_first_month_of_filling",
 														"fy_last_month_of_filling","contact_person","non_compliant"])
@@ -106,7 +106,7 @@ def get_data(filters):
 		
 		if gst_yearly_filling_summery:
 			data_row = {
-				"customer_id": gst_yearly_filling_summery.cid,
+				"customer_id": gst_yearly_filling_summery.customer_id,
 				"id":gst_yearly_filling_summery.name,
 				"company": gst_yearly_filling_summery.company,
 				"contact_person": gst_yearly_filling_summery.contact_person,

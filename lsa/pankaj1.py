@@ -519,6 +519,35 @@ def fetch_services(c_id=None,frequency=None):
         return "No data found for the given parameters."
 
 
+@frappe.whitelist()
+def fetch_services_test(c_id=None, frequency=None):
+    freq_dict = {
+        "All": ["M", "Q", "Y"],
+        "Monthly": ["M"],
+        "Quarterly": ["Q"],
+        "Yearly": ["Y"]
+    }
+
+    master_service_filter = {
+        'customer_id': c_id,
+        "enabled": 1,
+        "frequency": ("in", freq_dict[frequency])
+    }
+
+    c_services = []
+    all_services = frappe.get_all("Customer Chargeable Doctypes")
+    for service in all_services:
+        service_entries = frappe.get_all(
+            service["name"],
+            filters=master_service_filter,
+            fields=["description"]
+        )
+        # Add doctype name to each entry
+        for entry in service_entries:
+            entry["doctype"] = service["name"]
+            c_services.append(entry)
+
+    return c_services
 
 #############################################################################################
 

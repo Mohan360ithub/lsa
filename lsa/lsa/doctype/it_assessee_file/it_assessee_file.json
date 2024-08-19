@@ -53,6 +53,16 @@
   "pin_code",
   "state",
   "doc_attachment_tab",
+  "file_type",
+  "column_break_bogj",
+  "file_name",
+  "column_break_qdtg",
+  "attachment_notes",
+  "column_break_cwlg",
+  "attachment",
+  "section_break_ootr",
+  "attachment_html",
+  "section_break_yaix",
   "photo",
   "bank_passbook__cancel_cheque",
   "column_break_almu",
@@ -260,7 +270,7 @@
   {
    "fieldname": "doc_attachment_tab",
    "fieldtype": "Tab Break",
-   "label": "Doc Attachment"
+   "label": "Attachments"
   },
   {
    "fieldname": "photo",
@@ -298,7 +308,6 @@
    "label": "Accounts"
   },
   {
-   "default": "1",
    "fieldname": "current_recurring_fees",
    "fieldtype": "Currency",
    "label": "Current Recurring Fees",
@@ -415,11 +424,61 @@
    "label": "Service Status History",
    "options": "Service Master Status Item",
    "read_only": 1
+  },
+  {
+   "fieldname": "file_type",
+   "fieldtype": "Select",
+   "label": "File Type",
+   "options": "\nAssessee On boarding Form\nPrevious Years Data\nOther Documents",
+   "permlevel": 4
+  },
+  {
+   "fieldname": "column_break_bogj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "file_name",
+   "fieldtype": "Data",
+   "label": "File Name",
+   "permlevel": 4
+  },
+  {
+   "fieldname": "column_break_qdtg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "attachment_notes",
+   "fieldtype": "Small Text",
+   "label": "Attachment Notes",
+   "permlevel": 4
+  },
+  {
+   "fieldname": "column_break_cwlg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "attachment",
+   "fieldtype": "Attach",
+   "label": "Attachment",
+   "permlevel": 4
+  },
+  {
+   "fieldname": "section_break_ootr",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "attachment_html",
+   "fieldtype": "HTML",
+   "label": "Attachment HTML"
+  },
+  {
+   "fieldname": "section_break_yaix",
+   "fieldtype": "Section Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-07-10 13:07:00.331523",
+ "modified": "2024-08-02 17:16:36.790992",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "IT Assessee File",

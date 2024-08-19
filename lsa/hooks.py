@@ -132,14 +132,18 @@ app_license = "mit"
 
 doc_events = {
     "Customer": {
-        "on_update": "lsa.custom_customer.update_linked_doctypes"
-    },
+        "on_update": "lsa.custom_customer.update_linked_doctypes",
+        "before_insert":"lsa.custom_customer.lead_validation_before_insert",
+                },
     "Leave Application": {
         "after_insert": "lsa.custom_attendance.apply_for_leave"
-    },
-        "File":{
-        #"before_save" : "lsa.custom_file_manager.store_in_s3_cloud",
-    },
+                },
+    "File":{
+        "before_save" : "lsa.custom_file_manager.store_in_s3_cloud",
+                },
+    "Sales Order":{
+        "before_save" : "lsa.custom_sales_order.set_bad_debt_record_in_customer",
+                },
 }
 
 
@@ -260,6 +264,8 @@ scheduler_events = {
 # auth_hooks = [
 #	"lsa.auth.validate"
 # ]
+
+
 
 
 

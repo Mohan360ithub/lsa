@@ -9,7 +9,7 @@ class ITAssesseeFileYearlyReport(Document):
 	def on_submit(self):
             try:
                 # Fetch records from Gstfile with filter gst_type = 'regular'
-                it_assessee_file = frappe.get_all("IT Assessee File", filters={"enabled": 1}, fields=["name"])
+                it_assessee_file = frappe.get_all("IT Assessee File", filters={"enabled": 1}, fields=["name","customer_id"])
                 # print(it_assessee_file)
 
                 # Create new records in GST Monthly Filing
@@ -19,6 +19,7 @@ class ITAssesseeFileYearlyReport(Document):
                         "doctype": "IT Assessee Filing Data",
                         "it_assessee_file": record.name,
                         "ay": self.name,
+                        "customer_id":record.customer_id,
                         # Set other fields as needed
                         # "some_other_field": "Some Value"
                     })
@@ -56,4 +57,5 @@ def checking_user_authentication(user_email):
     except Exception as e:
         print(e)
         return {"status": "Failed"}
+
 

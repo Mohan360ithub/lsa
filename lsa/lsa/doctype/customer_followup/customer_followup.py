@@ -19,8 +19,9 @@ class CustomerFollowup(Document):
 			sales_order_exists=frappe.get_all("Sales Order", 
 									   filters={"name":sales_order,"customer":doc.customer_id})
 			if sales_order_exists:
+				previous_followup_list=frappe.get_all(doc.doctype,filters={"sales_order_summary": ["like", f"%{sales_order}%"]})
 				sales_order_doc=frappe.get_doc("Sales Order", sales_order)
-				sales_order_doc.custom_followup_count+=1
+				sales_order_doc.custom_followup_count=len(previous_followup_list)+1
 				# print(sales_order_doc)
 				sales_order_doc.save()
 
@@ -56,3 +57,4 @@ def close_followup(docname):
 
 
 	
+

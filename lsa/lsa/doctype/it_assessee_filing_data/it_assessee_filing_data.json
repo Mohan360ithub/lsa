@@ -15,6 +15,7 @@
   "it_assessee_file",
   "pan",
   "assessee_full_name",
+  "filing_type",
   "filing_status",
   "executive",
   "column_break_prnj",
@@ -23,6 +24,7 @@
   "contact_person",
   "customer_status",
   "mobile_no",
+  "it_enabled",
   "created_manually",
   "filing_notes",
   "income_and_deduction_tab",
@@ -49,7 +51,17 @@
   "section_break_vdbn",
   "total_income_and_deduction",
   "loan_details_tab",
-  "emi_details"
+  "emi_details",
+  "attachments_tab",
+  "file_type",
+  "column_break_luab",
+  "file_name",
+  "column_break_ptob",
+  "attachment_notes",
+  "column_break_hyet",
+  "attachment",
+  "section_break_somo",
+  "attachment_html"
  ],
  "fields": [
   {
@@ -319,6 +331,7 @@
    "fieldtype": "Select",
    "label": "Can be filed",
    "options": "YES\nNO",
+   "permlevel": 2,
    "read_only": 1,
    "reqd": 1
   },
@@ -327,12 +340,77 @@
    "fieldtype": "Table",
    "label": "EMI Details",
    "options": "Loan Details Tab EMI"
+  },
+  {
+   "default": "0",
+   "fetch_from": "it_assessee_file.enabled",
+   "fieldname": "it_enabled",
+   "fieldtype": "Check",
+   "label": "IT Enabled",
+   "read_only": 1
+  },
+  {
+   "fieldname": "filing_type",
+   "fieldtype": "Select",
+   "label": "Filing Type",
+   "options": "\nSalaried\nPersonal IT\nHigh Personal IT\nRegistered Business\nIT Audit"
+  },
+  {
+   "fieldname": "attachments_tab",
+   "fieldtype": "Tab Break",
+   "label": "Attachments"
+  },
+  {
+   "fieldname": "file_type",
+   "fieldtype": "Select",
+   "label": "File Type",
+   "options": "\nBS\nFinalized Computation\nProjected Report\nFinalized Accounting Backup\nFinalized Audit Related\nProperties Related\nLoans Related\nOther Documents",
+   "permlevel": 4
+  },
+  {
+   "fieldname": "column_break_luab",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "file_name",
+   "fieldtype": "Data",
+   "label": "File Name",
+   "permlevel": 4
+  },
+  {
+   "fieldname": "column_break_ptob",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "attachment_notes",
+   "fieldtype": "Small Text",
+   "label": "Attachment Notes",
+   "permlevel": 4
+  },
+  {
+   "fieldname": "column_break_hyet",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "attachment",
+   "fieldtype": "Attach",
+   "label": "Attachment",
+   "permlevel": 4
+  },
+  {
+   "fieldname": "section_break_somo",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "attachment_html",
+   "fieldtype": "HTML",
+   "label": "Attachment HTML"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-07-18 15:36:02.838063",
+ "modified": "2024-07-26 17:48:09.352752",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "IT Assessee Filing Data",

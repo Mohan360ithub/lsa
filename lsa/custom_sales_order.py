@@ -8,6 +8,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
+from lsa.lsa.doctype.whatsapp_message_log.whatsapp_message_log import wa_history_for_doctype_records
 
 
 @frappe.whitelist()
@@ -82,15 +83,12 @@ def sync_sales_orders_followup(so_id=None):
 
 
 @frappe.whitelist()
-def whatsapp_button(user_email=None):
+def whatsapp_button(user_email=None,so_id=None):
     try:
+
         status = False
         wa_status = False
         user_roles = frappe.get_all('Has Role', filters={'parent': user_email}, fields=['role'])
-
-        if user_email=="pankajsankhla90@gmail.com":
-            user_roles = frappe.get_all('Has Role', filters={'parent': "Administrator"}, fields=['role'])
-            return {"status": True}
 
         # Extract roles from the result
         roles = [role.get('role') for role in user_roles]
@@ -102,8 +100,18 @@ def whatsapp_button(user_email=None):
                 status = True
             if role in doc_wa_perm_roles:
                 wa_status = True
+        wa_history=None
+        if so_id:
+            resp_wa_history=wa_history_for_doctype_records("Sales Order",so_id)
+            if resp_wa_history:
+                wa_history=resp_wa_history
 
-        return {"status": status, "value": [roles],"wa_status":wa_status}
+        if user_email=="pankajsankhla90@gmail.com":
+            user_roles = frappe.get_all('Has Role', filters={'parent': "Administrator"}, fields=['role'])
+            status = True
+            wa_status = True
+
+        return {"status": status, "value": [roles],"wa_status":wa_status,"wa_history":wa_history}
 
     except Exception as e:
         #print(e)
@@ -1109,4 +1117,68 @@ def so_payment_status(so_id):
 
 
 
+@frappe.whitelist()
+def cancel_with_reason(docname, reason):
+    # Fetch the document
+    doc = frappe.get_doc('Sales Order', docname)
+    if doc.docstatus == 1:  # Ensure the document is not already canceled
+        # Set the reason for cancellation
+        doc.custom_reason_for_cancellation = reason
+        
+        # Save the document before cancellation
+        doc.save()
+        
+        # Proceed with cancellation
+        doc.cancel()
+        return {'message': 'Document cancelled successfully'}
+    else:
+        return {'message': 'Document cannot be cancelled'}
 
+
+def set_bad_debt_record_in_customer(doc, method):
+    # Save the current user session
+    original_user = frappe.session.user
+    if frappe.db.exists("Sales Order", doc.name):
+        so_id=doc.name
+        customer_id=doc.customer
+        old_sales_order = frappe.get_doc("Sales Order", so_id)
+        if doc.custom_bad_debt and  doc.custom_bad_debt != old_sales_order.custom_bad_debt:
+            try:
+                # Calculate the pending amount
+                pending_amount = doc.rounded_total - doc.advance_paid
+                
+                # Create the note text
+                note_text = f"Sales Order {so_id} marked as Bad Debt with a pending amount of {pending_amount}."
+                
+                # Create the new note
+                new_note = {
+                    "doctype": "CRM Note",
+                    "note": note_text,
+                    "added_by": original_user,
+                    "added_on": frappe.utils.now_datetime()
+                }
+                
+                # Fetch the Customer document
+                customer = frappe.get_doc("Customer", customer_id)
+                customer.custom_bad_debt_customer=1
+                
+                # Switch to Administrator user to perform the changes
+                # frappe.set_user("Administrator")
+                
+                # Append the new note to the customer's custom_admin_notes_table
+                customer.append("custom_admin_notes_table", new_note)
+                
+                # Save the Customer document
+                customer.save()
+                
+                # Commit the changes
+                frappe.db.commit()
+            
+            except Exception as e:
+                # Handle exceptions and revert changes if necessary
+                frappe.log_error(message=str(e), title="Error in set_bad_debt_record_in_customer")
+                frappe.db.rollback()
+                raise
+            # finally:
+            #     # Restore the original user session
+            #     frappe.set_user(original_user)

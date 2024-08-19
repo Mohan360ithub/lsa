@@ -23,7 +23,7 @@ class GstFillingData(Document):
             old_doc = frappe.get_doc(doc.doctype, doc.name)
             if doc.filing_status == "Filed Summery Shared With Client" and old_doc.filing_status != "Filed Summery Shared With Client":
                 existing_gst_file = frappe.get_all(doc.doctype,
-                                                    filters={'cid': doc.cid,
+                                                    filters={'customer_id': doc.customer_id,
                                                             "filing_status": "Filed Summery Shared With Client"},
                                                     fields=["name", "fy", "month", "modified"]
                                                     )
@@ -62,7 +62,7 @@ class GstFillingData(Document):
 
             elif doc.filing_status != "Filed Summery Shared With Client" and old_doc.filing_status == "Filed Summery Shared With Client":
                 existing_gst_file = frappe.get_all(doc.doctype,
-                                                filters={'cid': doc.cid,
+                                                filters={'customer_id': doc.customer_id,
                                                             "filing_status": "Filed Summery Shared With Client",
                                                             "name": ("not in", [doc.name])},
                                                 fields=["name", "fy", "month", "modified"]
@@ -165,7 +165,7 @@ def check_gst_compliance(manual=None):
                     12: "DEC"
                 }
     today = dt.date.today()
-    # today=dt.date(2024, 5, 5)
+    # today=dt.date(2024, 7, 25)
     today_day_number = today.day
 
     one_month_before = dt.date(today.year, today.month-1, 21)
@@ -208,7 +208,63 @@ def check_gst_compliance(manual=None):
     else:
         frappe.log_error(message=f"today_day_number: {today_day_number}, month_number: {month_number}, month_name: {month_name}", title="Error in GST Filing Non-compliance Marking")
 
+# @frappe.whitelist()
+# def check_gst_compliance(manual=None):
+#     month_dict = {
+#         1: "JAN", 2: "FEB", 3: "MAR", 4: "APR", 5: "MAY", 6: "JUN",
+#         7: "JUL", 8: "AUG", 9: "SEP", 10: "OCT", 11: "NOV", 12: "DEC"
+#     }
     
+#     today = dt.date.today()
+#     # Uncomment for testing purposes
+#     # today = dt.date(2024, 7, 25)
+
+#     # Get the current and previous month
+#     current_month = today.month
+#     current_year = today.year
+#     previous_month = today - relativedelta(months=1)
+    
+#     # Determine if today is past the 21st of the current month or if the new month has arrived
+#     past_21st = today.day >= 21
+#     new_month = today.month != previous_month.month
+
+#     if past_21st or new_month:
+#         fy = get_financial_year(previous_month)
+#         month_number = previous_month.month
+#         month_name = month_dict[month_number]
+        
+#         # Determine GST types
+#         gst_type = ["Regular", "QRMP"]
+#         if month_number % 3 == 0:
+#             gst_type.append("Composition")
+        
+#         # Fetch non-submitted GST Filling Data for the previous month
+#         gst_filling_data = frappe.get_all(
+#             "Gst Filling Data",
+#             filters={
+#                 'fy': fy,
+#                 'gst_type': ("in", gst_type),
+#                 'month': ("like", "%" + month_name),
+#                 'submitted': 0,
+#             }
+#         )
+        
+#         # Mark GST Filling Data and related summary as non-compliant
+#         for step_4 in gst_filling_data:
+#             gst_filling = frappe.get_doc("Gst Filling Data", step_4.name)
+#             gst_filling.non_compliant = 1
+#             gst_filling.save()
+            
+#             gst_yearly_summary = frappe.get_doc("Gst Yearly Filing Summery", gst_filling.gst_yearly_filling_summery_id)
+#             gst_yearly_summary.non_compliant = 1
+#             gst_yearly_summary.save()
+        
+#         return len(gst_filling_data)
+#     else:
+#         frappe.log_error(
+#             message=f"Today is {today}, which is before the 21st of the month or not in a new month. No GST Filing Data will be marked as non-compliant.",
+#             title="Info: GST Filing Non-compliance Check"
+#         )
 
 @frappe.whitelist()
 def create_gst_filing_data(gst_yearly_filling_summery_id,gstfile,gst_type,fy,gst_filing_data_report):
@@ -216,6 +272,8 @@ def create_gst_filing_data(gst_yearly_filling_summery_id,gstfile,gst_type,fy,gst
         existing_doc=frappe.get_all("Gst Filling Data",
                                     filters={"gst_yearly_filling_summery_id":gst_yearly_filling_summery_id,
                                              "gst_filling_report_id":gst_filing_data_report})
+        
+        gstfile_doc=frappe.get_doc("Gstfile",gstfile)
         if not(existing_doc):
             gst_filing_data_report_doc=frappe.get_all("Gst Filing Data Report",
                                     filters={"name":gst_filing_data_report},
@@ -229,6 +287,7 @@ def create_gst_filing_data(gst_yearly_filling_summery_id,gstfile,gst_type,fy,gst
                 gst_filling_data.gst_filling_report_id=gst_filing_data_report_doc[0].name
             gst_filling_data.gst_yearly_filling_summery_id = gst_yearly_filling_summery_id
             gst_filling_data.gstfile = gstfile
+            gst_filling_data.customer_id = gstfile_doc.customer_id
             gst_filling_data.created_manually=1
             gst_filling_data.insert()
             gst_filling_data.save()
@@ -496,6 +555,8 @@ def custom_save_as_draft(gst_yearly_filling_summary_id, sales_total_taxable, pur
     #     else:
     #         # Increment the field by the current value
     #         setattr(gst_yearly_filing_summery, field_name, getattr(gst_yearly_filing_summery, field_name) + field_value)
+
+
 
 
 

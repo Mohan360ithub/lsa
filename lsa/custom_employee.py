@@ -317,22 +317,44 @@ def get_leave_ledger_entries(
 #         return absent_data
 #     return None
 
+########################################### Srikanth Code Modification of get_employees_with_absent functionStart ################################################################
 
 @frappe.whitelist()
 def get_employees_with_absent():
-
     cur_month = frappe.utils.now_datetime().month
+    # Fetch all employee data
+    usr=frappe.session.user
+    emp_data = frappe.get_all('Employee', filters={"user_id":usr}, fields=['name', 'employee_name','user_id'])
+    reg_req_date={}
+    # Iterate over each employee to check for absences
+    for emp in emp_data:
+        emp_name = emp.name
+        emp_mail = emp.user_id
+        # Fetch attendance regularization requests for the employee
+        attendance_regularization = frappe.get_all(
+            "Team Ticket",
+            filters={
+                # "employee": emp_name,
+                "created_by": emp_mail,
+        
+            },
+            fields=["regularization_date","name","created_by"]
+        )
 
+        
+        # Check if there are any requests for the employee
+        if attendance_regularization:
+            for request in attendance_regularization:
+                date_value=(request.regularization_date)
+                reg_req_date[date_value]= request.name
+    
     # Fetch employees with birthdays in the current month
     employees = get_employee_for_user()
     if employees:
         employees_dict = {}
         for emp in employees:
-            employees_dict[emp.name] = emp.employee_name
-        
+            employees_dict[emp.name] = emp.employee_name       
         today = date.today()
-        # today = datetime.strptime("2024-05-15", "%Y-%m-%d")
-
 
         # Calculate the start date of the current month
         start_date = date(today.year, today.month, 1)
@@ -343,22 +365,17 @@ def get_employees_with_absent():
         else:
             end_date = date(today.year, today.month + 1, 1) - timedelta(days=1)
 
-
         leave_applications = frappe.get_all("Leave Application",
                                              filters={
                                                       "from_date": ("between", [str(start_date), str(end_date)]),
                                                       "employee":employees[0].name,
                                                       },
                                              fields=["name", "from_date", "to_date", "employee","status"])
-        
-
         # Initialize the dictionary
         leave_dict = {}
 
         # Iterate over each leave application
         for leave in leave_applications:
-            # from_date = datetime.strptime(str(leave["from_date"]), "%Y-%m-%d")
-            # to_date = datetime.strptime(str(leave["to_date"]), "%Y-%m-%d")
             from_date = leave.from_date
             to_date = leave.to_date
             employee = leave["employee"]
@@ -389,18 +406,119 @@ def get_employees_with_absent():
                 absent_data[str(ab_date.attendance_date)] = []
 
 
-
+            regularization_exists = None
             if (ab_date.attendance_date,ab_date.employee) in leave_dict:
+                
+                # if (ab_date.attendance_date) in reg_req_date:
+                #     regularization_exists=reg_req_date[ab_date.attendance_date]
+
                 absent_data[str(ab_date.attendance_date)].append([employees_dict[ab_date.employee], False, absent_date_checkin,ab_date.working_hours,"Applied for leave but not approved"])
             elif absent_date_checkin and (len(absent_date_checkin)%2 != 0 or absent_date_checkin[0].log_type == "OUT"):
-                absent_data[str(ab_date.attendance_date)].append([employees_dict[ab_date.employee], True, absent_date_checkin,ab_date.working_hours,"Mismatch in Checkins"])
+                
+                if (ab_date.attendance_date) in reg_req_date:
+                     regularization_exists=reg_req_date[ab_date.attendance_date]
+                     
+                absent_data[str(ab_date.attendance_date)].append([employees_dict[ab_date.employee], True, absent_date_checkin,ab_date.working_hours,"Mismatch in Checkins",regularization_exists])
             elif absent_date_checkin :
-                absent_data[str(ab_date.attendance_date)].append([employees_dict[ab_date.employee], True, absent_date_checkin,ab_date.working_hours,"Short working hours"])
+                
+                if (ab_date.attendance_date) in reg_req_date:
+                    regularization_exists=reg_req_date[ab_date.attendance_date]
+                absent_data[str(ab_date.attendance_date)].append([employees_dict[ab_date.employee], True, absent_date_checkin,ab_date.working_hours,"Short working hours",regularization_exists])
             else:
-                absent_data[str(ab_date.attendance_date)].append([employees_dict[ab_date.employee], False, absent_date_checkin,ab_date.working_hours,"Need to apply for Leave"])
+               
+               
+                if (ab_date.attendance_date) in reg_req_date:
+                     regularization_exists=reg_req_date[ab_date.attendance_date]
+
+                absent_data[str(ab_date.attendance_date)].append([employees_dict[ab_date.employee], False, absent_date_checkin,ab_date.working_hours,"Need to apply for Leave",regularization_exists])
 
         return absent_data
     return None
+########################################### Srikanth Code Start ################################################################
+
+# @frappe.whitelist()
+# def get_employees_with_absent():
+
+#     cur_month = frappe.utils.now_datetime().month
+
+#     # Fetch employees with birthdays in the current month
+#     employees = get_employee_for_user()
+#     if employees:
+#         employees_dict = {}
+#         for emp in employees:
+#             employees_dict[emp.name] = emp.employee_name
+        
+#         today = date.today()
+#         # today = datetime.strptime("2024-05-15", "%Y-%m-%d")
+
+
+#         # Calculate the start date of the current month
+#         start_date = date(today.year, today.month, 1)
+
+#         # Calculate the end date of the current month
+#         if today.month == 12:
+#             end_date = date(today.year + 1, 1, 1) - timedelta(days=1)
+#         else:
+#             end_date = date(today.year, today.month + 1, 1) - timedelta(days=1)
+
+
+#         leave_applications = frappe.get_all("Leave Application",
+#                                              filters={
+#                                                       "from_date": ("between", [str(start_date), str(end_date)]),
+#                                                       "employee":employees[0].name,
+#                                                       },
+#                                              fields=["name", "from_date", "to_date", "employee","status"])
+        
+
+#         # Initialize the dictionary
+#         leave_dict = {}
+
+#         # Iterate over each leave application
+#         for leave in leave_applications:
+#             # from_date = datetime.strptime(str(leave["from_date"]), "%Y-%m-%d")
+#             # to_date = datetime.strptime(str(leave["to_date"]), "%Y-%m-%d")
+#             from_date = leave.from_date
+#             to_date = leave.to_date
+#             employee = leave["employee"]
+#             status = leave["status"]
+            
+#             # Generate key-value pairs for each day in the leave application range
+#             current_date = from_date
+#             while current_date <= to_date or current_date<=to_date:
+#                 leave_dict[(current_date, employee)] = status
+#                 current_date += timedelta(days=1)
+        
+#         absent_date = frappe.get_all("Attendance",
+#                                      filters={"docstatus": 1,
+#                                               "status": "Absent",
+#                                               "employee":employees[0].name,
+#                                               "attendance_date": ("between", [str(start_date), str(end_date)]),
+#                                               },
+#                                      fields=["name", "attendance_date", "employee","working_hours"],
+#                                      order_by="attendance_date desc")
+#         absent_data = {}
+#         for ab_date in absent_date:
+#             absent_date_checkin = frappe.get_all("Employee Checkin",
+#                                      filters={"attendance": ab_date.name},
+#                                      fields=["name", "time", "log_type","custom_automatically_marked_by_system"],
+#                                      order_by="time asc")
+
+#             if str(ab_date.attendance_date) not in absent_data:
+#                 absent_data[str(ab_date.attendance_date)] = []
+
+
+
+#             if (ab_date.attendance_date,ab_date.employee) in leave_dict:
+#                 absent_data[str(ab_date.attendance_date)].append([employees_dict[ab_date.employee], False, absent_date_checkin,ab_date.working_hours,"Applied for leave but not approved"])
+#             elif absent_date_checkin and (len(absent_date_checkin)%2 != 0 or absent_date_checkin[0].log_type == "OUT"):
+#                 absent_data[str(ab_date.attendance_date)].append([employees_dict[ab_date.employee], True, absent_date_checkin,ab_date.working_hours,"Mismatch in Checkins"])
+#             elif absent_date_checkin :
+#                 absent_data[str(ab_date.attendance_date)].append([employees_dict[ab_date.employee], True, absent_date_checkin,ab_date.working_hours,"Short working hours"])
+#             else:
+#                 absent_data[str(ab_date.attendance_date)].append([employees_dict[ab_date.employee], False, absent_date_checkin,ab_date.working_hours,"Need to apply for Leave"])
+
+#         return absent_data
+#     return None
 
 
 
@@ -446,12 +564,22 @@ def get_employees_present_today():
 
 @frappe.whitelist()
 def get_notapproved_leave_applications_for_approver():
-    current_date = now_datetime().date()  # Get the current date in YYYY-MM-DD format
+
     usr=frappe.session.user
+    # leave_applications = frappe.get_all(
+    #     'Leave Application',
+    #     filters={
+    #         'status': 'Open',
+    #         "leave_approver":usr,
+    #         # 'to_date': ['>=', current_date]  # Filter to get only to_date greater than or equal to current date
+    #     },
+    #     fields=['employee_name','posting_date','from_date', 'to_date', 'total_leave_days','name']
+    # )
+
     leave_applications = frappe.get_all(
         'Leave Application',
         filters={
-            'status': 'Open',
+            'docstatus': 0,
             "leave_approver":usr,
             # 'to_date': ['>=', current_date]  # Filter to get only to_date greater than or equal to current date
         },
@@ -613,4 +741,6 @@ def appraisal_submission(emp_id):
         #     "status": False,
         #     "msg": f"Failed to submit appraisal and assign salary structure: {str(e)}"
         # }
+
+
 

@@ -123,7 +123,8 @@
    "fieldname": "customer_id",
    "fieldtype": "Link",
    "label": "Customer ID",
-   "options": "Customer"
+   "options": "Customer",
+   "reqd": 1
   },
   {
    "fetch_from": "customer_id.customer_name",
@@ -141,7 +142,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-01-12 09:51:14.505016",
+ "modified": "2024-08-09 12:36:42.638154",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "TDS QTRLY FILING",

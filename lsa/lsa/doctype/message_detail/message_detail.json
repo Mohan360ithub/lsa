@@ -66,6 +66,7 @@
    "default": "0",
    "fieldname": "sent_successfully",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Sent Successfully",
    "read_only": 1
   }
@@ -73,7 +74,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-07-18 14:54:04.530147",
+ "modified": "2024-07-26 10:54:35.550187",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Message Detail",

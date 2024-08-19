@@ -6,7 +6,8 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "doctype_name"
+  "doctype_name",
+  "service_item"
  ],
  "fields": [
   {
@@ -17,11 +18,17 @@
    "options": "DocType",
    "reqd": 1,
    "unique": 1
+  },
+  {
+   "fieldname": "service_item",
+   "fieldtype": "Table MultiSelect",
+   "label": "Service Item",
+   "options": "Lead Items"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-01-02 13:00:25.972244",
+ "modified": "2024-08-19 10:53:42.838462",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Customer Chargeable Doctypes",

@@ -56,7 +56,7 @@ def create_gst_yearly_filing_manually(gst_yearly_summary_report,gstfile,
 
             new_doc.gst_yearly_summery_report_id = gst_yearly_summary_report
             new_doc.fy = gst_yearly_summary_report
-            new_doc.cid = customer_id
+            new_doc.customer_id = customer_id
             new_doc.gst_file_id = gstfile
             new_doc.customer_status = customer_status
             new_doc.gstin = gstfile
@@ -93,7 +93,7 @@ def create_gst_yearly_filing_manually(gst_yearly_summary_report,gstfile,
 
 #                 new_doc.gst_yearly_summery_report_id = gst_yearly_summary_report
 #                 new_doc.fy = gst_yearly_summary_report
-#                 new_doc.cid = customer_id
+#                 new_doc.customer_id = customer_id
 #                 new_doc.gst_file_id = gstfile
 #                 new_doc.customer_status = customer_status
 #                 new_doc.gstin = gstfile
@@ -111,7 +111,7 @@ def create_gst_yearly_filing_manually(gst_yearly_summary_report,gstfile,
 
 #                     new_doc.gst_yearly_summery_report_id = gst_yearly_summary_report
 #                     new_doc.fy = gst_yearly_summary_report
-#                     new_doc.cid = customer_id
+#                     new_doc.customer_id = customer_id
 #                     new_doc.gst_file_id = gstfile
 #                     new_doc.customer_status = customer_status
 #                     new_doc.gstin = gstfile

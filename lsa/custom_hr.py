@@ -77,6 +77,8 @@ def get_employees_with_absent():
             if str(ab_date.attendance_date) not in absent_data:
                 absent_data[str(ab_date.attendance_date)] = []
 
+            if ab_date.employee not in employees_dict :
+                continue
             if employees_dict[ab_date.employee] not in emp_count:
                 emp_count[employees_dict[ab_date.employee]]=0
             emp_count[employees_dict[ab_date.employee]]+=1
@@ -139,7 +141,7 @@ def get_notapproved_leave_applications():
     leave_applications = frappe.get_all(
         'Leave Application',
         filters={
-            'status': 'Open'
+            'docstatus': 0
             # 'to_date': ['>=', current_date]  # Filter to get only to_date greater than or equal to current date
         },
         fields=['employee_name',"leave_approver",'posting_date','from_date', 'to_date', 'total_leave_days','name']
@@ -152,5 +154,7 @@ def get_notapproved_leave_applications():
         app["leave_approver_name"]=user.full_name
     return leave_applications
 ######################################Vatsal Modified srikanth Code End###########################################################
+
+
 
 

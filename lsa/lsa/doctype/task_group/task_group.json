@@ -22,7 +22,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Department",
-   "options": "\nGST\nIncome Tax\nProfessional Tax\nROC\nTDS\nRegistration\nClient Notice\nCRM\nHR\nAccounts",
+   "options": "\nGST\nIncome Tax\nProfessional Tax\nROC\nTDS\nRegistration\nClient Notice\nCRM\nHR\nAccounts\nOther Department",
    "reqd": 1
   },
   {
@@ -60,12 +60,12 @@
    "fieldtype": "Select",
    "label": "Status",
    "options": "Active\nInactive",
-   "read_only": 1
+   "permlevel": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-07-15 17:21:36.840579",
+ "modified": "2024-08-09 16:47:07.915664",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Task Group",

@@ -3,6 +3,8 @@
 
 import frappe
 from frappe.model.document import Document
+from lsa.custom_sales_order import so_payment_status
+from lsa.custom_customer import get_customer_annual_fees
 
 
  
@@ -16,7 +18,24 @@ class ClientGroup(Document):
         cust = frappe.get_doc("Customer", self.is_primary)
         cust.custom_client_group = self.name
         cust.save()
- 
+    def before_save(self):
+        if frappe.db.exists("Client Group",self.name):
+            old_doc = frappe.get_doc("Client Group", self.name)
+            if self.is_primary != old_doc.is_primary and self.enabled:
+                customer = frappe.get_all("Customer",
+                                        filters={"name": self.is_primary, "custom_client_group": self.name},
+                                        )
+                
+                if not customer:
+                    frappe.throw(f"The primary customer {self.is_primary} does not belong to the specified group {self.group_name}.")
+            if not self.enabled :
+                self.is_primary=None
+                customer_in_group = frappe.get_all("Customer",
+                                        filters={ "custom_client_group": self.name},
+                                        )
+                for customer in customer_in_group:
+                    frappe.db.set_value('Customer', customer.name, 'custom_client_group', None)
+        
 def customer_validation(customer_id):
     try:
         # Get Customer document
@@ -62,14 +81,14 @@ def add_customer_to_group(customer_id, group_name):
         raise
  
 ################# Below code is make Ajax call to get the HTML table #########################
-import frappe
+
  
-@frappe.whitelist()
-def fetch_customer_details(name):
-    customers = frappe.get_all('Customer', 
-                               filters={'custom_client_group': name}, 
-                               fields=['customer_name', 'custom_customer_status_', 'name'])
-    return customers
+# @frappe.whitelist()
+# def fetch_customer_details(name):
+#     customers = frappe.get_all('Customer', 
+#                                filters={'custom_client_group': name}, 
+#                                fields=['customer_name', 'custom_customer_status_', 'name'])
+#     return customers
 
 
 ############################## Below code is validating current customer is not primary in client group ####################################################################
@@ -80,3 +99,49 @@ def check_is_primary(customer_name,customer_groups):
         return True
     return False
  
+################################################### Vatsal Code Start ################################################################
+
+@frappe.whitelist()
+def get_client_group_summary(group_id,customer_id=None):
+    try:
+        # Get all the client groups
+        client_group_customers = frappe.get_all("Customer",filters={
+                                                                    "custom_client_group":group_id,
+                                                                    # "name":("not in",[customer_id]),
+                                                                    },
+                                                            fields=["name","customer_name","custom_customer_status_","custom_contact_person","custom_primary_mobile_no"],        
+                                                            )
+
+        # Initialize a dictionary to store the client group summary
+        client_group_summary = {}
+
+        # Loop through each client group
+        for customer in client_group_customers:
+            so_list = frappe.get_all("Sales Order",filters={
+                                                            "customer":customer.name,
+                                                            "docstatus":("not in",[2])
+                                                            },)
+            due_so_count=0
+            due_so_amount=0.00
+            for so in so_list:
+                so_status=so_payment_status(so.name)
+                if so_status["payment_status"]!="Cleared":
+                    due_so_count+=1
+                    due_so_amount+=so_status["balance_amount"]
+            annual_fees=get_customer_annual_fees(customer.name)
+            client_group_summary[customer.name] = {"customer_name":customer.customer_name,
+                                                   "custom_contact_person":customer.custom_contact_person,
+                                                   "custom_primary_mobile_no":customer.custom_primary_mobile_no,
+                                                   "customer_status":customer.custom_customer_status_,
+                                                   "due_so_count":due_so_count,
+                                                   "due_so_amount":due_so_amount,
+                                                   "annual_fees":annual_fees
+                                                   }
+        return {"status":True,"msg":"Client Group data fetched successfully!","client_group_summary":client_group_summary}
+    except Exception as e:
+        frappe.log_error(message=str(e), title="Failed to fetch client group summary")
+        return {"status":False,"msg": f"Failed to fetch client group summary:{e}"}
+    
+################################################### Vatsal Code End ###################################################
+
+

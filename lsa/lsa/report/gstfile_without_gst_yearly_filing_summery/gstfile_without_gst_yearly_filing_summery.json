@@ -10,7 +10,7 @@
  "is_standard": "Yes",
  "letter_head": "LSA",
  "letterhead": null,
- "modified": "2024-01-16 16:45:44.049630",
+ "modified": "2024-07-30 17:55:21.553950",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Gstfile Without Gst Yearly Filing Summery",
@@ -25,22 +25,13 @@
    "role": "System Manager"
   },
   {
-   "role": "LSA Employee"
-  },
-  {
    "role": "LSA CEO Admin"
   },
   {
-   "role": "LSA OPS MANAGER"
+   "role": "LSA OPS SENIOR MANAGER"
   },
   {
-   "role": "LSA GST Executive"
-  },
-  {
-   "role": "LSA GST Basic"
-  },
-  {
-   "role": "LSA GST Ops Manager"
+   "role": "LSA GST Ops Manager(A,Sernior)"
   }
  ]
 }

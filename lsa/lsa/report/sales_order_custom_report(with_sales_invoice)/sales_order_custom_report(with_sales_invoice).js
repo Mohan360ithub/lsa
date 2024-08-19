@@ -59,8 +59,16 @@ frappe.query_reports["Sales Order Custom Report(With Sales Invoice)"] = {
 			reqd: true,
 			default: "2025-03-31",
 		},
+		{
+			fieldname: "followup_range",
+			label: __("Followup Date Range"),
+			fieldtype: "Date Range",
+			// reqd: true,
+			// default: "2025-03-31",
+		},
 	]
 };
+
 
 
 

@@ -10,7 +10,7 @@
  "is_standard": "Yes",
  "letter_head": "LSA",
  "letterhead": null,
- "modified": "2024-02-16 15:39:34.380806",
+ "modified": "2024-07-30 17:51:23.377258",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Sales Invoice Sales Order",
@@ -34,9 +34,6 @@
   },
   {
    "role": "LSA CEO Admin"
-  },
-  {
-   "role": "Guest"
   }
  ]
 }

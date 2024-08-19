@@ -8,7 +8,7 @@ from lsa.custom_whatsapp_api import validate_whatsapp_instance,send_custom_whats
 
 def execute(filters=None):
     columns = [
-        {"fieldname": "cid", "label": _("CID"), "fieldtype": "Link", "options": "Customer", "width": 100},
+        {"fieldname": "customer_id", "label": _("CID"), "fieldtype": "Link", "options": "Customer", "width": 100},
         {"fieldname": "customer_status", "label": _("Customer Status"), "fieldtype": "Data", "width": 100},
         {"fieldname": "name", "label": _("ID"), "fieldtype": "Link", "options": "Gst Filling Data", "width": 100},
         {"fieldname": "filing_status", "label": _("Filing Status"), "fieldtype": "Data", "width": 170},
@@ -28,16 +28,19 @@ def execute(filters=None):
         {"fieldname": "filing_notes", "label": _("Filing Notes"), "fieldtype": "Data", "width": 150},
     ]
 
-    # Construct additional filters based on the provided filters
-    additional_filters = {}
+
     gstfile_enabled_filter=1
+
+    
+    # Construct additional filters based on the provided filters
+    additional_filters = {"gstfile_enabled":1}
     # Check if the mandatory filters are provided
     if filters.get("gst_type") and filters.get("fy") and filters.get("month"):
         additional_filters["gst_type"] = filters["gst_type"]
         additional_filters["fy"] = filters["fy"]
         additional_filters["month"] = filters["month"]
         if filters.get("customer_id"):
-            additional_filters["cid"] = filters["customer_id"]
+            additional_filters["customer_id"] = filters["customer_id"]
         
     else:
         # If mandatory filters are not provided, return empty data
@@ -53,7 +56,7 @@ def execute(filters=None):
     data = frappe.get_all(
         "Gst Filling Data",
         filters=additional_filters,
-        fields=["cid", "customer_status", "name", "filing_status", "gstfile", "gstfile_enabled", "company",
+        fields=["customer_id", "customer_status", "name", "filing_status", "gstfile", "gstfile_enabled", "company",
                 "mobile_no_gst", "gst_user_name", "gst_password", "proprietor_name", "executive",
                 "gst_type", "month", "fy", "gst_yearly_filling_summery_id", "filing_notes","non_compliant"],
     )
@@ -65,21 +68,21 @@ def execute(filters=None):
         data_new=[]
         if customer_status=="Enabled":
             for gst_file in data:
-                if (not customer_list[gst_file.cid]) :
+                if (not customer_list[gst_file.customer_id]) :
                     data_new.append(gst_file)
         elif customer_status=="Disabled":
             for gst_file in data:
-                if ( customer_list[gst_file.cid]) :
+                if ( customer_list[gst_file.customer_id]) :
                     data_new.append(gst_file)
         data=data_new
 
-    if "cid" in additional_filters:
-        del additional_filters["cid"]
+    if "customer_id" in additional_filters:
+        del additional_filters["customer_id"]
 
     # data_old = frappe.get_list(
     #     "Gst Filling Data",
     #     filters=additional_filters,
-    #     fields=["cid", "customer_status", "name", "filing_status", "gstfile", "gstfile_enabled", "company",
+    #     fields=["customer_id", "customer_status", "name", "filing_status", "gstfile", "gstfile_enabled", "company",
     #             "mobile_no_gst", "gst_user_name", "gst_password", "proprietor_name", "executive",
     #             "gst_type", "month", "fy", "gst_yearly_filling_summery_id", "filing_notes"],
     # )
@@ -329,7 +332,7 @@ def send_bulk_wa_for_filtered_gst_customer( message,
         else:
             gst_step_4_filter["non_compliant"]=0
     if customer_id:
-        gst_step_4_filter["cid"]=customer_id
+        gst_step_4_filter["customer_id"]=customer_id
 
     customer_diable_filter_list=[]
     if customer_enable_status:
@@ -343,7 +346,7 @@ def send_bulk_wa_for_filtered_gst_customer( message,
 
     gst_step_4_list=frappe.get_all("Gst Filling Data",
                                     filters=gst_step_4_filter,
-                                    fields=["mobile_no_gst","name","cid"])
+                                    fields=["mobile_no_gst","name","customer_id"])
     # count=1
     if gst_step_4_list:
         try:
@@ -364,7 +367,7 @@ def send_bulk_wa_for_filtered_gst_customer( message,
                 for step_4 in gst_step_4_list:
                     # print(count)
                     # count+=1
-                    if customer_diable_filter_list and step_4.cid not in customer_diable_filter_list:
+                    if customer_diable_filter_list and step_4.customer_id not in customer_diable_filter_list:
                         continue
                     resp_wa_send_message=send_custom_whatsapp_message(resp_instance_validation["whatsapp_instance_doc"],step_4.mobile_no_gst,message)
                     if resp_wa_send_message["status"]:
@@ -373,7 +376,7 @@ def send_bulk_wa_for_filtered_gst_customer( message,
                                                                 "type": "Gst Filling Data",
                                                                 "document_id": step_4.name,
                                                                 "mobile_number": step_4.mobile_no_gst,
-                                                                "customer": step_4.cid,
+                                                                "customer": step_4.customer_id,
                                                                 "message_id": message_id,
                                                                 "sent_successfully":1,
                                                             })
@@ -382,7 +385,7 @@ def send_bulk_wa_for_filtered_gst_customer( message,
                                                                 "type": "Gst Filling Data",
                                                                 "document_id": step_4.name,
                                                                 "mobile_number": step_4.mobile_no_gst,
-                                                                "customer": step_4.cid,
+                                                                "customer": step_4.customer_id,
                                                                 "message_id": message_id
                                                             })
                         frappe.log_error(f"An error occurred while sending the WhatsApp message. For Gst Filling Data {step_4.name} to {step_4.mobile_no_gst}",f"{resp_wa_send_message['msg']}")
@@ -399,5 +402,6 @@ def send_bulk_wa_for_filtered_gst_customer( message,
             frappe.log_error(f"An Exception error occurred while sending bulk WhatsApp messages for Gst Filling Data.",f"{er}")
             return {"status":False,"msg":f"An Exception error occurred while sending bulk WhatsApp messages for Gst Filling Data."}
     return {"status":False,"msg":f"No Gst Filling Data record found for the filters set."}
+
 
 

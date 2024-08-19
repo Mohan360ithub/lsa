@@ -355,7 +355,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "1",
    "fieldname": "current_recurring_fees",
    "fieldtype": "Currency",
    "label": "Current Recurring Fees",
@@ -454,7 +453,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-07-10 13:05:14.132183",
+ "modified": "2024-08-02 17:15:42.906509",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Professional Tax File",

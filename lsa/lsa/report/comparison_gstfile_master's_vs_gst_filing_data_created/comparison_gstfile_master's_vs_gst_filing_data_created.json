@@ -10,7 +10,7 @@
  "is_standard": "Yes",
  "letter_head": "LSA",
  "letterhead": null,
- "modified": "2024-01-16 16:45:44.084399",
+ "modified": "2024-07-30 17:55:11.555558",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Comparison Gstfile Master's Vs GST Filing Data created",
@@ -25,16 +25,10 @@
    "role": "System Manager"
   },
   {
-   "role": "LSA Employee"
-  },
-  {
    "role": "LSA CEO Admin"
   },
   {
-   "role": "LSA OPS MANAGER"
-  },
-  {
-   "role": "LSA GST Executive"
+   "role": "LSA OPS SENIOR MANAGER"
   }
  ]
 }

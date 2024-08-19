@@ -27,14 +27,16 @@
   "column_break_cnlz",
   "approved_registration_number",
   "validity_period",
-  "executive"
+  "executive",
+  "section_break_siko",
+  "add_notes"
  ],
  "fields": [
   {
    "fieldname": "registration_type",
    "fieldtype": "Select",
    "label": "Registration Type",
-   "options": "\nGST\nPAN\nMSME\nProfessional Tax\nTrademark\nIEC Import Export Code\nESI\nPF\nFSSAI Food License\nShop and Establishment Act\nMCA Roc - LLP\nMCA Roc - Pvt Ltd\nMca Roc - Opc\nTAN\nPartnership Firm\nStartup India Registration\nDSC Digital Signature",
+   "options": "\nGST\nPAN\nMSME\nProfessional Tax\nTrademark\nIEC Import Export Code\nESI\nPF\nFSSAI Food License\nShop and Establishment Act\nMCA Roc - LLP\nMCA Roc - Pvt Ltd\nMca Roc - Opc\nTAN\nPartnership Firm\nStartup India Registration\nDSC Digital Signature\nLabour Licence",
    "reqd": 1
   },
   {
@@ -45,6 +47,8 @@
    "reqd": 1
   },
   {
+   "fetch_from": "customer.customer_name",
+   "fetch_if_empty": 1,
    "fieldname": "entity_name",
    "fieldtype": "Data",
    "label": "Entity Name",
@@ -89,15 +93,19 @@
    "fetch_from": "customer.customer_name",
    "fieldname": "customer_name",
    "fieldtype": "Data",
-   "label": "Customer Name"
+   "label": "Customer Name",
+   "read_only": 1
   },
   {
+   "fetch_from": "customer.custom_primary_mobile_no",
+   "fetch_if_empty": 1,
    "fieldname": "mobile_number",
    "fieldtype": "Data",
-   "label": "Mobile Number",
-   "reqd": 1
+   "label": "Mobile Number"
   },
   {
+   "fetch_from": "customer.custom_primary_email",
+   "fetch_if_empty": 1,
    "fieldname": "email_id",
    "fieldtype": "Data",
    "label": "Email Id"
@@ -141,12 +149,22 @@
    "fetch_from": "customer.custom_contact_person",
    "fieldname": "contact_person",
    "fieldtype": "Data",
-   "label": "Contact Person"
+   "label": "Contact Person",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_siko",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "add_notes",
+   "fieldtype": "Small Text",
+   "label": "Add Notes"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-02-16 16:14:57.279700",
+ "modified": "2024-07-20 18:13:56.516629",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Registration Application",

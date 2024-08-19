@@ -341,7 +341,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "1",
    "fieldname": "current_recurring_fees",
    "fieldtype": "Currency",
    "label": "Current Recurring Fees",
@@ -438,7 +437,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-07-10 13:02:13.116543",
+ "modified": "2024-08-02 17:16:19.750907",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "MCA ROC File",

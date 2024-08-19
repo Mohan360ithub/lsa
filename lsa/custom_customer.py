@@ -14,7 +14,7 @@ from lsa.custom_sales_order import so_payment_status
 @frappe.whitelist()
 def sync_customer(customer_id=None):
     try:
-        followup_button,followup_values,values,open_followup,open_followup_i=sync_sales_orders_customer(customer_id)
+        followup_button,followup_values,values,open_followup,open_followup_i,unapproved_due_so=sync_sales_orders_customer(customer_id)
         services_values=sync_services_customer(customer_id)
         pricing_value=sync_services_pricing(customer_id)
         turnover_list=sync_turnover_gst(customer_id)
@@ -24,7 +24,7 @@ def sync_customer(customer_id=None):
             return {"status":"Synced successfully.","followup_button":followup_button,"values":values,
                         "followup_values":followup_values,"services_values":services_values,"open_followup":open_followup,
                         "open_followup_i":open_followup_i,"pricing_value":pricing_value,"turnover_list":turnover_list,
-                        'disabled_services_values':disabled_services_values}
+                        'disabled_services_values':disabled_services_values,"unapproved_due_so":unapproved_due_so}
         else:
             return {"status":"Sync Failed."}
     except Exception as e:
@@ -83,7 +83,7 @@ def sync_services_customer(customer_id=None):
     Client_Notices=["client-notices",["name","assessee_name", "notices_type","registration_number", "financial_year","executive_name"]]
     chargeable_service_values_n=frappe.get_all("Client Notices",
                                            filters={"cid":customer_id,
-                                                #    "enabled":1
+                                                   "status":"Open",
                                                    },
                                             fields=Client_Notices[1],
                                             )
@@ -156,6 +156,7 @@ def sync_sales_orders_customer(customer_id):
     custom_count_of_so_due=0
     custom_total_amount_due_of_so=0.00
     custom_details_of_so_due=[]
+    unapproved_due_so=False
 
     if existing_sales_orders:
 
@@ -199,6 +200,9 @@ def sync_sales_orders_customer(customer_id):
                     payment_status="Partially Paid"
                 so_details[sales_order.name]+=[payment_status]
                 so_details[sales_order.name]+=[sales_invoice_exists]
+                so_details[sales_order.name]+=[sales_order.custom_approval_status]
+                if sales_order.custom_approval_status!="Approved" :
+                    unapproved_due_so=True
         custom_details_of_so_due=", ".join(custom_details_of_so_due)
 
 
@@ -277,7 +281,7 @@ def sync_sales_orders_customer(customer_id):
                                             followup.status,followup.total_remaining_balance,
                                             followup.followup_date,followup.next_followup_date,
                                             followup.executive_name,followup.followup_note]]
-    return followup_button,followup_values,[so_details,custom_count_of_so_due,custom_total_amount_due_of_so,custom_details_of_so_due],open_followups,open_followup_i
+    return followup_button,followup_values,[so_details,custom_count_of_so_due,custom_total_amount_due_of_so,custom_details_of_so_due],open_followups,open_followup_i,unapproved_due_so
                         
     
 
@@ -602,8 +606,8 @@ def update_linked_doctypes(doc, method):
                                 "Client Notices":("cid","customer_status"),
                                 "DSC Digital Sign":("customer_id","customer_status"), 
                                 "ESI File":("customer_id","customer_status"), 
-                                "Gst Filling Data":("cid","customer_status"),
-                                "Gst Yearly Filing Summery":("cid","customer_status"), 
+                                "Gst Filling Data":("customer_id","customer_status"),
+                                "Gst Yearly Filing Summery":("customer_id","customer_status"), 
                                 "Gstfile":("customer_id","customer_status"), 
                                 "IT Assessee File":("customer_id","customer_status"), 
                                 "IT Assessee Filing Data":("customer_id","customer_status"),
@@ -1004,10 +1008,25 @@ def send_status_update_notification(cid, new_status, reason):
 
 #######################################Srikanth Code Start#####################################################################
 
+def lead_validation_before_insert(doc,method):
+    if not doc.lead_name:
+        frappe.throw("You can't create Customer directly! Lead has to be created before Customer creation.")
 
 
 
-
-
-
+def get_customer_annual_fees(customer_id):
+    annual_fees=0
+    chargeable_services=frappe.get_all("Customer Chargeable Doctypes")
+    for chargeable_service in chargeable_services:
+        # print(chargeable_service)
+        chargeable_service_values=frappe.get_all(chargeable_service.name,
+                                           filters={"customer_id":customer_id,
+                                                   "enabled":1},
+                                            fields=["annual_fees"]
+                                            )
+        # print(chargeable_service_values)
+        for chargeable_service in chargeable_service_values:
+            annual_fees+=chargeable_service.annual_fees
+    
+    return annual_fees
 

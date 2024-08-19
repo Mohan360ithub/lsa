@@ -1,4 +1,4 @@
-import frappe,requests,boto3,os,re
+import frappe,requests,boto3,os,re,socket
 import datetime,time
 import mimetypes
 from frappe.model.document import Document
@@ -7,15 +7,36 @@ from frappe import _
 from werkzeug.utils import secure_filename
 from frappe.exceptions import TimestampMismatchError
 
-base_dir="ERP_LSAOFFICE_S3"
+
+def get_base_directory():
+    # Get the local IP address
+    hostname = socket.gethostname()
+    local_ip = socket.gethostbyname(hostname)
+    
+    # Define local and production base directories
+    test_base_dir = "Test_ERP_LSAOFFICE_S3"
+    production_base_dir = "ERP_LSAOFFICE_S3"
+    
+    # Determine if the IP address is local
+    if local_ip.startswith('127.') or local_ip.startswith('10.') or local_ip.startswith('192.168.') or local_ip.startswith('172.16.'):
+        return test_base_dir
+    else:
+        return production_base_dir
 
 path_map={
-            #"Recurring Service Pricing":("Custom","/Customer/{customer_id}/Accounts/RSP/{name}"),                           
-            #"IT Assessee Filing Data":("Custom","/Customer/{customer_id}/Files/ITR/{it_assessee_file}/AY/{ay}"),
-            #"Gstfile":("Custom","/Customer/{customer_id}/File/GST/{name}"),
-            "Sales Order":("Core","/Customer/{customer}/Accounts"),#??????????????????????????????
-            "Lead":("Core",""),#??????????????????????????????
-            "Customer":("Core","/Customer/{name}"),#??????????????????????????????
+            "Lead":("Core","/Lead/{name}/Signed_Copy/"),
+            "Customer":("Core","/Customer/{name}/"),
+            
+            "Assessee":("Custom","/Customer/{customer_id}/Assessee/{name}/"),
+
+            "IT Assessee File":("Custom","/Customer/{customer_id}/Assessee/{pan}/Files/ITR/{name}/"),
+            "IT Assessee Filing Data":("Custom","/Customer/{customer_id}/Assessee/{pan}/Files/ITR/{it_assessee_file}/{ay}/"),
+
+            "Gstfile":("Custom","/Customer/{customer_id}/Assessee/{pan}/Files/GST/{name}/"),
+
+            "Sales Order":("Core","/Customer/{customer}/Accounts/Signed_Copy/SO_{name}_"),
+            "Recurring Service Pricing":("Custom","/Customer/{customer_id}/Accounts/RSP/{name}/"), 
+            
           }
 
 def store_in_s3_cloud(doc, method):
@@ -27,21 +48,23 @@ def store_in_s3_cloud(doc, method):
         
         if frappe.db.exists(doc.attached_to_doctype,doc.attached_to_name):
             attached_to_doc = frappe.get_doc(doc.attached_to_doctype, doc.attached_to_name)
-            attached_to_doctype_structure = frappe.get_doc("DocType",doc.attached_to_doctype)
-            field_names = [field.fieldname for field in attached_to_doctype_structure.fields]
             
             if path_map[doc.attached_to_doctype][0]=="Custom":
-                if ("file_name" not in field_names or "file_type" not in field_names ):
+                attached_to_doctype_structure = frappe.get_doc("DocType",doc.attached_to_doctype)
+                field_names = [field.fieldname for field in attached_to_doctype_structure.fields]
+                if ("file_name" not in field_names or "file_type" not in field_names or "attachment_notes" not in field_names):
                     frappe.throw(f"You have configured {doc.attached_to_doctype} for cloud storage but it is missing fields File Name and File Type")
 
                 if not(attached_to_doc.file_name and attached_to_doc.file_type):
                     frappe.throw(f"You need to set File Name and File Type fields before attaching document to {doc.attached_to_doctype}")
             else:
-                if ("custom_file_name" not in field_names or "custom_file_type" not in field_names):
+                custom_fields = frappe.get_all("Custom Field", filters={"dt": doc.attached_to_doctype}, fields=["fieldname"])
+                custom_field_names = [field['fieldname'] for field in custom_fields]
+                if ("custom_file_name" not in custom_field_names or "custom_file_type" not in custom_field_names or "custom_attachment_notes" not in custom_field_names):
                     frappe.throw(f"You have configured {doc.attached_to_doctype} for cloud storage but it is missing fields File Name and File Type")
 
                 if not(attached_to_doc.custom_file_type and attached_to_doc.custom_file_name):
-                    frappe.throw(f"You need to set File Name and File Type fields before attaching document to {doc.attached_to_doctype}")
+                    frappe.throw(f"You need to set Custom File Name and Custom File Type fields before attaching document to {doc.attached_to_doctype}")
 
         frappe.enqueue(
             'lsa.custom_file_manager.delayed_store_in_s3_cloud',
@@ -73,32 +96,41 @@ def delayed_store_in_s3_cloud(doc_name, retries=3, backoff_factor=1):
     file_mime_type = local_file_resp["mime_type"]
 
     formatted_datetime = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-
-    s3_folder_name, s3_file_name = generate_dynamic_path(base_dir, path_map, attached_to_doc, attached_to_doctype_field, file_mime_type, formatted_datetime)
-    s3_file_path=f"{s3_folder_name}/{s3_file_name}"
+    base_dir=get_base_directory()
+    s3_file_path, s3_file_name = generate_dynamic_path(base_dir, path_map, attached_to_doc, attached_to_doctype_field, file_mime_type, formatted_datetime)
+    # s3_file_path=f"{s3_folder_name}/{s3_file_name}"
     
     
     s3cloud_new_doc = frappe.new_doc('S3 Cloud Documents')
     s3cloud_new_doc.doctype_name = attached_to_doctype
     s3cloud_new_doc.doctype_id = attached_to_doc_name
     s3cloud_new_doc.doctype_document_subtype = attached_to_doctype_field
-    s3cloud_new_doc.s3_filename = s3_file_name
+    # s3cloud_new_doc.s3_filename = s3_file_name
     s3cloud_new_doc.s3_filepath = s3_file_path
     s3cloud_new_doc.s3_filesize = file_size
     s3cloud_new_doc.s3_file_mime_type = file_mime_type
     s3cloud_new_doc.uploaded_by = frappe.session.user
+    s3cloud_new_doc.file_ref=doc.name
 
     if path_map[doc.attached_to_doctype][0]=="Custom":
-        attached_to_doc.file_name=None
-        attached_to_doc.file_type=None
+        s3cloud_new_doc.file_name=attached_to_doc.file_name
+        s3cloud_new_doc.file_type=attached_to_doc.file_type
+        s3cloud_new_doc.notes=attached_to_doc.attachment_notes
     else:
-        attached_to_doc.custom_file_name=None
-        attached_to_doc.custom_file_type=None
+        s3cloud_new_doc.file_name=attached_to_doc.custom_file_name
+        s3cloud_new_doc.file_type=attached_to_doc.custom_file_type
+        s3cloud_new_doc.notes=attached_to_doc.custom_attachment_notes
     s3cloud_new_doc.insert()
     file_uploaded=False
     local_file_deleted=False
     attached_to_doc_updated=False
     attempt = 0
+    if (file_size/1024)>30:
+        frappe.log_error(f"Can't upload attachent of {attached_to_doc.doctype} {attached_to_doc.name} to s3", \
+                         f"Can't upload attachment of {attached_to_doc.doctype} {attached_to_doc.name} to s3 as size limit exceeded {file_size}kb, S3 Cloud Documents Ref: {doc_name}, File Ref: {doc.name}" )
+        s3cloud_new_doc.notes=f"Can't upload attachment of {attached_to_doc.doctype} {attached_to_doc.name} to s3 as size limit exceeded {file_size}kb, S3 Cloud Documents Ref: {doc_name}, File Ref: {doc.name}"
+        s3cloud_new_doc.save()
+        return {"status": False, "message": f"Can't upload attachent of {attached_to_doc.doctype} {attached_to_doc.name} to s3 due to file size limit exceeded"}
     while attempt < retries:
         try:
             if not file_uploaded:
@@ -115,6 +147,7 @@ def delayed_store_in_s3_cloud(doc_name, retries=3, backoff_factor=1):
                     doc.delete()
                     local_file_deleted=True
                     s3cloud_new_doc.deleted_from_local=1
+                    s3cloud_new_doc.file_ref=None
                 except Exception as e:
                     frappe.log_error(f"Error deleting local file", f"Error deleting local file: {str(e)}", )
                     # return {"status": False, "message": f"Error deleting local file {response['file_url']}"}
@@ -125,12 +158,17 @@ def delayed_store_in_s3_cloud(doc_name, retries=3, backoff_factor=1):
                     if path_map[doc.attached_to_doctype][0]=="Custom":
                         attached_to_doc.file_name=None
                         attached_to_doc.file_type=None
+                        attached_to_doc.attachment_notes=None
+                        
+
                     else:
                         attached_to_doc.custom_file_name=None
                         attached_to_doc.custom_file_type=None
+                        attached_to_doc.custom_attachment_notes=None
                     attached_to_doc.save()
                     attached_to_doc_updated=True
                     s3cloud_new_doc.removed_reference_from_attached_doc=1
+                    s3cloud_new_doc.file_ref=None
                 except Exception as e2:
                     frappe.log_error(f"Error updating attached document", f"Error updating attached document in doc {attached_to_doctype}: {str(e2)}", )
                     
@@ -194,9 +232,16 @@ def generate_dynamic_path(base_dir, path_map, attached_to_doc, attached_to_docty
         for field in fields:
             field_expression = '{' + str(field) + '}'
             folder_name = folder_name.replace(field_expression, str(getattr(attached_to_doc, field)))
-        file_name_prefix= "_".join([fnw.lower() for fnw in attached_to_doc.file_type.split(" ")])
-        file_name = f"{file_name_prefix}_{formatted_datetime}.{file_mime_type.split('/')[1]}"
-        return folder_name, file_name
+        
+        try:
+            file_name_prefix= "_".join([fnw.lower() for fnw in attached_to_doc.file_type.split(" ")])
+        except:
+            file_name_prefix= "_".join([fnw.lower() for fnw in attached_to_doc.custom_file_type.split(" ")])
+
+        file_name_suffix = f"{file_name_prefix}_{formatted_datetime}.{file_mime_type.split('/')[1]}"
+        file_path = folder_name+file_name_suffix
+        file_name = file_path.split("/")[-1]
+        return file_path, file_name
 
 def get_file_from_link(file_url, is_private):
     try:
@@ -286,8 +331,31 @@ def get_s3_documents(doctype_name, doctype_id):
         },
         fields=["name", "docname", "s3_filename", "s3_filepath", "s3_filesize", "s3_file_mime_type","file_type","file_name", "uploaded_by", "creation"]
     )
+
     return s3_docs
 
+
+@frappe.whitelist()
+def update_document_fields(doc_type, docname, file_type, file_type_value, file_name, file_name_value, attachment_notes, attachment_notes_value=None):
+    try:
+        # Fetch the document by type and name
+        doc = frappe.get_doc(doc_type, docname)
+        
+        # Update the fields with the provided values
+        setattr(doc, file_type, file_type_value)
+        setattr(doc, file_name, file_name_value)
+        setattr(doc, attachment_notes, attachment_notes_value)
+        
+        # Save the document
+        doc.save()
+        
+        # Commit the changes to the database
+        frappe.db.commit()
+        
+        # Optionally, you can return some success message or data
+        return {"status":True,"msg": "Document fields updated successfully."}
+    except Exception as e:
+        return {"status":False,"msg": "Failed to updated document fields."}
 
 
 

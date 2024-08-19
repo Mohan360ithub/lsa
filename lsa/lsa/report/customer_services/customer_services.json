@@ -10,7 +10,7 @@
  "is_standard": "Yes",
  "letter_head": "LSA",
  "letterhead": null,
- "modified": "2024-01-16 16:53:35.610061",
+ "modified": "2024-07-30 17:54:20.580533",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Customer Services",
@@ -21,34 +21,10 @@
  "report_type": "Script Report",
  "roles": [
   {
-   "role": "Sales User"
-  },
-  {
-   "role": "Sales Manager"
-  },
-  {
-   "role": "Stock User"
-  },
-  {
-   "role": "Sales Master Manager"
-  },
-  {
-   "role": "Accounts Manager"
-  },
-  {
-   "role": "Accounts User"
-  },
-  {
-   "role": "Stock Manager"
-  },
-  {
-   "role": "Employee Self Service"
-  },
-  {
    "role": "LSA Account Executive"
   },
   {
-   "role": "LSA Employee"
+   "role": "LSA CEO Admin"
   }
  ]
 }

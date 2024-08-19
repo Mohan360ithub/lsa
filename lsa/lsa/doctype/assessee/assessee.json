@@ -1,0 +1,169 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:pan",
+ "creation": "2024-07-26 16:04:50.606253",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "customer_id",
+  "customer_name",
+  "assessee_name",
+  "pan",
+  "column_break_hvri",
+  "contact_person",
+  "primary_mobile_no",
+  "type",
+  "created_from_master",
+  "section_break_ymym",
+  "file_type",
+  "column_break_sdhf",
+  "file_name",
+  "column_break_rvxt",
+  "attachment_notes",
+  "column_break_oksw",
+  "attachment",
+  "section_break_ggcb",
+  "attachment_html"
+ ],
+ "fields": [
+  {
+   "fieldname": "customer_id",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Customer ID",
+   "options": "Customer",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "customer_id.customer_name",
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "label": "Customer Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "customer_id.custom_contact_person",
+   "fieldname": "contact_person",
+   "fieldtype": "Data",
+   "label": "Contact Person",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "customer_id.custom_primary_mobile_no",
+   "fieldname": "primary_mobile_no",
+   "fieldtype": "Data",
+   "label": "Primary Mobile No",
+   "read_only": 1
+  },
+  {
+   "fieldname": "assessee_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Assessee Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_hvri",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "pan",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "PAN",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "type",
+   "fieldtype": "Select",
+   "label": "Type",
+   "options": "Individual\nCompany\nHUF (Hindu Undivided Family)\nAOP (Association of Persons)\nBOI (Body of Individuals)\nGovernment Agency\nArtificial Juridical Person\nLocal Authority\nFirm/Limited Liability Partnership\nTrust",
+   "reqd": 1
+  },
+  {
+   "fieldname": "created_from_master",
+   "fieldtype": "Link",
+   "label": "Created from Master",
+   "options": "DocType",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_ymym",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "file_type",
+   "fieldtype": "Select",
+   "label": "File Type",
+   "options": "\nPAN\nAadhaar\nPhoto\nBank Account\nDL\nPassport\nVoter ID",
+   "permlevel": 4
+  },
+  {
+   "fieldname": "column_break_sdhf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "file_name",
+   "fieldtype": "Data",
+   "label": "File Name",
+   "permlevel": 4
+  },
+  {
+   "fieldname": "column_break_rvxt",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "attachment_notes",
+   "fieldtype": "Small Text",
+   "label": "Attachment Notes",
+   "permlevel": 4
+  },
+  {
+   "fieldname": "column_break_oksw",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "attachment",
+   "fieldtype": "Attach",
+   "label": "Attachment",
+   "permlevel": 4
+  },
+  {
+   "fieldname": "section_break_ggcb",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "attachment_html",
+   "fieldtype": "HTML",
+   "label": "Attachment HTML"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-07-26 17:58:07.266377",
+ "modified_by": "Administrator",
+ "module": "Lsa",
+ "name": "Assessee",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "assessee_name"
+}

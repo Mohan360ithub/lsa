@@ -10,6 +10,7 @@
   "gst_yearly_summery_report_id",
   "fy",
   "cid",
+  "customer_id",
   "contact_person",
   "customer_status",
   "created_manually",
@@ -47,7 +48,17 @@
   "pt_tax_payment_date",
   "ctd_reference_number",
   "section_break_gjjb",
-  "pt_important_notes"
+  "pt_important_notes",
+  "attachments_tab",
+  "file_type",
+  "column_break_yade",
+  "file_name",
+  "column_break_tydf",
+  "attachment_notes",
+  "column_break_qmlz",
+  "attachment",
+  "section_break_laom",
+  "attachment_html"
  ],
  "fields": [
   {
@@ -89,6 +100,7 @@
    "fetch_from": "gst_file_id.customer_id",
    "fieldname": "cid",
    "fieldtype": "Link",
+   "hidden": 1,
    "in_standard_filter": 1,
    "label": "CID",
    "options": "Customer"
@@ -159,7 +171,7 @@
    "label": "GSTIN"
   },
   {
-   "fetch_from": "cid.custom_customer_status_",
+   "fetch_from": "customer_id.custom_customer_status_",
    "fieldname": "customer_status",
    "fieldtype": "Data",
    "label": "Customer Status"
@@ -257,7 +269,7 @@
    "label": "PT Important Notes"
   },
   {
-   "fetch_from": "cid.custom_contact_person",
+   "fetch_from": "customer_id.custom_contact_person",
    "fieldname": "contact_person",
    "fieldtype": "Data",
    "label": "Contact Person",
@@ -294,11 +306,70 @@
    "label": "Next Filing Summary",
    "options": "Gst Yearly Filing Summery",
    "read_only": 1
+  },
+  {
+   "fetch_from": "gst_file_id.customer_id",
+   "fieldname": "customer_id",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Customer ID",
+   "options": "Customer",
+   "reqd": 1
+  },
+  {
+   "fieldname": "attachments_tab",
+   "fieldtype": "Tab Break",
+   "label": "Attachments"
+  },
+  {
+   "fieldname": "file_type",
+   "fieldtype": "Select",
+   "label": "File Type",
+   "permlevel": 4
+  },
+  {
+   "fieldname": "column_break_yade",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "file_name",
+   "fieldtype": "Data",
+   "label": "File Name",
+   "permlevel": 4
+  },
+  {
+   "fieldname": "column_break_tydf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "attachment_notes",
+   "fieldtype": "Small Text",
+   "label": "Attachment Notes",
+   "permlevel": 4
+  },
+  {
+   "fieldname": "column_break_qmlz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "attachment",
+   "fieldtype": "Attach",
+   "label": "Attachment",
+   "permlevel": 4
+  },
+  {
+   "fieldname": "section_break_laom",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "attachment_html",
+   "fieldtype": "HTML",
+   "label": "Attachment HTML"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-06-24 15:13:38.959720",
+ "modified": "2024-07-26 18:26:40.793575",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Gst Yearly Filing Summery",

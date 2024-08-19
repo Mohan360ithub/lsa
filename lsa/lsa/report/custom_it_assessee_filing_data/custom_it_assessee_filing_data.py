@@ -17,6 +17,7 @@ def execute(filters=None):
         {"fieldname": "customer_status", "label": _("Customer Status"), "fieldtype": "Data", "width": 100},
         {"fieldname": "it_assessee_file", "label": _("PAN"), "fieldtype": "Link", "options": "IT Assessee File", "width": 165},
         {"fieldname": "filing_status", "label": _("Filing Status"), "fieldtype": "Data", "width": 170},
+        {"fieldname": "filing_type", "label": _("Filing Type"), "fieldtype": "Data", "width": 150},
         # {"fieldname": "pan", "label": _("PAN"), "fieldtype": "Data", "width": 50},
         {"fieldname": "executive", "label": _("Executive"), "fieldtype": "Data", "width": 150},
         {"fieldname": "mobile_no", "label": _("Mobile No"), "fieldtype": "Data", "width": 100},
@@ -26,7 +27,7 @@ def execute(filters=None):
     ]
 
     # Construct additional filters based on the provided filters
-    additional_filters = {}
+    additional_filters = {"it_enabled":1}
 
     # Check if the mandatory filters are provided
     if filters.get("ay"):
@@ -38,7 +39,7 @@ def execute(filters=None):
     data = frappe.get_all(
         "IT Assessee Filing Data",
         filters=additional_filters,
-        fields=["name", "can_be_filed", "customer_id","customer_name","contact_person", "assessee_full_name","customer_status", "it_assessee_file","filing_status",  "executive","mobile_no",  ],
+        fields=["name", "can_be_filed", "customer_id","customer_name","contact_person", "assessee_full_name","customer_status", "it_assessee_file","filing_status", "filing_type", "executive","mobile_no",  ],
         as_list=True
     )
 
@@ -54,6 +55,7 @@ def execute(filters=None):
             FROM `tabIT Assessee Filing Data`
             WHERE filing_status = %s
             AND ay = %s
+            AND it_enabled = 1
         """
 
         count_result = frappe.db.sql(count_query, [status, additional_filters["ay"]], as_dict=True)
@@ -63,7 +65,11 @@ def execute(filters=None):
     total_records_count = sum(status_counts.values())
 
     doc_shared_with_client = status_counts.get("DOCS SHARED WITH CLIENT", 0)
-    doc_shared_with_client_percentage = (doc_shared_with_client / total_records_count) * 100 if total_records_count != 0 else 0
+    filed = status_counts.get("FILED", 0)
+    ack_and_verified = status_counts.get("ACK AND VERIFIED", 0)
+    completed_docs=doc_shared_with_client+filed+ack_and_verified
+    # doc_shared_with_client_percentage = (doc_shared_with_client / total_records_count) * 100 if total_records_count != 0 else 0
+    doc_shared_with_client_percentage = (completed_docs / total_records_count) * 100 if total_records_count != 0 else 0
 
     executive_counts = {}
 
@@ -74,6 +80,7 @@ def execute(filters=None):
             FROM `tabIT Assessee Filing Data`
             WHERE executive = %s
             AND ay = %s
+            AND it_enabled = 1
         """
 
         count_result = frappe.db.sql(count_query, [executive, additional_filters["ay"]], as_dict=True)
@@ -86,6 +93,7 @@ def execute(filters=None):
             WHERE executive = %s
             AND filing_status = 'DOCS SHARED WITH CLIENT'
             AND ay = %s
+            AND it_enabled = 1
         """
 
         filed_summery_shared_count_result = frappe.db.sql(filed_summery_shared_query, [executive, additional_filters["ay"]], as_dict=True)
@@ -98,6 +106,7 @@ def execute(filters=None):
             WHERE executive = %s
             AND filing_status != 'DOCS SHARED WITH CLIENT'
             AND ay = %s
+            AND it_enabled = 1
         """
 
         not_doc_shared_with_client_result = frappe.db.sql(not_doc_shared_with_client_query, [executive, additional_filters["ay"]], as_dict=True)
@@ -356,4 +365,7 @@ def send_bulk_wa_for_filtered_it_customer(  message,
             frappe.log_error(f"An Exception error occurred while sending Bulk WhatsApp messages for IT Assessee Filing Data.",f"{er}")
             return {"status":False,"msg":f"An Exception error occurred while sending bulk WhatsApp messages for IT Assessee Filing Data."}
     return {"status":False,"msg":f"No IT Assessee Filing Data record found for the filters set."}
+
+
+
 

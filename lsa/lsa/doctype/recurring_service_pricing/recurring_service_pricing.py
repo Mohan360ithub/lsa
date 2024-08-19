@@ -1031,4 +1031,17 @@ def disable_service_file(doctype,file_id,reason):
         return {"status":False,"msg":f"Error changing service status: {e}"}
 
 
+@frappe.whitelist()
+def fetch_services_for_item(customer_id,item,service_master):
+    try:
+        service_master_for_customer=frappe.get_all(service_master,
+                                                                filters={
+                                                                    "customer_id":customer_id,
+                                                                    "enabled":1,
+                                                                    },
+                                                                fields=["name", "description"])
+        return {"status":True, "service_master_list":service_master_for_customer}
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), f"Failed to fetch services for item {item} for Customer {customer_id} in Sales Order")
+        return {"status":False, "msg":f"Failed to fetch services for item {item} for Customer {customer_id} in Sales Order: {e}"}
 

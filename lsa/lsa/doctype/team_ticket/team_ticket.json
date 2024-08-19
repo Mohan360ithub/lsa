@@ -13,6 +13,14 @@
   "created_by",
   "status",
   "date",
+  "section_break_ezin",
+  "regularization_date",
+  "column_break_jvja",
+  "first_checkin",
+  "column_break_isnx",
+  "last_checkout",
+  "column_break_ncei",
+  "note",
   "section_break_oeed",
   "description",
   "reference_section",
@@ -32,6 +40,7 @@
    "read_only": 1
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "type",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -49,6 +58,7 @@
    "reqd": 1
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "title",
    "fieldtype": "Data",
    "label": "Title",
@@ -100,6 +110,7 @@
    "fieldtype": "Section Break"
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "sub_category",
    "fieldtype": "Link",
    "label": "Sub Category",
@@ -112,11 +123,59 @@
    "fieldtype": "Datetime",
    "label": "Date",
    "read_only": 1
+  },
+  {
+   "fieldname": "section_break_ezin",
+   "fieldtype": "Section Break"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "depends_on": "eval: doc.sub_category == 'Request-19950'",
+   "fieldname": "regularization_date",
+   "fieldtype": "Date",
+   "label": "Regularization Date",
+   "mandatory_depends_on": "eval: doc.sub_category == 'Request-19950'"
+  },
+  {
+   "fieldname": "column_break_jvja",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "depends_on": "eval: doc.sub_category == 'Request-19950'",
+   "fieldname": "first_checkin",
+   "fieldtype": "Time",
+   "label": "First Checkin",
+   "mandatory_depends_on": "eval: doc.sub_category == 'Request-19950'"
+  },
+  {
+   "fieldname": "column_break_isnx",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "depends_on": "eval: doc.sub_category == 'Request-19950'",
+   "fieldname": "last_checkout",
+   "fieldtype": "Time",
+   "label": "Last Checkout",
+   "mandatory_depends_on": "eval: doc.sub_category == 'Request-19950'"
+  },
+  {
+   "fieldname": "column_break_ncei",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "depends_on": "eval: doc.sub_category == 'Request-19950'",
+   "fieldname": "note",
+   "fieldtype": "Small Text",
+   "label": "Note",
+   "mandatory_depends_on": "eval: doc.sub_category == 'Request-19950'"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-07-15 17:20:16.376338",
+ "modified": "2024-07-30 11:58:59.898561",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Team Ticket",
@@ -136,6 +195,7 @@
    "write": 1
   }
  ],
+ "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],
