@@ -997,4 +997,57 @@ accounts@lsaoffice.com'''
 
 
 
+# By Mohan
 
+
+
+
+import frappe
+from frappe import _
+
+@frappe.whitelist()
+def fetch_customer_chargeable_doctypes(item_code):
+    try:
+        # Define the SQL query to get distinct chargeable doctype names
+        query = """
+            SELECT DISTINCT ccd.name
+            FROM `tabCustomer Chargeable Doctypes` AS ccd
+            JOIN `tabLead Items` AS li
+            ON ccd.name = li.parent
+            WHERE li.service_name = %s
+        """
+        
+        # Execute the query
+        results = frappe.db.sql(query, item_code, as_dict=True)
+        
+        # Return the list of doctype names
+        return [row['name'] for row in results]
+    
+    except Exception as e:
+        frappe.throw(_("Error fetching Customer Chargeable Doctypes: {0}").format(str(e)))
+
+
+
+@frappe.whitelist()
+def fetch_records_for_customer(customer_id, item_code):
+    try:
+        # Fetch the chargeable doctypes
+        chargeable_doctypes = fetch_customer_chargeable_doctypes(item_code)
+        
+        if not chargeable_doctypes:
+            return []  # Return an empty list if no chargeable doctypes are found
+        
+        # Initialize an empty list to store records
+        records = []
+        
+        # Iterate over each chargeable doctype to fetch records
+        for doctype in chargeable_doctypes:
+            # Fetch records for the customer from each chargeable doctype
+            records.extend(frappe.get_all(doctype, filters={
+                'customer_id': customer_id
+            }, fields=['name','description']))
+        
+        return records
+    
+    except Exception as e:
+        frappe.throw(_("Error fetching records for customer: {0}").format(str(e)))
