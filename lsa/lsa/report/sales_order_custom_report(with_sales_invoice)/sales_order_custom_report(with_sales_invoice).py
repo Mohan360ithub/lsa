@@ -151,6 +151,8 @@ def get_data(filters):
     if filters:
         if filters.get("customer_id"):
             additional_filters["customer"] = filters.get("customer_id")
+        if filters.get("so_approved"):
+            additional_filters["custom_approval_status"] = filters.get("so_approved")
         if filters.get("doc_status"):
             status_list=filters.get("doc_status").split(',')
             status_list=[z.strip() for z in status_list if z.isalpha()]

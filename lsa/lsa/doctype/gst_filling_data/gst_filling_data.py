@@ -202,6 +202,9 @@ def check_gst_compliance(manual=None):
             gst_yearly_summary = frappe.get_doc("Gst Yearly Filing Summery", gst_filling.gst_yearly_filling_summery_id)
             gst_yearly_summary.non_compliant = 1
             gst_yearly_summary.save()
+            gstfile_doc = frappe.get_doc("Gstfile", gst_filling.gstfile)
+            gstfile_doc.non_compliant = 1
+            gstfile_doc.save()
     
 
         return len(gst_filling_data)
@@ -555,6 +558,7 @@ def custom_save_as_draft(gst_yearly_filling_summary_id, sales_total_taxable, pur
     #     else:
     #         # Increment the field by the current value
     #         setattr(gst_yearly_filing_summery, field_name, getattr(gst_yearly_filing_summery, field_name) + field_value)
+
 
 
 

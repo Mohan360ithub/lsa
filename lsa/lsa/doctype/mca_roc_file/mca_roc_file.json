@@ -61,13 +61,16 @@
   "notes_html",
   "notes",
   "account_tab",
+  "section_break_fyju",
   "service_name",
   "hsn_code",
   "description",
   "column_break_dfri",
   "current_recurring_fees",
   "frequency",
-  "annual_fees"
+  "annual_fees",
+  "section_break_ovon",
+  "addon_services"
  ],
  "fields": [
   {
@@ -433,11 +436,26 @@
    "label": "Service Status History",
    "options": "Service Master Status Item",
    "read_only": 1
+  },
+  {
+   "fieldname": "addon_services",
+   "fieldtype": "Table",
+   "label": "Addon Services",
+   "options": "Service Master Addon",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_fyju",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "section_break_ovon",
+   "fieldtype": "Section Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-08-02 17:16:19.750907",
+ "modified": "2024-08-29 12:44:45.560847",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "MCA ROC File",

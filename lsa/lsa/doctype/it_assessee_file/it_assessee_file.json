@@ -75,7 +75,9 @@
   "column_break_nexw",
   "current_recurring_fees",
   "frequency",
-  "annual_fees"
+  "annual_fees",
+  "section_break_dgiv",
+  "addon_services"
  ],
  "fields": [
   {
@@ -474,11 +476,22 @@
   {
    "fieldname": "section_break_yaix",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "section_break_dgiv",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "addon_services",
+   "fieldtype": "Table",
+   "label": "Addon Services",
+   "options": "Service Master Addon",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-08-02 17:16:36.790992",
+ "modified": "2024-08-29 12:43:14.807651",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "IT Assessee File",

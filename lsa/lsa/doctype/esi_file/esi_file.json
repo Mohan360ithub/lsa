@@ -68,7 +68,9 @@
   "column_break_iboy",
   "current_recurring_fees",
   "frequency",
-  "annual_fees"
+  "annual_fees",
+  "section_break_lwhu",
+  "addon_services"
  ],
  "fields": [
   {
@@ -432,11 +434,22 @@
    "label": "Service Status History",
    "options": "Service Master Status Item",
    "read_only": 1
+  },
+  {
+   "fieldname": "section_break_lwhu",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "addon_services",
+   "fieldtype": "Table",
+   "label": "Addon Services",
+   "options": "Service Master Addon",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-08-02 17:15:29.940772",
+ "modified": "2024-08-29 12:46:06.224315",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "ESI File",

@@ -85,7 +85,9 @@
   "column_break_udoe",
   "current_recurring_fees",
   "frequency",
-  "annual_fees"
+  "annual_fees",
+  "section_break_ripr",
+  "addon_services"
  ],
  "fields": [
   {
@@ -590,11 +592,22 @@
    "fieldname": "attachment_html",
    "fieldtype": "HTML",
    "label": "Attachment HTML"
+  },
+  {
+   "fieldname": "section_break_ripr",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "addon_services",
+   "fieldtype": "Table",
+   "label": "Addon Services",
+   "options": "Service Master Addon",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-08-02 17:16:28.048509",
+ "modified": "2024-08-29 12:43:49.422059",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Gstfile",

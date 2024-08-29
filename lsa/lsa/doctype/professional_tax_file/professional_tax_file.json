@@ -69,7 +69,9 @@
   "column_break_pcad",
   "current_recurring_fees",
   "frequency",
-  "annual_fees"
+  "annual_fees",
+  "section_break_dcpz",
+  "addon_services"
  ],
  "fields": [
   {
@@ -449,11 +451,22 @@
    "label": "Service Status History",
    "options": "Service Master Status Item",
    "read_only": 1
+  },
+  {
+   "fieldname": "section_break_dcpz",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "addon_services",
+   "fieldtype": "Table",
+   "label": "Addon Services",
+   "options": "Service Master Addon",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-08-02 17:15:42.906509",
+ "modified": "2024-08-29 12:45:33.411836",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Professional Tax File",

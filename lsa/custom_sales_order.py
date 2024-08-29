@@ -3,6 +3,7 @@ import requests,random,json
 from frappe import _
 from frappe.utils import today
 from datetime import datetime
+import locale
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -890,17 +891,19 @@ For your convenience, you can also use the following payment link:
 
 I hope this email finds you well.
 
-This is a friendly reminder regarding your sales invoice due amount of {balance_amount} for the period from {from_date} to {to_date}. The invoice details are as follows:</pre>'''
+This is a friendly reminder regarding your sales invoice due amount of {float_to_inr(balance_amount)} for the period from {from_date} to {to_date}. The invoice details are as follows:</pre>'''
         
 
         body += """
                 <br><table class="table table-bordered" style="border-color: #444444; border-collapse: collapse; width: 80%;">
                     <thead>
                         <tr style="background-color:#3498DB;color:white;text-align: left;">
-                            <th style="vertical-align: middle;border: solid 2px #bcb9b4; width: 10%;">S. No.</th>
-                            <th style="vertical-align: middle;border: solid 2px #bcb9b4; width: 20%;">Item</th>
-                            <th style="vertical-align: middle;border: solid 2px #bcb9b4; width: 40%;">Description</th>
-                            <th style="vertical-align: middle;border: solid 2px #bcb9b4; width: 10%;">Quantity</th>
+                            <th style="vertical-align: middle;border: solid 2px #bcb9b4; width: 5%;">S. No.</th>
+                            <th style="vertical-align: middle;border: solid 2px #bcb9b4; width: 15%;">Item</th>
+                            <th style="vertical-align: middle;border: solid 2px #bcb9b4; width: 15%;">From Date</th>
+                            <th style="vertical-align: middle;border: solid 2px #bcb9b4; width: 15%;">To Date</th>
+                            <th style="vertical-align: middle;border: solid 2px #bcb9b4; width: 25%;">Description</th>
+                            <th style="vertical-align: middle;border: solid 2px #bcb9b4; width: 5%;">Quantity</th>
                             <th style="vertical-align: middle;border: solid 2px #bcb9b4; width: 10%;">Rate(INR)</th>
                             <th style="vertical-align: middle;border: solid 2px #bcb9b4; width: 10%;">Amount(INR)</th>
                             
@@ -914,10 +917,12 @@ This is a friendly reminder regarding your sales invoice due amount of {balance_
                 <tr>
                     <td style="border: solid 2px #bcb9b4;">{count}</td>
                     <td style="border: solid 2px #bcb9b4;">{item.item_code}</td>
+                    <td style="border: solid 2px #bcb9b4;">{item.custom_soi_from_date}</td>
+                    <td style="border: solid 2px #bcb9b4;">{item.custom_soi_to_date}</td>
                     <td style="border: solid 2px #bcb9b4;">{item.description}</td>
                     <td style="border: solid 2px #bcb9b4;">{item.qty}</td>
-                    <td style="border: solid 2px #bcb9b4;">₹ {item.rate}</td>
-                    <td style="border: solid 2px #bcb9b4;">₹ {item.amount}</td>
+                    <td style="border: solid 2px #bcb9b4;">{float_to_inr(item.rate)}</td>
+                    <td style="border: solid 2px #bcb9b4;">{float_to_inr(item.amount)}</td>
                     
                 </tr>
             """
@@ -932,10 +937,11 @@ This is a friendly reminder regarding your sales invoice due amount of {balance_
 
 Bank Account Details:
 
+Bank: Bank of Baroda, JC Road, Bangalore
 Account Name: Lokesh Sankhala and Associates
 Account Number: 73830200000526
 IFSC Code: BARB0VJJCRO
-Bank: Bank of Baroda, JC Road, Bangalore-560002
+
 UPI ID: LSABOB@UPI
 GPay / PhonePe Number: 9513199200
 {payment_link}
@@ -947,12 +953,13 @@ Best Regards,
 LSA Office Account Team
 Email: accounts@lsaoffice.com
 Phone: 8951692788 </pre>'''
-
+        cc_email="lokesh.bwr@gmail.com"
         # print(body)
         # Create the email message
         message = MIMEMultipart()
         message['From'] = sender_email
         message['To'] = recipient
+        message['Cc'] = cc_email
         message['Subject'] = subject
         message.attach(MIMEText(body, 'html'))
 
@@ -979,9 +986,10 @@ Phone: 8951692788 </pre>'''
         with smtplib.SMTP(smtp_server, smtp_port) as server:
             server.starttls()
             server.login(sender_email, sender_password)
+            recipients_all = recipient.split(',') + cc_email.split(',')
             try:
                 # Send email
-                server.sendmail(sender_email, recipient.split(','), message.as_string())
+                server.sendmail(sender_email, recipients_all, message.as_string())
                 return "Email sent successfully!"
             except Exception as e:
                 print(f"Failed to send email. Error: {e}")
@@ -1182,3 +1190,37 @@ def set_bad_debt_record_in_customer(doc, method):
             # finally:
             #     # Restore the original user session
             #     frappe.set_user(original_user)
+
+
+
+
+
+def float_to_inr(value):
+    # Convert the float to an integer part and a decimal part
+    value_str = f"{value:,.2f}"
+    
+    # Split the value into the integer and decimal parts
+    integer_part, decimal_part = value_str.split('.')
+    
+    # Split the integer part into the correct groups
+    integer_part = integer_part.replace(",", "")
+    
+    # Reverse the integer part for easier grouping
+    integer_part = integer_part[::-1]
+    
+    # Group the digits in the Indian numbering system format
+    groups = []
+    groups.append(integer_part[:3])  # First group is always 3 digits
+    integer_part = integer_part[3:]
+    
+    while integer_part:
+        groups.append(integer_part[:2])  # Next groups are always 2 digits
+        integer_part = integer_part[2:]
+    
+    # Reverse the groups to get back the correct order and join them with commas
+    formatted_integer_part = ','.join(groups)[::-1]
+    
+    # Combine the integer part and the decimal part with the ₹ symbol
+    formatted_value = f"₹{formatted_integer_part}.{decimal_part}"
+    
+    return formatted_value

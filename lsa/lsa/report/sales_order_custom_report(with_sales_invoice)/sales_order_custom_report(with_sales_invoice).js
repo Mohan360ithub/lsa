@@ -39,6 +39,13 @@ frappe.query_reports["Sales Order Custom Report(With Sales Invoice)"] = {
 			//default: "ACTIVE,ON NOTICE",
 		},
 		{
+			fieldname: "so_approved",
+			label: __("SO Approved"),
+			fieldtype: "Select",
+			options:["","Approved","Not Approved"],
+			default: "",
+		},
+		{
 			fieldname: "sales_invoice",
 			label: __("Sales Invoice"),
 			fieldtype: "Select",
