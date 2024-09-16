@@ -104,6 +104,9 @@ def check_is_primary(customer_name,customer_groups):
 @frappe.whitelist()
 def get_client_group_summary(group_id,customer_id=None):
     try:
+        client_group = frappe.get_doc("Client Group", group_id)
+        group_name = client_group.group_name if client_group else "Unknown Group"
+
         # Get all the client groups
         client_group_customers = frappe.get_all("Customer",filters={
                                                                     "custom_client_group":group_id,
@@ -137,7 +140,8 @@ def get_client_group_summary(group_id,customer_id=None):
                                                    "due_so_amount":due_so_amount,
                                                    "annual_fees":annual_fees
                                                    }
-        return {"status":True,"msg":"Client Group data fetched successfully!","client_group_summary":client_group_summary}
+        return {"status":True,"msg":"Client Group data fetched successfully!","client_group_summary":client_group_summary,"group_id": group_id,
+            "group_name": group_name}
     except Exception as e:
         frappe.log_error(message=str(e), title="Failed to fetch client group summary")
         return {"status":False,"msg": f"Failed to fetch client group summary:{e}"}

@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class ServiceMasterAddon(Document):
+class S3CloudDocuments(Document):
 	pass

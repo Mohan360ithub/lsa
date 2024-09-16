@@ -9,7 +9,7 @@ def execute(filters=None):
         # Customer details columns
         {"label": "ID", "fieldname": "so_id", "fieldtype": "Link", "options": "Sales Order", "width": 100},
         {"label": "Status PE", "fieldname": "custom_payment_status", "fieldtype": "Select", "width": 60},
-        {"label": "SI", "fieldname": "si_status", "fieldtype": "Data", "width": 35},
+        # {"label": "SI", "fieldname": "si_status", "fieldtype": "Data", "width": 35},
 
         {"label": "CID", "fieldname": "customer_id", "fieldtype": "Link", "options": "Customer", "width": 90},
         {"label": "Company Name", "fieldname": "customer_name", "fieldtype": "Data", "width": 150},
@@ -31,10 +31,10 @@ def execute(filters=None):
         {"label": "FollowUp", "fieldname": "followup_button", "fieldtype": "HTML", "width": 30},
         {"label": "SO From Date", "fieldname": "custom_so_from_date", "fieldtype": "Date", "width": 110},
         {"label": "SO To Date", "fieldname": "custom_so_to_date", "fieldtype": "Date", "width": 110},
-        {"label": "Status SI", "fieldname": "custom_payment_status_si", "fieldtype": "Data", "width": 100},
-        {"label": "Sales Invoice", "fieldname": "custom_si_ids", "fieldtype": "Link", "options": "Sales Invoice", "width": 150},
-        {"label": "Amount Paid SI", "fieldname": "si_advanced_paid", "fieldtype": "Currency", "width": 100},
-        {"label": "Due Amount SI", "fieldname": "custom_so_balance_amount_si", "fieldtype": "Currency", "width": 100},
+        # {"label": "Status SI", "fieldname": "custom_payment_status_si", "fieldtype": "Data", "width": 100},
+        # {"label": "Sales Invoice", "fieldname": "custom_si_ids", "fieldtype": "Link", "options": "Sales Invoice", "width": 150},
+        # {"label": "Amount Paid SI", "fieldname": "si_advanced_paid", "fieldtype": "Currency", "width": 100},
+        # {"label": "Due Amount SI", "fieldname": "custom_so_balance_amount_si", "fieldtype": "Currency", "width": 100},
     ]
     base_url=frappe.utils.get_url() 
     # Get data for the report
@@ -448,6 +448,7 @@ def get_latest_sales_order_ids():
     sales_order_ids = [row['document_id'] for row in result]
     
     return sales_order_ids
+
 
 
 

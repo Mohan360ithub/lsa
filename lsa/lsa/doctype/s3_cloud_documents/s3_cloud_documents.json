@@ -1,0 +1,167 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:{doctype_name}-{######}",
+ "creation": "2024-07-17 18:05:36.414095",
+ "default_view": "List",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_qfyl",
+  "column_break_dmuy",
+  "doctype_name",
+  "doctype_id",
+  "doctype_document_subtype",
+  "file_name",
+  "file_type",
+  "file_ref",
+  "notes",
+  "column_break_pnzh",
+  "s3_filename",
+  "s3_filepath",
+  "s3_filesize",
+  "s3_file_mime_type",
+  "uploaded_by",
+  "uploaded_to_s3",
+  "deleted_from_local",
+  "removed_reference_from_attached_doc"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_qfyl",
+   "fieldtype": "Section Break",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_dmuy",
+   "fieldtype": "Column Break",
+   "read_only": 1
+  },
+  {
+   "fieldname": "doctype_name",
+   "fieldtype": "Link",
+   "label": "Doctype Name",
+   "options": "DocType",
+   "read_only": 1
+  },
+  {
+   "fieldname": "doctype_id",
+   "fieldtype": "Dynamic Link",
+   "label": "Doctype ID",
+   "options": "doctype_name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "doctype_document_subtype",
+   "fieldtype": "Data",
+   "label": "Doctype Document Subtype",
+   "read_only": 1
+  },
+  {
+   "fieldname": "file_name",
+   "fieldtype": "Data",
+   "label": "File name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "file_type",
+   "fieldtype": "Data",
+   "label": "File Type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "file_ref",
+   "fieldtype": "Data",
+   "label": "File Ref",
+   "options": "File",
+   "read_only": 1
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_pnzh",
+   "fieldtype": "Column Break",
+   "read_only": 1
+  },
+  {
+   "fieldname": "s3_filename",
+   "fieldtype": "Data",
+   "label": "S3 Filename",
+   "read_only": 1
+  },
+  {
+   "fieldname": "s3_filepath",
+   "fieldtype": "Data",
+   "label": "S3 Filepath",
+   "read_only": 1
+  },
+  {
+   "fieldname": "s3_filesize",
+   "fieldtype": "Data",
+   "label": "S3 Filesize(in kbs)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "s3_file_mime_type",
+   "fieldtype": "Data",
+   "label": "S3 File Mime Type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "uploaded_by",
+   "fieldtype": "Data",
+   "label": "Uploaded By",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "uploaded_to_s3",
+   "fieldtype": "Check",
+   "label": "Uploaded to S3",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "deleted_from_local",
+   "fieldtype": "Check",
+   "label": "Deleted from Local",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "removed_reference_from_attached_doc",
+   "fieldtype": "Check",
+   "label": "Removed Reference from Attached Doc",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-09-03 12:24:39.540941",
+ "modified_by": "Administrator",
+ "module": "Lsa",
+ "name": "S3 Cloud Documents",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

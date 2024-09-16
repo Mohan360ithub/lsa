@@ -14,6 +14,7 @@
   "created_by",
   "task_creation_date_time",
   "assigned_to",
+  "billable",
   "section_break_dulp",
   "customer_task",
   "section_break_wbrz",
@@ -192,11 +193,18 @@
    "fieldtype": "Link",
    "label": "Customer ID",
    "options": "Customer"
+  },
+  {
+   "fieldname": "billable",
+   "fieldtype": "Select",
+   "label": "Billable",
+   "options": "\nYes\nNo",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-07-12 10:08:35.774341",
+ "modified": "2024-09-04 18:00:07.577657",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Team Task",

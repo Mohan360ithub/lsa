@@ -598,6 +598,10 @@ accounts@lsaoffice.com
                 sales_invoice_whatsapp_log.type = "Template"
                 sales_invoice_whatsapp_log.message = message
                 sales_invoice_whatsapp_log.insert()
+                sales_invoice_whatsapp_log.reload()
+                invoice_doc.custom_shared_with_customer=1
+                invoice_doc.custom_first_sharing_details=f"WA: {sales_invoice_whatsapp_log.name}"
+                invoice_doc.save()
                 return {"status":True,"msg":"WhatsApp message sent successfully"}
             else:
                 return {"status":False,"error":f"{response.json()}","msg":"An error occurred while sending the WhatsApp message."}
@@ -990,6 +994,9 @@ Phone: 8951692788 </pre>'''
             try:
                 # Send email
                 server.sendmail(sender_email, recipients_all, message.as_string())
+                so_doc.custom_shared_with_customer=1
+                so_doc.custom_first_sharing_details=f"Email: {frappe.session.user} at {frappe.utils.now_datetime()} to {recipient}"
+                so_doc.save()
                 return "Email sent successfully!"
             except Exception as e:
                 print(f"Failed to send email. Error: {e}")
@@ -1224,3 +1231,4 @@ def float_to_inr(value):
     formatted_value = f"₹{formatted_integer_part}.{decimal_part}"
     
     return formatted_value
+

@@ -118,13 +118,15 @@ function bulk_wa_txt_message() {
 			},
 			callback: function (resBulkWA) {
 				// Handle the response as needed
-				if (resBulkWA.message) {
+				if (resBulkWA.message.status) {
 					frappe.msgprint(resBulkWA.message.msg);
 				}else{
+					console.log(resBulkWA)
 				}
 			}
 		});
 				
 	}, 'Configure bulk customer notifications for GST filing:');
 }
+
 

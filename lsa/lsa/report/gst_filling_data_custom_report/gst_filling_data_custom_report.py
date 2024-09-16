@@ -349,7 +349,7 @@ def send_bulk_wa_for_filtered_gst_customer( message,
                                     fields=["mobile_no_gst","name","customer_id"])
     # count=1
     if gst_step_4_list:
-        try:
+        # try:
             whatsapp_instance="Operations"
 
             resp_instance_validation=validate_whatsapp_instance(whatsapp_instance)
@@ -370,6 +370,7 @@ def send_bulk_wa_for_filtered_gst_customer( message,
                     if customer_diable_filter_list and step_4.customer_id not in customer_diable_filter_list:
                         continue
                     resp_wa_send_message=send_custom_whatsapp_message(resp_instance_validation["whatsapp_instance_doc"],step_4.mobile_no_gst,message)
+                    # resp_wa_send_message={"status":True,"message_id":"123456"}
                     if resp_wa_send_message["status"]:
                         message_id=resp_wa_send_message["message_id"]
                         new_whatsapp_log.append("details", {
@@ -386,7 +387,7 @@ def send_bulk_wa_for_filtered_gst_customer( message,
                                                                 "document_id": step_4.name,
                                                                 "mobile_number": step_4.mobile_no_gst,
                                                                 "customer": step_4.customer_id,
-                                                                "message_id": message_id
+                                                                # "message_id": message_id
                                                             })
                         frappe.log_error(f"An error occurred while sending the WhatsApp message. For Gst Filling Data {step_4.name} to {step_4.mobile_no_gst}",f"{resp_wa_send_message['msg']}")
                 
@@ -398,10 +399,13 @@ def send_bulk_wa_for_filtered_gst_customer( message,
                 return {"status":True,"msg":f"Successfully send bulk messages for Gst Filling Data, remaining WhatsApp instance credits are {int(credits)-len(gst_step_4_list)}"}
             else:
                 return {"status":False,"msg":f"Not enough credits available in Whatsapp Instance({credits}) to send bulk messages for GST Filing Data({len(gst_step_4_list)})."}
-        except Exception as er:
-            frappe.log_error(f"An Exception error occurred while sending bulk WhatsApp messages for Gst Filling Data.",f"{er}")
-            return {"status":False,"msg":f"An Exception error occurred while sending bulk WhatsApp messages for Gst Filling Data."}
+        # except Exception as er:
+        #     frappe.log_error(f"An Exception error occurred while sending bulk WhatsApp messages for Gst Filling Data.",f"{er}")
+        #     return {"status":False,"msg":f"An Exception error occurred while sending bulk WhatsApp messages for Gst Filling Data."}
     return {"status":False,"msg":f"No Gst Filling Data record found for the filters set."}
+
+
+
 
 
 

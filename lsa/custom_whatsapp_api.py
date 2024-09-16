@@ -75,10 +75,10 @@ def sync_instance_data(name):
             whatsapp_instance_doc.credits_usage = instance_data['instanceUsage'] ##
             whatsapp_instance_doc.connection_status = instance_data['isLoggedIn'] ##
             whatsapp_instance_doc.today_credits_usage = instance_data['todayUsage'] ##
-            whatsapp_instance_doc.save()
+            whatsapp_instance_doc.save(ignore_permissions=True)
         else:
             whatsapp_instance_doc.connection_status = 0 ##
-            whatsapp_instance_doc.save()
+            whatsapp_instance_doc.save(ignore_permissions=True)
 
 
         return {'status':True,"msg": "WhatsApp Instance data stored successfully."}

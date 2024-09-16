@@ -527,6 +527,180 @@ accounts@lsaoffice.com
     sales_invoice_whatsapp_log.type = "Template"
     sales_invoice_whatsapp_log.insert()
 
+
+
+
+@frappe.whitelist()
+def so_summary_wa_followup_customer(customer_id, customer_name, new_mobile):
+    try:
+        # Get all relevant sales orders
+        existing_sales_orders = frappe.get_all(
+            "Sales Order",
+            filters={"customer": customer_id, "docstatus": ['in', [0, 1]]}
+        )
+
+        # Initialize the message template
+        message = f"Dear {customer_name},\n\nYou are having a due amount to be paid for the following Sales Invoices:\n"
+
+        custom_count_of_so_due = 0
+        custom_total_amount_due_of_so = 0.00
+        custom_details_of_so_due = {}
+
+        sales_invoice_whatsapp_log = frappe.new_doc('WhatsApp Message Log')
+
+        if existing_sales_orders:
+            for existing_sales_order in existing_sales_orders:
+                sales_order = frappe.get_doc("Sales Order", existing_sales_order.name)
+
+                # Initialize amounts
+                custom_so_balance = sales_order.rounded_total
+                advance_paid = 0
+
+                # Get payment entries related to the sales order
+                pes = frappe.get_all(
+                    "Payment Entry Reference",
+                    filters={"reference_doctype": "Sales Order", "reference_name": sales_order.name, "docstatus": 1},
+                    fields=["name", "parent", "allocated_amount"]
+                )
+                for pe in pes:
+                    custom_so_balance -= pe.allocated_amount
+                    advance_paid += pe.allocated_amount
+
+                # Adjust balance for any related sales invoices
+                if custom_so_balance > 0:
+                    si_item_list = frappe.get_all(
+                        "Sales Invoice Item",
+                        filters={"sales_order": sales_order.name, "docstatus": 1},
+                        fields=["name", "parent"]
+                    )
+                    si_list = list(set(si.parent for si in si_item_list))
+                    for si_name in si_list:
+                        si_pe = frappe.get_all(
+                            "Payment Entry Reference",
+                            filters={"reference_doctype": "Sales Invoice", "reference_name": si_name, "docstatus": 1},
+                            fields=["name", "parent", "allocated_amount"]
+                        )
+                        for pe in si_pe:
+                            custom_so_balance -= pe.allocated_amount
+                            advance_paid += pe.allocated_amount
+
+                # Update message and details if there is a balance due
+                if custom_so_balance > 0:
+                    custom_count_of_so_due += 1
+                    custom_total_amount_due_of_so += custom_so_balance
+                    custom_details_of_so_due[sales_order.name] = [
+                        "Unpaid" if custom_so_balance == sales_order.rounded_total else "Partially Paid",
+                        sales_order.rounded_total,
+                        advance_paid,
+                        custom_so_balance,
+                        sales_order.custom_so_from_date,
+                        sales_order.custom_so_to_date,
+                        sales_order.custom_followup_count
+                    ]
+
+                    message += f"\n{custom_count_of_so_due}. {sales_order.name} from {sales_order.custom_so_from_date} to {sales_order.custom_so_to_date} with due amount ₹{custom_so_balance}/-."
+
+            # Add bank details and final message content
+            message += f"""
+            \n\nKindly pay the net due amount of ₹{custom_total_amount_due_of_so}/- to the below bank details:
+
+Our Bank Account:
+Lokesh Sankhala and ASSOCIATES
+Account No = 73830200000526
+IFSC = BARB0VJJCRO
+Bank = Bank of Baroda, JC Road, Bangalore-560002
+UPI id = LSABOB@UPI
+Gpay / Phonepe no = 9513199200
+
+Call us immediately in case of any queries.
+
+Best Regards,
+LSA Office Account Team
+accounts@lsaoffice.com
+8951692788
+            """
+
+            # Send WhatsApp message for the first sales order
+            if existing_sales_orders:
+                first_sales_order = existing_sales_orders[0]
+                wa_response = due_so_whatsapp_so_summary(
+                    first_sales_order.name,
+                    "Partially Paid" if custom_total_amount_due_of_so > 0 else "Paid",
+                    new_mobile,
+                    message
+                )
+
+                if wa_response["status"]:
+                    # Log the WhatsApp message
+                    sales_invoice_whatsapp_log.append("details", {
+                        "type": "Sales Order",
+                        "document_id": first_sales_order.name,
+                        "mobile_number": new_mobile,
+                        "customer": customer_id,
+                        "message_id": wa_response["message_id"]
+                    })
+                    sales_invoice_whatsapp_log.send_date = frappe.utils.now_datetime()
+                    sales_invoice_whatsapp_log.sender = frappe.session.user
+                    sales_invoice_whatsapp_log.type = "Template"
+                    sales_invoice_whatsapp_log.insert()
+
+                    return {"status": True, "msg": "WhatsApp message sent successfully"}
+                else:
+                    return {"status": False, "msg": wa_response["msg"]}
+
+        return {"status": True, "msg": "No pending sales orders for the customer."}
+
+    except Exception as e:
+        frappe.logger().error(f"Error in so_summary_wa_followup_customer: {e}")
+        return {"status": False, "msg": "An unexpected error occurred. Please contact the system administrator."}
+
+@frappe.whitelist()
+def due_so_whatsapp_so_summary(docname, paymentstatus, new_mobile, template):
+    try:
+        whatsapp_instance = frappe.get_all('WhatsApp Instance', filters={
+            'module': 'Accounts', 
+            'connection_status': 1, 
+            'active': 1
+        })
+        
+        if not whatsapp_instance:
+            return {"status": False, "msg": "WhatsApp API instance is not connected."}
+        
+        instance = frappe.get_doc('WhatsApp Instance', whatsapp_instance[0].name)
+        ins_id = instance.instance_id
+
+        # Validate mobile number
+        if len(new_mobile) != 10:
+            return {"status": False, "msg": "Please provide a valid 10-digit mobile number."}
+
+        # WhatsApp API call
+        url = "https://wts.vision360solutions.co.in/api/sendFileWithCaption"
+        # print("templateeeeeeeeeeeee",template)
+        params = {
+            "token": ins_id,
+            "phone": f"91{new_mobile}",
+            "message": template,
+            "link": frappe.utils.get_url() + f"/api/method/frappe.utils.print_format.download_pdf?doctype=Sales%20Order&name={docname}&format=Payment%20Pending%20Sales%20Order&no_letterhead=0&letterhead=LSA&settings=%7B%7D&_lang=en/Pending_Sales_Order.pdf"
+        }
+
+        response = requests.post(url, params=params)
+        response.raise_for_status()
+        response_data = response.json()
+
+        if response_data.get('status') == 'success':
+            message_id = response_data['data']['messageIDs'][0]
+            return {"status": True, "msg": "WhatsApp message sent successfully", "message_id": message_id}
+        else:
+            return {"status": False, "msg": f"Error: {response_data.get('message')}"}
+
+    except requests.exceptions.RequestException as e:
+        frappe.logger().error(f"Network error: {e}")
+        return {"status": False, "msg": "Network error occurred. Please try again later."}
+    except Exception as e:
+        frappe.logger().error(f"Error: {e}")
+        return {"status": False, "msg": "An unexpected error occurred. Please contact the system administrator."}
+
+
 @frappe.whitelist()
 def due_so_whatsapp(docname,paymentstatus,new_mobile,template):
     # new_mobile="9098543046"
@@ -701,7 +875,16 @@ def disable_customer(customer_id,reason):
             except Exception as eso:
                 frappe.logger().error(f"Error to fetch payment status for Sales Order {so.name}: {eso} {resp}")
                 return {"status":False,"message": f"Error to fetch payment status for Sales Order {so.name}: {eso} {resp}"}
+            
+        rsp_list=frappe.get_all("Recurring Service Pricing",filters={"customer_id":customer_id,"status":("not in",("Discontinued"))})
+        
+        if rsp_list and new_status!="Enabled":
+            # continue
+            frappe.throw(f"You can't disable customer having active Recurring Service Pricing {rsp_list[0].name}")
+            # pass
+            
         customer_doc.save()
+
 
         serv_freq={"M":"Monthly",
                    "Q":"Quarterly",
@@ -1029,4 +1212,5 @@ def get_customer_annual_fees(customer_id):
             annual_fees+=chargeable_service.annual_fees
     
     return annual_fees
+
 

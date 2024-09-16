@@ -30,7 +30,9 @@
   {
    "fieldname": "customer_id",
    "fieldtype": "Link",
+   "in_filter": 1,
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Customer ID",
    "options": "Customer",
    "reqd": 1
@@ -97,7 +99,7 @@
    "fieldname": "file_type",
    "fieldtype": "Select",
    "label": "File Type",
-   "options": "\nPAN\nAadhaar\nPhoto\nBank Account\nDL\nPassport\nVoter ID",
+   "options": "\nPAN\nAadhaar\nPhoto\nBank Account\nDL\nPassport\nVoter ID\nOther",
    "permlevel": 4
   },
   {
@@ -142,7 +144,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-07-26 17:58:07.266377",
+ "modified": "2024-09-06 18:30:06.249030",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Assessee",

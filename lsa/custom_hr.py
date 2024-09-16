@@ -5,6 +5,16 @@ from frappe.utils import now_datetime
 
 
 
+@frappe.whitelist()
+def get_team_ticket_records():
+    # Ensure the status parameter is a list
+
+    # Query the Team Ticket doctype with the given statuses
+    tickets = frappe.get_all('Team Ticket', 
+                             filters={'status': ['in', 'Open']}, 
+                             fields=['name','title', 'type', 'sub_category','description', 'created_by', 'status'])
+    
+    return tickets
 
 @frappe.whitelist()
 def get_employees_with_absent():

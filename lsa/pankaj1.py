@@ -1051,3 +1051,24 @@ def fetch_records_for_customer(customer_id, item_code):
     
     except Exception as e:
         frappe.throw(_("Error fetching records for customer: {0}").format(str(e)))
+
+
+
+
+@frappe.whitelist(allow_guest=True)
+def get_sales_order_id(customer_id):
+    # Fetch the sales order ID based on the customer ID with docstatus 0 or 1
+    sales_order = frappe.get_all(
+        'Sales Order',
+        filters={
+            'customer': customer_id,
+            'docstatus': ['in', [0, 1]]  # Only include drafts and submitted
+        },
+        fields=['name'],
+        limit_page_length=1
+    )
+    
+    if sales_order:
+        return {'sales_order_id': sales_order[0]['name']}
+    else:
+        return {'sales_order_id': None}
