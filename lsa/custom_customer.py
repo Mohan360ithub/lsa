@@ -640,6 +640,7 @@ accounts@lsaoffice.com
                         "message_id": wa_response["message_id"]
                     })
                     sales_invoice_whatsapp_log.send_date = frappe.utils.now_datetime()
+                    sales_invoice_whatsapp_log.message = message
                     sales_invoice_whatsapp_log.sender = frappe.session.user
                     sales_invoice_whatsapp_log.type = "Template"
                     sales_invoice_whatsapp_log.insert()

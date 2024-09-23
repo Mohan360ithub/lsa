@@ -94,6 +94,17 @@ def execute(filters=None):
 def get_data(filters):
     
     fy=frappe.get_doc("FY",filters.get("fy"))
+    start_date, end_date=fy.title,fy.year_end_date
+
+    formated_months = [ 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec','Jan', 'Feb', 'Mar']
+    sorted_months = []
+    for i in formated_months:
+        if i in ['Jan', 'Feb', 'Mar']:
+            sorted_months.append(i + "-" + str(end_date.year))
+        else:
+            sorted_months.append(i + "-" + str(start_date.year))
+
+
     advance_filter = {}
     
     if filters.get("customer_id"):
@@ -201,12 +212,12 @@ def get_data(filters):
                     # item_key = (customer_service["service_name"], customer_service["customer_id"])
                     item_key=customer_service["description"]
                     net_qty=0
-                    missing_months=['April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December','January', 'February', 'March']
+                    missing_months=sorted_months
                     sales_order_count=0
                     sales_order_details=""
                     if item_key in soi_qty_map:
                         net_qty = soi_qty_map[item_key][0]
-                        missing_months=get_missing_months_in_fy(fy.title,fy.year_end_date,soi_qty_map[item_key][1])
+                        missing_months=get_missing_months_in_fy(start_date, end_date,soi_qty_map[item_key][1])
                         sales_order_count=len(soi_qty_map[item_key][2])
                         sales_order_details=", \n".join(soi_qty_map[item_key][2])
                         
@@ -247,10 +258,8 @@ def get_data(filters):
 
 
 
-def get_missing_months_in_fy(fy_start_date, fy_end_date, date_ranges):
-    try:
-        # Helper function to get all months in a given range
-        def get_months_in_range(start_date, end_date):
+
+def get_months_in_range(start_date, end_date):
             months = set()
             # Ensure dates are datetime.date
             start_date = start_date if isinstance(start_date, date) else start_date.date()
@@ -258,16 +267,28 @@ def get_missing_months_in_fy(fy_start_date, fy_end_date, date_ranges):
 
             current = start_date
             while current <= end_date:
-                months.add(calendar.month_name[current.month])
+                year = current.year
+                # month_str = f"{calendar.month_abbr[current.month].upper()}-{year}"
+                month_str = f"{calendar.month_abbr[current.month]}"
+                months.add(month_str)
                 if current.month == 12:
-                    current = date(current.year + 1, 1, 1)
+                    current = date(year + 1, 1, 1)
                 else:
-                    current = date(current.year, current.month + 1, 1)
+                    current = date(year, current.month + 1, 1)
             return months
+
+def get_missing_months_in_fy(fy_start_date, fy_end_date, date_ranges):
+    try:
+        
+        
 
         # Ensure fiscal year dates are datetime.date
         fy_start = fy_start_date if isinstance(fy_start_date, date) else fy_start_date.date()
         fy_end = fy_end_date if isinstance(fy_end_date, date) else fy_end_date.date()
+
+        fy_start_year = fy_start.year
+
+        fy_end_year = fy_end.year
 
         # All months in the fiscal year
         all_months_in_fy = get_months_in_range(fy_start, fy_end)
@@ -279,11 +300,57 @@ def get_missing_months_in_fy(fy_start_date, fy_end_date, date_ranges):
             covered_months.update(get_months_in_range(start_date, end_date))
 
         # Determine missing months
-        missing_months = sorted(all_months_in_fy - covered_months, key=lambda x: list(calendar.month_name).index(x))
-        return missing_months
+        missing_months = (all_months_in_fy - covered_months)
+                            
+        formated_months = [ 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec','Jan', 'Feb', 'Mar']
+        sorted_missing_months = []
+        for i in formated_months:
+            if i in missing_months and i in ['Jan', 'Feb', 'Mar']:
+                sorted_missing_months.append(i + "-" + str(fy_end_year))
+            elif i in missing_months:
+                sorted_missing_months.append(i + "-" + str(fy_start_year))
+        return sorted_missing_months
     except Exception as e:
-        #  print("errorrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr",e)
-         frappe.log_error(f"Error while getting missing biling months in 'Missing SO before 2024 for Recurring Services' Report: {e}")
+        frappe.log_error(f"Error while getting missing biling months in 'Missing SO before 2024 for Recurring Services' Report: {e}")
+
+
+# def get_missing_months_in_fy(fy_start_date, fy_end_date, date_ranges):
+#     try:
+#         # Helper function to get all months in a given range
+#         def get_months_in_range(start_date, end_date):
+#             months = set()
+#             # Ensure dates are datetime.date
+#             start_date = start_date if isinstance(start_date, date) else start_date.date()
+#             end_date = end_date if isinstance(end_date, date) else end_date.date()
+
+#             current = start_date
+#             while current <= end_date:
+#                 months.add(calendar.month_name[current.month])
+#                 if current.month == 12:
+#                     current = date(current.year + 1, 1, 1)
+#                 else:
+#                     current = date(current.year, current.month + 1, 1)
+#             return months
+
+#         # Ensure fiscal year dates are datetime.date
+#         fy_start = fy_start_date if isinstance(fy_start_date, date) else fy_start_date.date()
+#         fy_end = fy_end_date if isinstance(fy_end_date, date) else fy_end_date.date()
+
+#         # All months in the fiscal year
+#         all_months_in_fy = get_months_in_range(fy_start, fy_end)
+
+#         # Collect covered months from all date ranges
+#         covered_months = set()
+#         for date_range in date_ranges:
+#             start_date, end_date = date_range
+#             covered_months.update(get_months_in_range(start_date, end_date))
+
+#         # Determine missing months
+#         missing_months = sorted(all_months_in_fy - covered_months, key=lambda x: list(calendar.month_name).index(x))
+#         return missing_months
+#     except Exception as e:
+#         #  print("errorrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr",e)
+#          frappe.log_error(f"Error while getting missing biling months in 'Missing SO before 2024 for Recurring Services' Report: {e}")
 
 
 
@@ -530,5 +597,6 @@ def get_missing_months_in_fy(fy_start_date, fy_end_date, date_ranges):
 #     except Exception as e:
 #         #  print("errorrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr",e)
 #          frappe.log_error(f"Error while getting missing biling months in 'Missing SO before 2024 for Recurring Services' Report: {e}")
+
 
 

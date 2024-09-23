@@ -215,6 +215,7 @@
    "fieldname": "file_type",
    "fieldtype": "Select",
    "label": "File Type",
+   "options": "\nApproval Doc\nOthers",
    "permlevel": 4
   },
   {
@@ -259,7 +260,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-07-26 18:17:29.456673",
+ "modified": "2024-09-18 16:37:05.203590",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Recurring Service Pricing",

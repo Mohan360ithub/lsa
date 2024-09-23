@@ -25,6 +25,16 @@ frappe.query_reports["So Final Due CID Wise"] = {
             "get_data": function (txt) {
                 return frappe.db.get_link_options("Client Group", txt);
             }
+        },
+        {
+            fieldname: "from_date",
+            label: __("Sales Order From Date"),
+            fieldtype: "Date",
+        },
+        {
+            fieldname: "to_date",
+            label: __("Sales Order To Date"),
+            fieldtype: "Date",
         }      
         
     ]
@@ -64,7 +74,9 @@ function openSalesOrders(customer_id) {
                                         <th>SO From Date</th>
                                         <th>SO To Date</th>
                                         <th>Amount</th>
-                                        <th>Status</th>
+                                        <th>Paid Amount</th>
+                                        <th>Balance Amount</th>
+                                        <th>Payment Status</th>
                                     </tr>
                                 </thead>
                                 <tbody>`;
@@ -76,7 +88,9 @@ function openSalesOrders(customer_id) {
                                 <td>${order.custom_so_from_date}</td>
                                 <td>${order.custom_so_to_date}</td>
                                 <td>${order.rounded_total}</td>
-                                <td>${order.status}</td>
+                                <td>${order.paid_amount}</td>
+                                <td>${order.balance_amount}</td>
+                                <td>${order.payment_status}</td>
                             </tr>`;
                 });
 
@@ -92,3 +106,4 @@ function openSalesOrders(customer_id) {
         }
     });
 }
+
