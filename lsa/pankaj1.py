@@ -488,13 +488,45 @@ def create_it_assessee_manual_record(yearly_report, current_form_name):
 
 
 
+# @frappe.whitelist()
+# def fetch_services(c_id=None,frequency=None):
+#     freq_dict={ "All":"M,Q,Y","Monthly":"M","Quarterly":"Q","Yearly":"Y"}
+    
+#     all_services = frappe.get_all("Customer Chargeable Doctypes")
+#     master_service_filter={'customer_id': c_id,
+#                            "enabled":1,
+#                            "frequency":("in",freq_dict[frequency])}
+#     all_services = frappe.get_all("Customer Chargeable Doctypes")
+#     c_services=[]
+#     for service in all_services:
+#         # print(service["name"])
+#         # if service["name"] in ("IT Assessee File","Gstfile"):
+#             # print(service["name"])
+#         c_services_n= (frappe.get_all(
+#             service["name"], 
+#             filters = master_service_filter,
+#             fields = ["name","service_name","hsn_code","description","customer_id","current_recurring_fees"]))
+#         c_services+=list(c_services_n)
+#             # for c_service in c_services_n:
+#             #   pass
+#     #print(c_services)
+    
+#     if c_services:
+#         # For demonstration purposes, let's just send back a response.
+#         data = c_services
+#         return data
+#     else:
+#         return "No data found for the given parameters."
+
 @frappe.whitelist()
 def fetch_services(c_id=None,frequency=None):
     freq_dict={ "All":"M,Q,Y","Monthly":"M","Quarterly":"Q","Yearly":"Y"}
     
     all_services = frappe.get_all("Customer Chargeable Doctypes")
     master_service_filter={'customer_id': c_id,
-                           "enabled":1,
+                           "enabled":1,}
+    master_service_addon_filter={"status":"Running",
+                            "status":"Active",
                            "frequency":("in",freq_dict[frequency])}
     all_services = frappe.get_all("Customer Chargeable Doctypes")
     c_services=[]
@@ -503,10 +535,20 @@ def fetch_services(c_id=None,frequency=None):
         # if service["name"] in ("IT Assessee File","Gstfile"):
             # print(service["name"])
         c_services_n= (frappe.get_all(
-            service["name"], 
-            filters = master_service_filter,
-            fields = ["name","service_name","hsn_code","description","customer_id","current_recurring_fees"]))
-        c_services+=list(c_services_n)
+                        service["name"], 
+                        filters = master_service_filter,
+                        # fields = ["name","service_name","hsn_code","description","customer_id","current_recurring_fees"]))
+                        fields = ["name","description"]))
+        for service in c_services_n:
+            master_service_addon_filter["parent"]=service.name
+            service_addons= frappe.get_all("Service Master Addon",
+                                         filters=master_service_addon_filter,
+                                         fields=["addon_service_name","current_charges"]
+                                        )
+            if service_addons:
+                for service_addon in service_addons:
+                    merged_service = {**service, **service_addon}
+                    c_services.append(merged_service)
             # for c_service in c_services_n:
             #   pass
     #print(c_services)
@@ -516,7 +558,7 @@ def fetch_services(c_id=None,frequency=None):
         data = c_services
         return data
     else:
-        return "No data found for the given parameters."
+        return None
 
 
 @frappe.whitelist()
@@ -1072,3 +1114,4 @@ def get_sales_order_id(customer_id):
         return {'sales_order_id': sales_order[0]['name']}
     else:
         return {'sales_order_id': None}
+

@@ -17,7 +17,78 @@ from lsa.custom_mail import single_mail
 
 class RecurringServicePricing(Document):
 
+    def validate(self):
+        if frappe.db.exists("Recurring Service Pricing", self.name):
+            old_doc = frappe.get_doc("Recurring Service Pricing", self.name)
+            if old_doc.status!=self.status and self.status=="Approved":
+                all_service_addons = []
+                all_services = frappe.get_all("Customer Chargeable Doctypes")
+                
+                for service in all_services:
+                    all_service_records = frappe.get_all(
+                        service.name,
+                        filters={"customer_id": self.customer_id, "enabled": 1},
+                        fields=["name", "service_name", "frequency", "current_recurring_fees"]
+                    )
+                    
+                    for record in all_service_records:
+                        service_addons = frappe.get_all(
+                            "Service Master Addon",
+                            filters={"parent": record.name},
+                            fields=["addon_service_name"]
+                        )
+                        all_service_addons += [
+                            (addon.addon_service_name, record.name) for addon in service_addons
+                        ]
+                
+                # frappe.log_error( "All Service Addons in Validation",f"{all_service_addons}")
+                
+                rsp_service_addons = [
+                    (item.service_name, item.service_id) for item in self.recurring_services
+                ]
+                rsp_service_addons_to_log = [
+                    (item.service_name, item.service_id,item.name) for item in self.recurring_services
+                ]
+                
+                # frappe.log_error( "RSP Service Addons in Validation",f"{rsp_service_addons_to_log},{self.name}")
+                
+                # Comparison
+                if set(rsp_service_addons) != set(all_service_addons):
+                    mismatch = set(rsp_service_addons).symmetric_difference(set(all_service_addons))
+                    frappe.throw(
+                        f"The addons in RSP {self.name} do not match with addons of service masters. "
+                        f"Please check the following mismatches: {mismatch}"
+                    )
+
+
+    # def validate(self):
+
+    #     all_service_addons=[]
+    #     all_services = frappe.get_all("Customer Chargeable Doctypes")
+    #     for service in all_services:
+    #         # Get all records for the current service doctype
+    #         all_service_records = frappe.get_all(service.name, filters={"customer_id":self.customer_id,"enabled":1}, fields=["name", "service_name", "frequency", "current_recurring_fees"])
+            
+    #         for record in all_service_records:
+
+    #             # Get the document for each service record
+    #             service_addon = frappe.get_all("Service Master Addon", filters={"parent": record.name},fields=["name","addon_service_name"])
+    #             all_service_addons+=[(addon.addon_service_name,record.name) for addon in service_addon]
+    #     rsp_service_addons=[]       
+    #     for item in self.recurring_services:
+    #         rsp_service_addons.append((item.service_name, item.service_id))
+        
+    #     if sorted(rsp_service_addons)!=sorted(all_service_addons):
+    #         frappe.throw(f"The addons in RSP doesnot match with addons of service masters, to add new addons go to respective service masters")
+
+
     def on_update(self):
+        frequency_dict =    {
+                "Monthly": "M",
+                "Quarterly": "Q",
+                "Half-yearly": "H",
+                "Yearly": "Y"
+            }
         if self.status == "Approved" :
             # print(type(self.effective_from))
             # print(self.effective_from)
@@ -72,7 +143,26 @@ class RecurringServicePricing(Document):
                 price_doc.next_pricing=self.name
                 price_doc.save()
                 prev_price_doc=price_doc.name
-            if self.service_active==0:       
+            # if self.service_active==0:       
+            #     for item in self.recurring_services:
+            #         if item.price_revised=="Yes":
+            #             item.effective_from = self.effective_from
+            #         elif item.service_id in old_service_id_effective_date:
+            #             item.effective_from = old_service_id_effective_date[item.service_id]
+            #         else:
+            #             item.effective_from = self.effective_from
+            #         item.enabled = 1
+            #         item.save()
+            #         master_service_doc = frappe.get_doc(item.service_type,item.service_id)
+            #         if master_service_doc.current_recurring_fees!=item.revised_charges:
+            #             master_service_doc.current_recurring_fees=item.revised_charges
+            #         master_service_doc.save()
+            #     self.service_active=1
+            #     self.previous_pricing=prev_price_doc
+            #     self.save()
+            # print(self.recurring_services)
+            if self.service_active==0:    
+                # print("Service Masters GEtting Updatedddddddddddddddddddddddddddddddddddd!!!!!!!!!!!!!!select * from `tabSessions`;!!!!!!!!!!!!!!!!29BPOPM7873K2ZS bench --site lsa.local mariadb") 
                 for item in self.recurring_services:
                     if item.price_revised=="Yes":
                         item.effective_from = self.effective_from
@@ -81,14 +171,43 @@ class RecurringServicePricing(Document):
                     else:
                         item.effective_from = self.effective_from
                     item.enabled = 1
-                    item.save()
+                    # item.save()
+
+                    # print(item.service_name,item.revised_charges,frequency_dict[item.frequency],item.frequency )
                     master_service_doc = frappe.get_doc(item.service_type,item.service_id)
-                    if master_service_doc.current_recurring_fees!=item.revised_charges:
-                        master_service_doc.current_recurring_fees=item.revised_charges
-                    master_service_doc.save()
+                    # print(master_service_doc.addon_services)
+                    item_master_list=frappe.get_all("Service Master Addon",
+                                                        filters={
+                                                            'parent':item.service_id,
+                                                            "addon_service_name":item.service_name
+                                                        },)
+                    if item_master_list:
+                        addon_doc=frappe.get_doc("Service Master Addon",item_master_list[0].name)
+                        if item.revised_charges:
+                            addon_doc.current_charges = item.revised_charges
+                            addon_doc.status = "Active"
+
+                        else:
+                            addon_doc.current_charges = item.revised_charges
+                            addon_doc.status = "Inactive"
+                        addon_doc.save()
+                    else:
+                        master_service_doc.reload()
+
+                        new_item = master_service_doc.append('addon_services', {})
+                
+                        # Set values for fields in the new row
+                        new_item.addon_service_name = item.service_name
+                        new_item.current_charges = item.revised_charges
+                        new_item.frequency = frequency_dict[item.frequency] 
+                        master_service_doc.save()
+                    # print(master_service_doc.addon_services)
+
                 self.service_active=1
                 self.previous_pricing=prev_price_doc
+                frappe.log_error( "Trigger Before save")
                 self.save()
+                frappe.log_error( "Trigger After save")
         elif self.status == "Discontinued" :
             
             if not self.effective_to:
@@ -102,54 +221,87 @@ class RecurringServicePricing(Document):
                 # print(self.effective_to)
                 item.effective_to=self.effective_to
                 item.enabled=0
-                item.save()
+                # item.save()
             if self.service_active!=0:
                 self.service_active=0
+                frappe.log_error( "Trigger Before save")
                 self.save()
+                frappe.log_error( "Trigger After save")
             
-
 
 
 @frappe.whitelist()
 def fetch_services(customer_id=None):
     frequency_map={"M":"Monthly","Q":"Quarterly","H":"Half-yearly","Y":"Yearly"}
     all_services = frappe.get_all("Customer Chargeable Doctypes")
-    existing_pricing=frappe.get_all("Recurring Service Pricing",
-                                    filters={"customer_id":customer_id,
-                                             "status":"Approved"},)
-    existing_pricing_items={}
-    if existing_pricing and len(existing_pricing)==1:
-        existing_pricing=frappe.get_doc("Recurring Service Pricing",existing_pricing[0].name)
-        for row in existing_pricing.recurring_services:
-            existing_pricing_items[row.service_id]=row.revised_charges
 
-    # print(existing_pricing_items)
     c_services=[]
     for service in all_services:
-        # print(service["name"])
-        # if service["name"] in ("IT Assessee File","Gstfile"):
-            # print(service["name"])
-        c_services_n= (frappe.get_all(service["name"], 
+
+        c_services_n = frappe.get_all(service["name"], 
                                         filters={'customer_id': customer_id,"enabled":1},
-                                        fields=["name","description","current_recurring_fees","enabled","frequency"]))
+                                        fields=["name","description"])
         for c_service in c_services_n:
-            c_service["service_type"]=service["name"]
-            # print(c_service["name"])
-            c_service["frequency"]=frequency_map[c_service["frequency"]]
-            if c_service["name"] in existing_pricing_items:
-                c_service["current_recurring_fees"]=existing_pricing_items[c_service["name"]]
-            else:
-                c_service["current_recurring_fees"]=c_service["current_recurring_fees"]
-        c_services+=list(c_services_n)
-            # for c_service in c_services_n:
-            #   pass
+            c_services_addons= (frappe.get_all("Service Master Addon", 
+                                            filters={"parenttype":service["name"],'parent': c_service.name},
+                                            fields=["name","parent","parenttype","addon_service_name","current_charges","frequency"]))
+            for c_services_addon in c_services_addons:
+                # c_service["service_type"]=service["name"]
+                # print(c_service["name"])
+                c_services_addon["description"]=c_service["description"]
+                c_services_addon["frequency"]=frequency_map[c_services_addon["frequency"]]
+                c_services_addon["service_type"]=c_services_addon["parenttype"]
+                c_services_addon["name"]=c_service.name
+                c_services+=[(c_services_addon)]
+
     
     if c_services:
         # For demonstration purposes, let's just send back a response.
         data = c_services
-        return data
+        return {"status":True,"data":data}
     else:
-        return "No data found for the given parameters."
+        return {"status":False,"msg":"No data found for the given parameters."}
+    
+# @frappe.whitelist()
+# def fetch_services(customer_id=None):
+#     frequency_map={"M":"Monthly","Q":"Quarterly","H":"Half-yearly","Y":"Yearly"}
+#     all_services = frappe.get_all("Customer Chargeable Doctypes")
+#     existing_pricing=frappe.get_all("Recurring Service Pricing",
+#                                     filters={"customer_id":customer_id,
+#                                              "status":"Approved"},)
+#     existing_pricing_items={}
+#     if existing_pricing and len(existing_pricing)==1:
+#         existing_pricing=frappe.get_doc("Recurring Service Pricing",existing_pricing[0].name)
+#         for row in existing_pricing.recurring_services:
+#             existing_pricing_items[row.service_id]=row.revised_charges
+
+#     # print(existing_pricing_items)
+#     c_services=[]
+#     for service in all_services:
+#         # print(service["name"])
+#         # if service["name"] in ("IT Assessee File","Gstfile"):
+#             # print(service["name"])
+#         c_services_n= (frappe.get_all(service["name"], 
+#                                         filters={'customer_id': customer_id,"enabled":1},
+#                                         fields=["name","description","current_recurring_fees","enabled","frequency"]))
+#         for c_service in c_services_n:
+#             c_service["service_type"]=service["name"]
+#             # print(c_service["name"])
+#             c_service["frequency"]=frequency_map[c_service["frequency"]]
+#             if c_service["name"] in existing_pricing_items:
+#                 c_service["current_recurring_fees"]=existing_pricing_items[c_service["name"]]
+#             else:
+#                 c_service["current_recurring_fees"]=c_service["current_recurring_fees"]
+#         c_services+=list(c_services_n)
+#             # for c_service in c_services_n:
+#             #   pass
+    
+#     if c_services:
+#         # For demonstration purposes, let's just send back a response.
+#         data = c_services
+#         return data
+#     else:
+#         return "No data found for the given parameters."
 
 
 @frappe.whitelist()
@@ -697,7 +849,8 @@ LSA Office
                                                 "document_id": invoice_doc.name,
                                                 "mobile_number": new_mobile,
                                                 "customer":customer,
-                                                "message_id":message_id
+                                                "message_id":message_id,
+                                                "sent_successfully":1, 
                                                             
                                                 # Add other fields of the child table row as needed
                                             })
@@ -825,7 +978,8 @@ def send_rsp_whatsapp_bulk(new_mobile):
 #                                                         "document_id": invoice_doc.name,
 #                                                         "mobile_number": new_mobile_dict[invoice_key],
 #                                                         "customer":invoice_doc.customer,
-#                                                         "message_id":message_id
+#                                                         "message_id":message_id,
+
                                                                     
 #                                                         # Add other fields of the child table row as needed
 #                                                     })
@@ -920,7 +1074,7 @@ def send_rsp_whatsapp_bulk(new_mobile):
 
 ####################################Srikanth code start ###############################################################################
 ##########################################  USER AUTH ######################################
-import frappe
+
  
 @frappe.whitelist()
 def check_user_permission(service_master):
@@ -1044,4 +1198,81 @@ def fetch_services_for_item(customer_id,item,service_master):
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), f"Failed to fetch services for item {item} for Customer {customer_id} in Sales Order")
         return {"status":False, "msg":f"Failed to fetch services for item {item} for Customer {customer_id} in Sales Order: {e}"}
+
+
+
+@frappe.whitelist()
+def fetch_service_master_and_frequency(item_code, description):
+    # Fetch all relevant Customer Chargeable Doctypes
+    # chargeable_doctype = frappe.get_all(
+    #                                     'Customer Chargeable Doctypes',
+    #                                     fields=['name'],
+    #                                     filters={'service_item': ("like",item_code)}
+    #                                 )
+    chargeable_doctype = frappe.get_all(
+                                        'Lead Items',
+                                        fields=['parent'],
+                                        filters={'service_name': item_code,
+                                                 "parenttype":"Customer Chargeable Doctypes"}
+                                    )
+    # print(chargeable_doctype)
+    if not chargeable_doctype:
+        return {"service_master": None, "frequency": "M"}
+
+    # Find the relevant service master
+    service_master = chargeable_doctype[0].parent
+    # print(service_master)
+
+    if not service_master:
+        return {"service_master": None, "frequency": "M"}
+    
+    service_master_record = frappe.get_all(
+                                            service_master,
+                                            filters={'description': description},
+                                            fields=['name']
+                                        )
+    # print(service_master_record)
+    service_master_record_id=service_master_record[0].name
+    # Fetch frequency from Service Master Addon
+    service_master_record_doc = frappe.get_doc(service_master,service_master_record_id)
+    frequency=None
+    for addons in service_master_record_doc.addon_services:
+        # print(addons.addon_service_name)
+        if item_code==addons.addon_service_name and addons.status=="Active":
+            frequency=addons.frequency
+            break
+    # Default to "M" if no frequency is found
+    if not frequency:
+        frequency = "M"
+
+    return {
+        "service_master": service_master,
+        "frequency": frequency
+    }
+
+
+def service_master_addon_validation(doc,method):
+    if frappe.db.exists(doc.doctype,{'name': doc.name}):
+        old_doc = frappe.get_doc(doc.doctype, doc.name)
+        old_addons=[i.addon_service_name for i in old_doc.addon_services]
+        new_addons=[j.addon_service_name for j in doc.addon_services]
+
+        if len(old_addons)>len(new_addons):
+            frappe.throw("You can't delete addons, you can only inactivate the addons!")
+
+        if len(old_addons)<len(new_addons) and not ( set(new_addons)-set(old_addons)):
+            frappe.throw("You can't add one type of addons multiple times, you can revise charges with new RSP approval!")
+    else:
+        if not doc.addon_services:
+            frappe.throw(f"At least one addon service should be set for valid {doc.doctype} creation!")
+
+        
+
+
+
+
+
+
+
+
 

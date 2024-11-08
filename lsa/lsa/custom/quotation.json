@@ -529,7 +529,7 @@
    "_user_tags": null,
    "amend": 0,
    "cancel": 0,
-   "create": 0,
+   "create": 1,
    "creation": "2024-07-20 15:11:09.142566",
    "delete": 0,
    "docstatus": 0,
@@ -551,7 +551,7 @@
    "select": 1,
    "share": 0,
    "submit": 0,
-   "write": 0
+   "write": 1
   }
  ],
  "doctype": "Quotation",

@@ -25,7 +25,10 @@ def execute(filters=None):
         {"label": "SO Approved", "fieldname": "so_tag", "fieldtype": "HTML", "width": 80},
         {"label": "Customer Status", "fieldname": "custom_customer_status_", "fieldtype": "Data", "width": 65},
         # {"label": "Customer Disabled", "fieldname": "custom_customer_disabled_", "fieldtype": "Data", "width": 50},
+        {"label": "Customer GST Type", "fieldname": "custom_gst_type", "fieldtype": "Data", "width": 65},
+
         {"label": "Next Follwup Date", "fieldname": "next_followup_date", "fieldtype": "Date", "width": 100},
+        {"label": "Whatapp Count", "fieldname": "what_app_count", "fieldtype": "Data", "width": 50},
 
         {"label": "FollowUp Count", "fieldname": "followup_count", "fieldtype": "Int", "width": 30},
         {"label": "FollowUp", "fieldname": "followup_button", "fieldtype": "HTML", "width": 30},
@@ -174,7 +177,30 @@ def get_data(filters):
     #     elif filters.get("customer_enabled")=="Customer Disabled":
     #         customer_filter["disabled"] = 1
     
+    customer_filter = {}
 
+    # print('filterrrrrrrrrrrrrrrrr', filters.get("custom_gst_type"))
+
+    # Check if the filter contains "custom_gst_type"
+    if filters.get("custom_gst_type"):
+        gst_type_list = filters.get("custom_gst_type")
+
+        # Replace 'NULL' with empty string and filter out duplicates
+        cleaned_gst_type_list = []
+        for gst in gst_type_list:
+            if gst == 'NULL':
+                cleaned_gst_type_list.append('')
+            else:
+                cleaned_gst_type_list.append(gst.strip())
+
+        # Remove duplicates (if you want)
+        cleaned_gst_type_list = list(set(cleaned_gst_type_list))
+
+        # Set the filter criteria based on the cleaned list
+        if '' in cleaned_gst_type_list:
+            customer_filter["custom_gst_type"] = ["in", cleaned_gst_type_list]
+        else:
+            customer_filter["custom_gst_type"] = ["in", cleaned_gst_type_list]
     so_s = frappe.get_all("Sales Order",
                           filters=additional_filters,
                           fields=["name","customer","customer_name","contact_mobile","custom_so_from_date","custom_so_to_date",
@@ -186,9 +212,9 @@ def get_data(filters):
             cu.append(cu_so.customer)
 
     cu_s = frappe.get_all("Customer",
-                        #   filters=customer_filter,
+                          filters=customer_filter,
                         fields=["name","custom_customer_tags","custom_customer_behaviour_","custom_behaviour_note",
-                                  "custom_customer_status_","custom_contact_person","custom_primary_mobile_no","custom_primary_email","disabled"])
+                                  "custom_customer_status_","custom_contact_person","custom_primary_mobile_no","custom_primary_email","disabled","custom_gst_type"])
     so_shared_with_client=get_latest_sales_order_ids()
     #so_shared_with_client=[]
 
@@ -226,6 +252,7 @@ def get_data(filters):
     so_with_fu={}
     for so in so_s:
         doc_status_map = {0: "Draft", 1: "Submitted", 2: "Cancelled"}
+        message_count = frappe.db.count('Message Detail', filters={'document_id': so.name})
         # custom_customer_tags_small={"SO Approved":"Approved","SO Not Approved":" Not Approved","Not Approached SO":"Not Approached"}
         # if so.customer=="20130563":
         #     # print(so)
@@ -241,6 +268,7 @@ def get_data(filters):
                 "custom_customer_behaviour_":cu_s[so.customer]["custom_customer_behaviour_"],
                 "custom_behaviour_note": cu_s[so.customer]["custom_behaviour_note"],
                 "custom_customer_status_": cu_s[so.customer]["custom_customer_status_"],
+                "custom_gst_type": cu_s[so.customer]["custom_gst_type"],
                 "custom_customer_disabled_": cu_s[so.customer]["disabled"],
                 "custom_so_from_date": so.custom_so_from_date,
                 "custom_so_to_date": so.custom_so_to_date,
@@ -249,6 +277,7 @@ def get_data(filters):
                 "doc_status": doc_status_map[so.docstatus],
                 "custom_followup_count": so.custom_followup_count,
                 "shared_with_client":"Yes" if so.name in so_shared_with_client else "No",
+                "what_app_count":message_count,
             }
 
             custom_so_balance = so.rounded_total

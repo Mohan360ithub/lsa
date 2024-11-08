@@ -27,8 +27,7 @@
    "fieldname": "instance_id",
    "fieldtype": "Data",
    "label": "Instance Id",
-   "reqd": 1,
-   "set_only_once": 1
+   "reqd": 1
   },
   {
    "fieldname": "instance_name",
@@ -121,7 +120,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-07-16 11:51:28.501967",
+ "modified": "2024-09-24 17:15:09.135156",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "WhatsApp Instance",

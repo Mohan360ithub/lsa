@@ -71,7 +71,12 @@
   "frequency",
   "annual_fees",
   "section_break_dcpz",
-  "addon_services"
+  "addon_services",
+  "section_break_axfs",
+  "column_break_mwfy",
+  "column_break_weyq",
+  "column_break_hkob",
+  "create_new_rsp"
  ],
  "fields": [
   {
@@ -364,8 +369,8 @@
    "permlevel": 2,
    "precision": "2",
    "print_hide": 1,
-   "report_hide": 1,
-   "reqd": 1
+   "read_only": 1,
+   "report_hide": 1
   },
   {
    "fetch_from": "service_name.gst_hsn_code",
@@ -461,12 +466,34 @@
    "fieldtype": "Table",
    "label": "Addon Services",
    "options": "Service Master Addon",
-   "read_only": 1
+   "permlevel": 2
+  },
+  {
+   "fieldname": "section_break_axfs",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_mwfy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_weyq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_hkob",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "create_new_rsp",
+   "fieldtype": "Button",
+   "label": "Create New RSP",
+   "permlevel": 2
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-08-29 12:45:33.411836",
+ "modified": "2024-11-07 10:30:47.668463",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Professional Tax File",

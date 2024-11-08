@@ -142,6 +142,9 @@ def validate_whatsapp_instance(instance_name):
         if not whatsapp_instance_doc.active:
             return {"status": False, "msg": "Your WhatsApp Instance is not Active, please contact admin to activate it"}
         
+        if int(whatsapp_instance_doc.remaining_credits) < 1 :
+            return {"status": False, "msg": "Your WhatsApp Instance is not having any credits, please ask Admin to recharge for new credits"}
+        
         return {"status": True, "msg": "WhatsApp instance is valid and active.", "whatsapp_instance_doc": whatsapp_instance_doc}
     except Exception as e:
         return {"status": False, "msg": f"An error occurred while validating Whatsapp instance{instance_name}: {e}"}
@@ -177,4 +180,40 @@ def send_custom_whatsapp_message(whatsapp_instance_doc, mobile_number, message):
     except requests.exceptions.RequestException as e:
         # frappe.log_error("An error occurred while sending the WhatsApp message. For {m_no}",f"{e}")
         return {"status": False, "msg": f"An error occurred while sending the WhatsApp message. For {mobile_number}: {e}"}
+
+
+
+def send_custom_whatsapp_message_with_file(whatsapp_instance_doc, new_mobile, message_template,pdflink):
+
+    if not new_mobile or not new_mobile.isnumeric() or len(new_mobile)!=10:
+        frappe.log_error(f"An error occurred while sending the WhatsApp message. For {new_mobile}","Invalid Mobile Number")
+        return {"status": False, "msg": "Invalid mobile number"}
+    
+    url = whatsapp_instance_doc.base_url+"sendFileWithCaption"
+    # print('ttttttttttttttttttttttttttttttttttttttttttttttt',whatsapp_instance_doc.instance_id,url)
+    params = {
+        "token": whatsapp_instance_doc.instance_id,
+        "phone": f"91{new_mobile}",
+        "message": message_template,
+        "link": pdflink
+    }
+    
+    try:
+        message_id=""
+        response = requests.post(url, params=params)
+        response.raise_for_status()
+        response_data = response.json()
+        message_id = response_data['data']['messageIDs'][0]
+
+        if response_data.get('status') == 'success':
+            
+            return {"status": True, "msg": "WhatsApp message sent successfully", "message_id": message_id}
+        else:
+            frappe.log_error(f"An error occurred while sending the WhatsApp message. For {new_mobile}",f"{response_data}")
+            return {"status": False, "msg": f"An error occurred while sending the WhatsApp message: {response_data}"}
+
+    except requests.exceptions.RequestException as e:
+        frappe.log_error(f"An error occurred while sending the WhatsApp message. For {new_mobile}",f"{e}")
+        return {"status": False, "msg": f"An error occurred while sending the WhatsApp message. For {new_mobile}: {e}"}
+
 

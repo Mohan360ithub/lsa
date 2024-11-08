@@ -9,6 +9,23 @@ frappe.query_reports["Custom IT Assessee Filing Data"] = {
 			"fieldtype": "Link",
 			"options": "IT Assessee File Yearly Report"
 		},
+		{
+			"fieldname": "gst_category",
+			"label": __("GST Category"),
+			"fieldtype": "Select",
+			"options": [
+				"All",
+				"Registered Regular",
+				"Registered Composition",
+				"Unregistered",
+				"SEZ",
+				"Overseas",
+				"Deemed Export",
+				"UIN Holders",
+				"Tax Deductor"
+			],
+			"default":"All"
+		}
 	]
 };
 

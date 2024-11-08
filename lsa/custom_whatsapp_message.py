@@ -57,7 +57,8 @@ def send_whatsapp_message(values_prompt):
                                     "document_id": invoice_doc.name,
                                     "mobile_number": new_mobile_dict[invoice_key],
                                     "customer":invoice_doc.customer,
-                                    "message_id":message_id                                                
+                                    "message_id":message_id,
+                                    "sent_successfully":1,                                                    
                                     # Add other fields of the child table row as needed
                                 })
 
@@ -171,7 +172,8 @@ def send_so_whatsapp_message(values_prompt):
                                     "document_id": invoice_doc.name,
                                     "mobile_number": new_mobile_dict[invoice_key],
                                     "customer":invoice_doc.customer,
-                                    "message_id":message_id                                                
+                                    "message_id":message_id,
+                                    "sent_successfully":1,                                                    
                                     # Add other fields of the child table row as needed
                                 })
 
@@ -221,4 +223,5 @@ def send_so_whatsapp_message(values_prompt):
             return {"status":False,"msg":"Your WhatApp API instance is not connected"}
     except Exception as er:
         return {"status":False,"msg":f"Error: {er}"}
+
 

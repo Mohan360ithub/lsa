@@ -16,6 +16,8 @@ def execute(filters=None):
         {"label": "Company Name", "fieldname": "customer_name", "fieldtype": "Data", "width": 150},
         {"label": "Contact Person", "fieldname": "custom_contact_person", "fieldtype": "Data", "width": 125},
         {"label": "Mobile No.", "fieldname": "mobile number", "fieldtype": "Data", "width": 110},
+        {"label": "Customer GST Type", "fieldname": "custom_gst_type", "fieldtype": "Data", "width": 65},
+
         {"label": "Shared with Client", "fieldname": "shared_with_client", "fieldtype": "Data", "width": 50},
 
         # {"label": "Total Amount", "fieldname": "rounded_total", "fieldtype": "Currency", "width": 100},
@@ -346,7 +348,7 @@ def get_data(filters):
 
     # Execute query
     so_s = frappe.db.sql(query, as_dict=True)
-    print('so_ssssssssssssssssssssss',so_s)
+    # print('so_ssssssssssssssssssssss',so_s)
     total_amount = 0
     item_summary = {}
 
@@ -425,11 +427,34 @@ def get_data(filters):
     for cu_so in so_s:
         if cu_so.customer not in cu:
             cu.append(cu_so.customer)
+    customer_filter = {}
 
+    # print('filterrrrrrrrrrrrrrrrr', filters.get("custom_gst_type"))
+
+    # Check if the filter contains "custom_gst_type"
+    if filters.get("custom_gst_type"):
+        gst_type_list = filters.get("custom_gst_type")
+
+        # Replace 'NULL' with empty string and filter out duplicates
+        cleaned_gst_type_list = []
+        for gst in gst_type_list:
+            if gst == 'NULL':
+                cleaned_gst_type_list.append('')
+            else:
+                cleaned_gst_type_list.append(gst.strip())
+
+        # Remove duplicates (if you want)
+        cleaned_gst_type_list = list(set(cleaned_gst_type_list))
+
+        # Set the filter criteria based on the cleaned list
+        if '' in cleaned_gst_type_list:
+            customer_filter["custom_gst_type"] = ["in", cleaned_gst_type_list]
+        else:
+            customer_filter["custom_gst_type"] = ["in", cleaned_gst_type_list]
     cu_s = frappe.get_all("Customer",
-                        #   filters=customer_filter,
+                          filters=customer_filter,
                         fields=["name","custom_customer_tags","custom_customer_behaviour_","custom_behaviour_note",
-                                  "custom_customer_status_","custom_contact_person","custom_primary_mobile_no","custom_primary_email","disabled"])
+                                  "custom_customer_status_","custom_contact_person","custom_primary_mobile_no","custom_primary_email","disabled","custom_gst_type"])
     so_shared_with_client=get_latest_sales_order_ids()
     #so_shared_with_client=[]
 
@@ -490,7 +515,8 @@ def get_data(filters):
                 "doc_status": doc_status_map[so.docstatus],
                 "custom_followup_count": so.custom_followup_count,
                 "shared_with_client":"Yes" if so.name in so_shared_with_client else "No",
-                "service":so.item_codes
+                "service":so.item_codes,
+                "custom_gst_type": cu_s[so.customer]["custom_gst_type"]
             }
 
             custom_so_balance = so.rounded_total
@@ -661,7 +687,7 @@ def get_data(filters):
                         data += [data_row]
             else:
                 data += [data_row]
-    print('testtttttttttttttttttttttttt',item_summary)
+    # print('testtttttttttttttttttttttttt',item_summary)
     return data,{"item_summary":item_summary,"so_with_fu":len(so_with_fu),"so_wo_followup":len(so_wo_followup),"overdue_followup":len(overdue_followup),"today_followup":len(today_followup),"upcoming_followup":len(upcoming_followup),}
 
 
@@ -1264,7 +1290,7 @@ def get_latest_sales_order_ids():
 #             pe_s_d[pe_i["reference_name"]]+=[[pe_i["name"],pe_i["parent"],pe_i["allocated_amount"]]]
 #         else:
 #             pe_s_d[pe_i["reference_name"]]=[[pe_i["name"],pe_i["parent"],pe_i["allocated_amount"]]]
-	
+    
 #     so_wo_followup=set()
 #     overdue_followup=set()
 #     today_followup=set()

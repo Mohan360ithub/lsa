@@ -70,7 +70,12 @@
   "frequency",
   "annual_fees",
   "section_break_ovon",
-  "addon_services"
+  "addon_services",
+  "section_break_rnmz",
+  "column_break_slhp",
+  "column_break_ncxj",
+  "column_break_czsa",
+  "create_new_rsp"
  ],
  "fields": [
   {
@@ -351,8 +356,8 @@
    "permlevel": 2,
    "precision": "2",
    "print_hide": 1,
-   "report_hide": 1,
-   "reqd": 1
+   "read_only": 1,
+   "report_hide": 1
   },
   {
    "fetch_from": "service_name.gst_hsn_code",
@@ -442,7 +447,7 @@
    "fieldtype": "Table",
    "label": "Addon Services",
    "options": "Service Master Addon",
-   "read_only": 1
+   "permlevel": 2
   },
   {
    "fieldname": "section_break_fyju",
@@ -451,11 +456,33 @@
   {
    "fieldname": "section_break_ovon",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "section_break_rnmz",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_slhp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_ncxj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_czsa",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "create_new_rsp",
+   "fieldtype": "Button",
+   "label": "Create New RSP",
+   "permlevel": 2
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-08-29 12:44:45.560847",
+ "modified": "2024-11-07 10:31:04.652377",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "MCA ROC File",

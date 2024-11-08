@@ -28,7 +28,8 @@ def execute(filters=None):
         {"label": "CID", "fieldname": "customer_id", "fieldtype": "Link", "options": "Customer", "width": 100},
         {"label": "Customer Name", "fieldname": "customer_name", "fieldtype": "Data", "width": 100},
         {"label": "Customer Status", "fieldname": "custom_customer_status_", "fieldtype": "Data", "width": 100},
-        
+        {"label": "Customer GST Type", "fieldname": "custom_gst_type", "fieldtype": "Data", "width": 65},
+
         {"label": "File Type", "fieldname": "file_type", "fieldtype": "Link","options": "Customer", "width": 100},
         {"label": "File ID", "fieldname": "name", "fieldtype": "Dynamic Link", "options":"file_type", "width": 100},
         {"label": "File Name", "fieldname": "file_name", "fieldtype": "Data", "width": 150},
@@ -97,13 +98,36 @@ def customer_services(filters):
 
 
     
+    customer_filter = {}
 
+    # print('filterrrrrrrrrrrrrrrrr', filters.get("custom_gst_type"))
+
+    # Check if the filter contains "custom_gst_type"
+    if filters.get("custom_gst_type"):
+        gst_type_list = filters.get("custom_gst_type")
+
+        # Replace 'NULL' with empty string and filter out duplicates
+        cleaned_gst_type_list = []
+        for gst in gst_type_list:
+            if gst == 'NULL':
+                cleaned_gst_type_list.append('')
+            else:
+                cleaned_gst_type_list.append(gst.strip())
+
+        # Remove duplicates (if you want)
+        cleaned_gst_type_list = list(set(cleaned_gst_type_list))
+
+        # Set the filter criteria based on the cleaned list
+        if '' in cleaned_gst_type_list:
+            customer_filter["custom_gst_type"] = ["in", cleaned_gst_type_list]
+        else:
+            customer_filter["custom_gst_type"] = ["in", cleaned_gst_type_list]        
     service_master_filter={}
     if filters.get("service_master"):
         service_master_filter["name"] = filters.get("service_master")
 
     # Fetch all customers
-    customers = frappe.get_all("Customer", filters={"disabled": 0}, fields=["name", "customer_name", "custom_contact_person", "custom_primary_mobile_no", "disabled", "custom_primary_email", "custom_customer_status_", "custom_customer_tags", "custom_customer_behaviour_", "custom_behaviour_note", "custom_customer_status_", "custom_state"])
+    customers = frappe.get_all("Customer", filters={"disabled": 0,**customer_filter}, fields=["name", "customer_name", "custom_contact_person", "custom_primary_mobile_no", "disabled", "custom_primary_email", "custom_customer_status_","custom_gst_type", "custom_customer_tags", "custom_customer_behaviour_", "custom_behaviour_note", "custom_customer_status_", "custom_state"])
 
     custome_map = {customer["name"]: {k: v for k, v in customer.items() if k != "name"} for customer in customers}
 

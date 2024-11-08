@@ -14,6 +14,8 @@
   "total_remaining_balance",
   "executive_name",
   "executive",
+  "email_id",
+  "customer_disabled",
   "column_break_lffe",
   "status",
   "followup_date",
@@ -21,6 +23,8 @@
   "client_person",
   "next_followup_date",
   "dummy_field",
+  "send_mail",
+  "send_whatapp",
   "section_break_nals",
   "sales_order_summary",
   "column_break_etfi",
@@ -155,22 +159,50 @@
   },
   {
    "fetch_from": "customer_id.custom_primary_mobile_no",
+   "fetch_if_empty": 1,
    "fieldname": "mobile_number",
    "fieldtype": "Data",
-   "label": "Mobile Number",
-   "read_only": 1
+   "label": "Mobile Number"
   },
   {
    "fieldname": "dummy_field",
    "fieldtype": "Small Text",
    "hidden": 1,
    "label": "Dummy Field"
+  },
+  {
+   "fetch_from": "customer_id.custom_primary_email",
+   "fetch_if_empty": 1,
+   "fieldname": "email_id",
+   "fieldtype": "Data",
+   "label": "Email ID"
+  },
+  {
+   "default": "0",
+   "fieldname": "send_mail",
+   "fieldtype": "Check",
+   "label": "Email Sent",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "send_whatapp",
+   "fieldtype": "Check",
+   "label": "Whatapp Sent",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fetch_from": "customer_id.disabled",
+   "fieldname": "customer_disabled",
+   "fieldtype": "Check",
+   "label": "Customer Disabled"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_calendar_and_gantt": 1,
  "links": [],
- "modified": "2024-03-18 18:32:00.470567",
+ "modified": "2024-09-26 11:41:54.630722",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Customer Followup",

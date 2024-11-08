@@ -70,7 +70,12 @@
   "frequency",
   "annual_fees",
   "section_break_lwhu",
-  "addon_services"
+  "addon_services",
+  "section_break_fvna",
+  "column_break_aeyy",
+  "column_break_ylap",
+  "column_break_tivp",
+  "create_new_rsp"
  ],
  "fields": [
   {
@@ -444,12 +449,34 @@
    "fieldtype": "Table",
    "label": "Addon Services",
    "options": "Service Master Addon",
-   "read_only": 1
+   "permlevel": 2
+  },
+  {
+   "fieldname": "section_break_fvna",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_aeyy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_ylap",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_tivp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "create_new_rsp",
+   "fieldtype": "Button",
+   "label": "Create New RSP",
+   "permlevel": 2
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-08-29 12:46:06.224315",
+ "modified": "2024-11-07 10:30:41.614289",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "ESI File",

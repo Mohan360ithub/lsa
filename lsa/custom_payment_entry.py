@@ -98,7 +98,8 @@ accounts@lsaoffice.com
                                                 "document_id": docname,
                                                 "mobile_number": new_mobile,
                                                 "customer":customer,
-                                                "message_id":message_id
+                                                "message_id":message_id,
+                                                "sent_successfully":1,  
                                                             
                                                 # Add other fields of the child table row as needed
                                             })
@@ -402,3 +403,4 @@ def get_unreconciled_bnk_transactions():
             "status": False,
             "msg": f"Failed to get bank transactions details: {str(e)}"
         }
+

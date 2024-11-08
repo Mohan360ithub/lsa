@@ -11,6 +11,7 @@
   "customer_name",
   "contact_person",
   "mobile_number",
+  "email_id",
   "column_break_cqev",
   "type",
   "document_id",
@@ -66,15 +67,22 @@
    "default": "0",
    "fieldname": "sent_successfully",
    "fieldtype": "Check",
-   "hidden": 1,
+   "in_list_view": 1,
    "label": "Sent Successfully",
+   "read_only": 1
+  },
+  {
+   "fieldname": "email_id",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Email Id",
    "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-09-06 15:05:00.181620",
+ "modified": "2024-09-25 17:59:47.630687",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Message Detail",

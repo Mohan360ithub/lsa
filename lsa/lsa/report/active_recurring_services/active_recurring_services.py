@@ -14,6 +14,7 @@ def execute(filters=None):
         {"label": "Mobile No.", "fieldname": "mobile number", "fieldtype": "Data", "width": 120, },
         {"label": "Email", "fieldname": "custom_primary_email", "fieldtype": "Data", "width": 150, },
         {"label": "Status", "fieldname": "status", "fieldtype": "Data", "width": 100, },
+        {"label": "Customer GST Type", "fieldname": "custom_gst_type", "fieldtype": "Data", "width": 65},
         {"label": "Enabled", "fieldname": "enabled", "fieldtype": "Data", "width": 50, },
         {"label": "Customer Payment Agree", "fieldname": "custom_customer_tags", "fieldtype": "Data", "width": 100, },
         {"label": "Customer Behaviour", "fieldname": "custom_customer_behaviour_", "fieldtype": "Data", "width": 100, },
@@ -68,7 +69,7 @@ def execute(filters=None):
 
     return columns, data, html_card
 
-	 
+     
 
 def customer_services(filters):
 
@@ -91,21 +92,46 @@ def customer_services(filters):
     if frequency_filter:
         frequency_filter_l=frequency_filter.split(",")
         frequency_filter_l=[f.strip() for f in frequency_filter_l if f]
-        print(frequency_filter_l)
+        # print(frequency_filter_l)
         advance_filter["frequency"]=["in",frequency_filter_l]
 
+    customer_filter = {}
 
+    # print('filterrrrrrrrrrrrrrrrr', filters.get("custom_gst_type"))
+
+    # Check if the filter contains "custom_gst_type"
+    if filters.get("custom_gst_type"):
+        gst_type_list = filters.get("custom_gst_type")
+
+        # Replace 'NULL' with empty string and filter out duplicates
+        cleaned_gst_type_list = []
+        for gst in gst_type_list:
+            if gst == 'NULL':
+                cleaned_gst_type_list.append('')
+            else:
+                cleaned_gst_type_list.append(gst.strip())
+
+        # Remove duplicates (if you want)
+        cleaned_gst_type_list = list(set(cleaned_gst_type_list))
+
+        # Set the filter criteria based on the cleaned list
+        if '' in cleaned_gst_type_list:
+            customer_filter["custom_gst_type"] = ["in", cleaned_gst_type_list]
+        else:
+            customer_filter["custom_gst_type"] = ["in", cleaned_gst_type_list]
     # Get all customers
     customers = frappe.get_all("Customer",
+                               filters=customer_filter,
                                fields=["name", "customer_name","custom_contact_person","custom_primary_mobile_no",
                                        "disabled","custom_primary_email","custom_customer_status_",
                                        "custom_customer_tags","custom_customer_behaviour_","custom_behaviour_note",
-                                        "custom_customer_status_"])
+                                        "custom_customer_status_","custom_gst_type"])
 
     custome_map={}
     for customer in customers:
         custome_map[customer["name"]]={z:customer[z] for z in customer if z!= "name"}
-
+        # custome_map[customer["name"]]=customer
+    # print("Customer Map:", custome_map) 
     del customers
     services = frappe.get_all("Customer Chargeable Doctypes", fields=["name"])
 
@@ -119,13 +145,16 @@ def customer_services(filters):
         if not(service_name) or service_name==service.name:
             for customer_service in customer_services:
                 cid=customer_service["customer_id"]
+                if cid not in custome_map:
+                    continue
+                # print('cidddddddddddddddd',cid)
                 data_row = {
                     "customer_id": cid,
                     "customer_name": custome_map[cid]["customer_name"],
                     "custom_contact_person": custome_map[cid]["custom_contact_person"],
                     "mobile number": custome_map[cid]["custom_primary_mobile_no"],
                     "custom_primary_email": custome_map[cid]["custom_primary_email"],
-                    # "enabled": custome_map[cid]["disabled"],
+                    "custom_gst_type": custome_map[cid]["custom_gst_type"],
                     "status": custome_map[cid]["custom_customer_status_"],
                     "custom_customer_tags":custome_map[cid]["custom_customer_tags"],
                     "custom_customer_behaviour_":custome_map[cid]["custom_customer_behaviour_"],

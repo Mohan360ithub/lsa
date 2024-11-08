@@ -23,7 +23,21 @@ frappe.query_reports["Customer Recurring Service Tracking Report"] = {
 			fieldtype: "Select",
 			options:["All","ACTIVE","ON NOTICE","HOLD"],
 			default: "All",
-		},		
+		},
+		{
+            "fieldname": "custom_gst_type",
+            "label": __("Customer GST Type"),
+            "fieldtype": "MultiSelectList",
+            "options": ["NULL","Regular", "Composition", "QRMP"],
+            // Custom filter logic will handle empty or "All" selection separately
+            get_data: function (txt) {
+                // Define the options array
+                let options = ["NULL","Regular", "Composition", "QRMP"];
+        
+                // Filter options based on the input text
+                return options.filter(option => option.toLowerCase().includes(txt.toLowerCase()));
+            }
+        },		
 				   
     ]
 };

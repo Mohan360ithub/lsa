@@ -22,6 +22,7 @@ def execute(filters=None):
 
         {"label": "Status", "fieldname": "status", "fieldtype": "Data", "width": 100, "height": 100},
         {"label": "Enabled", "fieldname": "enable", "fieldtype": "Data", "width": 50, "height": 100},
+        {"label": "Customer GST Type", "fieldname": "custom_gst_type", "fieldtype": "Data", "width": 65},
 
         #RSP
         {"label": "RSP", "fieldname": "rsp", "fieldtype": "Link", "options": "Recurring Service Pricing", "width": 100, "height": 100},
@@ -65,7 +66,7 @@ def execute(filters=None):
         # Add column for service customer details
         servic_doc = {"label": str(service.doctype_name)[:-4] + " Customer", "fieldname": service.name + " customer", "fieldtype": "Text Editor", "width": 250, "height": 100}
         columns.append(servic_doc)
-    print(columns)
+    # print(columns)
     # Get data for the report
     data = get_data(services, filters)
 
@@ -117,12 +118,36 @@ def get_data(services, filters):
     service_filter = filters.get("service_user")
     status_filter = filters.get("status")
     enabled_filter = filters.get("enabled")
+    customer_filter = {}
 
+    # print('filterrrrrrrrrrrrrrrrr', filters.get("custom_gst_type"))
+
+    # Check if the filter contains "custom_gst_type"
+    if filters.get("custom_gst_type"):
+        gst_type_list = filters.get("custom_gst_type")
+
+        # Replace 'NULL' with empty string and filter out duplicates
+        cleaned_gst_type_list = []
+        for gst in gst_type_list:
+            if gst == 'NULL':
+                cleaned_gst_type_list.append('')
+            else:
+                cleaned_gst_type_list.append(gst.strip())
+
+        # Remove duplicates (if you want)
+        cleaned_gst_type_list = list(set(cleaned_gst_type_list))
+
+        # Set the filter criteria based on the cleaned list
+        if '' in cleaned_gst_type_list:
+            customer_filter["custom_gst_type"] = ["in", cleaned_gst_type_list]
+        else:
+            customer_filter["custom_gst_type"] = ["in", cleaned_gst_type_list]
     # Get all customers
     customers = frappe.get_all("Customer", 
+                               filters=customer_filter,
                                fields=["name", "customer_name", "custom_contact_person", "custom_primary_mobile_no",
                                        "custom_primary_email","disabled","custom_customer_status_","custom_customer_tags",
-                                       "custom_customer_behaviour_","custom_customer_status_"])
+                                       "custom_customer_behaviour_","custom_customer_status_","custom_gst_type"])
     
     unsettled_sales_orders = frappe.get_all(
                 "Sales Order",
@@ -202,7 +227,7 @@ def get_data(services, filters):
             "custom_contact_person": i.custom_contact_person,
             "mobile number": i.custom_primary_mobile_no,
             "custom_primary_email": i.custom_primary_email,
-
+            "custom_gst_type":i.custom_gst_type,
             "status": i.custom_customer_status_,
             "custom_customer_tags":i.custom_customer_tags,
             "custom_customer_behaviour_":i.custom_customer_behaviour_,

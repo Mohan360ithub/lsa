@@ -291,7 +291,7 @@ def send_so_whatsapp_message(new_mobile):
     success_sales_invoices = []
     whatsapp_items = []
     # instance_id=whatsapp_demo.instance_id
-    whatsapp_demo = frappe.get_all('WhatsApp Instance',filters={'module':'Accounts','connection_status':1,'active':1})
+    whatsapp_demo = frappe.get_all('WhatsApp Instance',filters={'module':'Operations','connection_status':1,'active':1})
     if whatsapp_demo:
         whatsapp_demo_doc = instance = frappe.get_doc('WhatsApp Instance',whatsapp_demo[0].name)
         connection_status = whatsapp_demo_doc.connection_status
@@ -408,7 +408,8 @@ accounts@lsaoffice.com
                                                         "document_id": invoice_doc.name,
                                                         "mobile_number": new_mobile_dict[invoice_key],
                                                         "customer":invoice_doc.customer,
-                                                        "message_id":message_id
+                                                        "message_id":message_id,
+                                                        "sent_successfully":1, 
                                                                     
                                                         # Add other fields of the child table row as needed
                                                     })
@@ -486,7 +487,7 @@ accounts@lsaoffice.com
 def whatsapp_so_template(docname,from_date,to_date,new_mobile):
     #new_mobile="9098543046"
 
-    whatsapp_demo = frappe.get_all('WhatsApp Instance',filters={'module':'Accounts','connection_status':1,'active':1})
+    whatsapp_demo = frappe.get_all('WhatsApp Instance',filters={'module':'Operations','connection_status':1,'active':1})
     if whatsapp_demo:
         sales_invoice_whatsapp_log = frappe.new_doc('WhatsApp Message Log')
         whatsapp_items = []
@@ -589,7 +590,8 @@ accounts@lsaoffice.com
                                                 "document_id": invoice_doc.name,
                                                 "mobile_number": new_mobile,
                                                 "customer":invoice_doc.customer,
-                                                "message_id":message_id
+                                                "message_id":message_id,
+                                                "sent_successfully":1, 
                                                             
                                                 # Add other fields of the child table row as needed
                                             })
@@ -626,7 +628,7 @@ accounts@lsaoffice.com
 def whatsapp_so_custom(docname,new_mobile,cust_message):
     #new_mobile="9098543046"
 
-    whatsapp_demo = frappe.get_all('WhatsApp Instance',filters={'module':'Accounts','connection_status':1,'active':1})
+    whatsapp_demo = frappe.get_all('WhatsApp Instance',filters={'module':'Operations','connection_status':1,'active':1})
     if whatsapp_demo:
         sales_invoice_whatsapp_log = frappe.new_doc('WhatsApp Message Log')
         whatsapp_items = []
@@ -692,7 +694,8 @@ def whatsapp_so_custom(docname,new_mobile,cust_message):
                                                 "document_id": invoice_doc.name,
                                                 "mobile_number": new_mobile,
                                                 "customer":invoice_doc.customer,
-                                                "message_id":message_id
+                                                "message_id":message_id,
+                                                "sent_successfully":1, 
                                                             
                                                 # Add other fields of the child table row as needed
                                             })
@@ -737,7 +740,7 @@ def send_bulk_custom_so_whatsapp_message(values_prompt):
 
         # Extract the mobile numbers from the dictionary
         new_mobile_dict = values_dict
-        whatsapp_demo =  frappe.get_all('WhatsApp Instance',filters={'module':'Accounts','connection_status':1,'active':1})
+        whatsapp_demo =  frappe.get_all('WhatsApp Instance',filters={'module':'Operations','connection_status':1,'active':1})
         if whatsapp_demo:
             whatsapp_demo_doc = frappe.get_doc('WhatsApp Instance',whatsapp_demo[0].name)
             connection_status = whatsapp_demo_doc.connection_status
@@ -797,7 +800,8 @@ def send_bulk_custom_so_whatsapp_message(values_prompt):
                                     "document_id": invoice_doc.name,
                                     "mobile_number": new_mobile_dict[invoice_key],
                                     "customer":invoice_doc.customer,
-                                    "message_id":message_id                                                
+                                    "message_id":message_id,
+                                    "sent_successfully":1,                                                 
                                     # Add other fields of the child table row as needed
                                 })
 
@@ -1231,4 +1235,5 @@ def float_to_inr(value):
     formatted_value = f"₹{formatted_integer_part}.{decimal_part}"
     
     return formatted_value
+
 

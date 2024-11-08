@@ -70,7 +70,12 @@
   "frequency",
   "annual_fees",
   "section_break_jmed",
-  "addon_services"
+  "addon_services",
+  "section_break_ulzi",
+  "column_break_jkqa",
+  "column_break_ycpt",
+  "column_break_chye",
+  "create_new_rsp"
  ],
  "fields": [
   {
@@ -446,12 +451,34 @@
    "fieldtype": "Table",
    "label": "Addon Services",
    "options": "Service Master Addon",
-   "read_only": 1
+   "permlevel": 2
+  },
+  {
+   "fieldname": "section_break_ulzi",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_jkqa",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_ycpt",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_chye",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "create_new_rsp",
+   "fieldtype": "Button",
+   "label": "Create New RSP",
+   "permlevel": 2
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-08-29 12:45:09.240353",
+ "modified": "2024-11-07 10:30:53.695182",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Provident Fund File",

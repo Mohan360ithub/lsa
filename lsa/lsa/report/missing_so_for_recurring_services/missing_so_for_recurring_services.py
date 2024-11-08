@@ -38,7 +38,8 @@ def execute(filters=None):
         {"label": "CID", "fieldname": "customer_id", "fieldtype": "Link", "options": "Customer", "width": 100},
         {"label": "Customer Name", "fieldname": "customer_name", "fieldtype": "Data", "width": 100},
         {"label": "Customer Status", "fieldname": "custom_customer_status_", "fieldtype": "Data", "width": 100},
-        
+        {"label": "Customer GST Type", "fieldname": "custom_gst_type", "fieldtype": "Data", "width": 65},
+
         {"label": "File Type", "fieldname": "file_type", "fieldtype": "Link","options": "Customer", "width": 100},
         {"label": "Service Addon", "fieldname": "service_name", "fieldtype": "Link","options": "Item", "width": 100},
         {"label": "File ID", "fieldname": "name", "fieldtype": "Dynamic Link", "options":"file_type", "width": 100},
@@ -122,8 +123,35 @@ def get_data(filters):
     if filters.get("service_master"):
         service_master_filter["name"] = filters.get("service_master")
 
+
+
+    customer_filter = {}
+
+    # print('filterrrrrrrrrrrrrrrrr', filters.get("custom_gst_type"))
+
+    # Check if the filter contains "custom_gst_type"
+    if filters.get("custom_gst_type"):
+        gst_type_list = filters.get("custom_gst_type")
+
+        # Replace 'NULL' with empty string and filter out duplicates
+        cleaned_gst_type_list = []
+        for gst in gst_type_list:
+            if gst == 'NULL':
+                cleaned_gst_type_list.append('')
+            else:
+                cleaned_gst_type_list.append(gst.strip())
+
+        # Remove duplicates (if you want)
+        cleaned_gst_type_list = list(set(cleaned_gst_type_list))
+
+        # Set the filter criteria based on the cleaned list
+        if '' in cleaned_gst_type_list:
+            customer_filter["custom_gst_type"] = ["in", cleaned_gst_type_list]
+        else:
+            customer_filter["custom_gst_type"] = ["in", cleaned_gst_type_list]
+
     # Fetch all customers
-    customers = frappe.get_all("Customer", filters={"disabled": 0}, fields=["name", "customer_name", "custom_contact_person", "custom_primary_mobile_no", "disabled", "custom_primary_email", "custom_customer_status_", "custom_customer_tags", "custom_customer_behaviour_", "custom_behaviour_note", "custom_customer_status_", "custom_state"])
+    customers = frappe.get_all("Customer", filters={"disabled": 0,**customer_filter }, fields=["name", "customer_name", "custom_contact_person", "custom_primary_mobile_no", "disabled", "custom_primary_email", "custom_customer_status_", "custom_customer_tags", "custom_customer_behaviour_", "custom_behaviour_note", "custom_customer_status_", "custom_state","custom_gst_type"])
 
     custome_map = {customer["name"]: {k: v for k, v in customer.items() if k != "name"} for customer in customers}
 
@@ -137,8 +165,8 @@ def get_data(filters):
     # Fetch all sales orders and map them by their names
     so_list = frappe.get_all("Sales Order", filters={"docstatus": ("in", [0, 1]), 
                                                     #  "customer": "20130709",
-													 "custom_so_from_date":(">=",fy.title),
-													 "custom_so_to_date":("<=",fy.year_end_date),
+                                                     "custom_so_from_date":(">=",fy.title),
+                                                     "custom_so_to_date":("<=",fy.year_end_date),
                                                      }, fields=["name", "customer","owner"])
     so_dict={}
     for i in so_list:
@@ -150,8 +178,8 @@ def get_data(filters):
     # Fetch all sales order items and sum up quantities by item_code and customer_id
     soi_list = frappe.get_all("Sales Order Item", filters={"docstatus": ("not in", [2]), 
                                                            "parent": ("not in", [None]),
-														   "custom_soi_from_date":(">=",fy.title),
-														   "custom_soi_to_date":("<=",fy.year_end_date),
+                                                           "custom_soi_from_date":(">=",fy.title),
+                                                           "custom_soi_to_date":("<=",fy.year_end_date),
                                                            "custom_service_master":("not in", [None]),
                                                            "item_code":("in",list(addon_master_dict))
                                                            }, 
@@ -201,7 +229,7 @@ def get_data(filters):
             for customer_service in customer_services:
                 if customer_service["customer_id"] not in custome_map or customer_service.name not in service_addons_map:
                     continue
-                print(service_addons_map[customer_service.name])
+                # print(service_addons_map[customer_service.name])
                 for service_addon in service_addons_map[customer_service.name]:
                     addon_customer_service = copy.deepcopy(customer_service)
                     service_current_charges=service_addons_map[customer_service.name][service_addon]["current_charges"]
@@ -469,8 +497,8 @@ def get_missing_months_in_fy(fy_start_date, fy_end_date, date_ranges):
 #     # Fetch all sales orders and map them by their names
 #     so_list = frappe.get_all("Sales Order", filters={"docstatus": ("in", [0, 1]), 
 #                                                     #  "customer": "20130709",
-# 													 "custom_so_from_date":(">=",fy.title),
-# 													 "custom_so_to_date":("<=",fy.year_end_date),
+#                                                    "custom_so_from_date":(">=",fy.title),
+#                                                    "custom_so_to_date":("<=",fy.year_end_date),
 #                                                      }, fields=["name", "customer","owner"])
 #     so_dict={}
 #     for i in so_list:
@@ -482,8 +510,8 @@ def get_missing_months_in_fy(fy_start_date, fy_end_date, date_ranges):
 #     # Fetch all sales order items and sum up quantities by item_code and customer_id
 #     soi_list = frappe.get_all("Sales Order Item", filters={"docstatus": ("not in", [2]), 
 #                                                            "parent": ("not in", [None]),
-# 														   "custom_soi_from_date":(">=",fy.title),
-# 														   "custom_soi_to_date":("<=",fy.year_end_date),
+#                                                          "custom_soi_from_date":(">=",fy.title),
+#                                                          "custom_soi_to_date":("<=",fy.year_end_date),
 #                                                            }, 
 #                                                            fields=["name", "parent", "item_code", "rate", "description", "qty","custom_soi_from_date","custom_soi_to_date"], 
 #                                                            order_by="item_code asc")
@@ -544,7 +572,7 @@ def get_missing_months_in_fy(fy_start_date, fy_end_date, date_ranges):
 #                     "file_name":customer_service[master_service_fields[service.name][1][2]],
 #                     "go_to_file": f"<button class='btn btn-xs btn-primary' title='{service.name}' onclick=\"frappe.set_route('Form', '{service.name}', '{customer_service['name']}')\">View File</button>",
 #                     "ideal_qty":yearly_frequency_count,
-# 					"net_qty": net_qty,
+#                   "net_qty": net_qty,
 #                     "qty_difference":(yearly_frequency_count-net_qty),
 #                     "completion_status": completion_status,
 #                     "missing_months": ", ".join(missing_months),

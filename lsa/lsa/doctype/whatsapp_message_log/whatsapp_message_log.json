@@ -8,6 +8,9 @@
   "sender",
   "send_date",
   "message_type",
+  "communication_platforms",
+  "email_id",
+  "cc_mail_id",
   "column_break_iksv",
   "message",
   "sales_order",
@@ -118,11 +121,31 @@
    "label": "Message Type",
    "options": "Template\nCustom",
    "read_only": 1
+  },
+  {
+   "default": "WhatsApp",
+   "fieldname": "communication_platforms",
+   "fieldtype": "Select",
+   "label": "Communication Platforms",
+   "options": "Email\nWhatsApp",
+   "read_only": 1
+  },
+  {
+   "fieldname": "email_id",
+   "fieldtype": "Data",
+   "label": "Email Id",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cc_mail_id",
+   "fieldtype": "Small Text",
+   "label": "CC Mail Id",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-07-18 14:54:56.027474",
+ "modified": "2024-09-25 18:16:42.978643",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "WhatsApp Message Log",

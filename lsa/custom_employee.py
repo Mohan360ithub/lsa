@@ -522,6 +522,46 @@ def get_employees_with_absent():
 
 
 
+# @frappe.whitelist()
+# def get_employees_present_today():
+#     # Get today's date
+#     today_date = today()
+    
+#     # Fetch all check-ins and check-outs for today, ordered by time
+#     checkins = frappe.get_all('Employee Checkin', 
+#                               filters={'time': ['>=', today_date]},
+#                               fields=['employee', 'employee_name', 'time', 'log_type'],
+#                               order_by='time')
+    
+#     # Process the logs to get the first IN and the last OUT for each employee
+#     employee_logs = {}
+#     for checkin in checkins:
+#         employee = checkin['employee']
+#         if employee not in employee_logs:
+#             employee_logs[employee] = {'employee_name': checkin['employee_name'], 'first_in': None, 'last_out': None}
+        
+#         if checkin['log_type'] == 'IN' and employee_logs[employee]['first_in'] is None:
+#             employee_logs[employee]['first_in'] = checkin['time']
+#         employee_logs[employee]['last_log'] = checkin['log_type']
+#         if checkin['log_type'] == 'OUT':
+#             employee_logs[employee]['last_out'] = checkin['time']
+    
+#     # Prepare the final list
+#     result = []
+#     for employee, logs in employee_logs.items():
+#         last_out = logs['last_out'] if logs.get('last_log') == 'OUT' else None
+#         result.append({
+#             'employee': employee,
+#             'employee_name': logs['employee_name'],
+#             'first_in': logs['first_in'],
+#             'last_out': last_out
+#         })
+    
+#     return result
+
+
+# Mohan added break hours
+
 @frappe.whitelist()
 def get_employees_present_today():
     # Get today's date
@@ -533,16 +573,30 @@ def get_employees_present_today():
                               fields=['employee', 'employee_name', 'time', 'log_type'],
                               order_by='time')
     
-    # Process the logs to get the first IN and the last OUT for each employee
+    # Process the logs to get the first IN, last OUT, and total break hours for each employee
     employee_logs = {}
     for checkin in checkins:
         employee = checkin['employee']
         if employee not in employee_logs:
-            employee_logs[employee] = {'employee_name': checkin['employee_name'], 'first_in': None, 'last_out': None}
-        
+            employee_logs[employee] = {
+                'employee_name': checkin['employee_name'], 
+                'first_in': None, 
+                'last_out': None,
+                'total_break_seconds': 0  # Track break time in seconds for precise calculation
+            }
+
+        # Calculate break duration based on previous OUT and current IN
+        if employee_logs[employee]['last_out'] and checkin['log_type'] == 'IN':
+            out_time = employee_logs[employee]['last_out']
+            break_duration_seconds = (checkin['time'] - out_time).total_seconds()
+            employee_logs[employee]['total_break_seconds'] += break_duration_seconds
+
+        # Set first IN and OUT
         if checkin['log_type'] == 'IN' and employee_logs[employee]['first_in'] is None:
             employee_logs[employee]['first_in'] = checkin['time']
+        
         employee_logs[employee]['last_log'] = checkin['log_type']
+        
         if checkin['log_type'] == 'OUT':
             employee_logs[employee]['last_out'] = checkin['time']
     
@@ -550,15 +604,24 @@ def get_employees_present_today():
     result = []
     for employee, logs in employee_logs.items():
         last_out = logs['last_out'] if logs.get('last_log') == 'OUT' else None
+        
+        # Convert break time from seconds to hours and minutes (HH:MM)
+        total_break_seconds = logs['total_break_seconds']
+        break_hours = int(total_break_seconds // 3600)  # Full hours
+        break_minutes = int((total_break_seconds % 3600) // 60)  # Remaining minutes
+        
+        # Format total break hours as HH:MM
+        total_break_hours_formatted = f"{break_hours}h {break_minutes}m"
+
         result.append({
             'employee': employee,
             'employee_name': logs['employee_name'],
             'first_in': logs['first_in'],
-            'last_out': last_out
+            'last_out': last_out,
+            'total_break_hours': total_break_hours_formatted  # Display in HH:MM format
         })
-    
+    # print('resultttttttttttttttttttt',result)
     return result
-
 
 
 

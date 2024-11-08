@@ -144,6 +144,30 @@ doc_events = {
     "Sales Order":{
         "before_save" : "lsa.custom_sales_order.set_bad_debt_record_in_customer",
                 },
+    "Sales Invoice":{
+        "before_save" : "lsa.custom_sales_invoice.prevent_linking_payment_entry",
+                },
+    "Gstfile":{
+        "before_save" :"lsa.lsa.doctype.recurring_service_pricing.recurring_service_pricing.service_master_addon_validation"
+                },
+    "TDS File":{
+       "before_save" :"lsa.lsa.doctype.recurring_service_pricing.recurring_service_pricing.service_master_addon_validation"
+                },
+    "Professional Tax File":{
+       "before_save" :"lsa.lsa.doctype.recurring_service_pricing.recurring_service_pricing.service_master_addon_validation"
+                },
+    "IT Assessee File":{
+       "before_save" :"lsa.lsa.doctype.recurring_service_pricing.recurring_service_pricing.service_master_addon_validation"
+                },
+    "MCA ROC File":{
+       "before_save" :"lsa.lsa.doctype.recurring_service_pricing.recurring_service_pricing.service_master_addon_validation"
+                },
+    "Provident Fund File":{
+       "before_save" :"lsa.lsa.doctype.recurring_service_pricing.recurring_service_pricing.service_master_addon_validation"
+                },
+    "ESI File":{
+       "before_save" :"lsa.lsa.doctype.recurring_service_pricing.recurring_service_pricing.service_master_addon_validation"
+                },
 }
 
 
@@ -264,6 +288,9 @@ scheduler_events = {
 # auth_hooks = [
 #	"lsa.auth.validate"
 # ]
+
+
+
 
 
 

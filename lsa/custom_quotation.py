@@ -86,7 +86,8 @@ accounts@lsaoffice.com
                                                 "document_id": invoice_doc.name,
                                                 "mobile_number": new_mobile,
                                                 "customer":customer,
-                                                "message_id":message_id
+                                                "message_id":message_id,
+                                                "sent_successfully":1,  
                                                             
                                                 # Add other fields of the child table row as needed
                                             })
@@ -234,5 +235,6 @@ def get_file_from_link(link):
     except Exception as e:
         print(f"Error fetching file from link: {e}")
         return None
+
 
 

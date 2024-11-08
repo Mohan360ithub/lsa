@@ -5,23 +5,21 @@ def execute(filters=None):
         {"label": "CID", "fieldname": "customer_id", "fieldtype": "Link", "options": "Customer", "width": 100},
         {"label": "Customer Name", "fieldname": "customer_name", "fieldtype": "Data", "width": 200},
         {"label": "Contact Person", "fieldname": "custom_contact_person", "fieldtype": "Data", "width": 150},
-        {"label": "Pending Amount", "fieldname": "pending_amount", "fieldtype": "Currency", "width": 100},
-        {"label": "Next Followup Date", "fieldname": "next_followup_date", "fieldtype": "Date", "width": 120},
-        {"label": "Last Comment", "fieldname": "last_comment", "fieldtype": "Text", "width": 200},
         {"label": "Mobile No.", "fieldname": "mobile_number", "fieldtype": "Data", "width": 120},
+        {"label": "Pending Amount", "fieldname": "pending_amount", "fieldtype": "Currency", "width": 100},
         {"label": "Status", "fieldname": "status", "fieldtype": "Data", "width": 100},
+        {"label": "GST Type", "fieldname": "custom_gst_type", "fieldtype": "Data", "width": 100},
         {"label": "Client Group", "fieldname": "custom_client_group", "fieldtype": "Link", "options": "Client Group", "width": 100},
         {"label": "Group Name", "fieldname": "group_name", "fieldtype": "Data", "width": 150},  # New column for group name
         {"label": "SO Count", "fieldname": "so_count", "fieldtype": "HTML", "width": 100},
         {"label": "1st SO From Date", "fieldname": "first_so_from_date", "fieldtype": "Date", "width": 120},
         {"label": "Last SO To Date", "fieldname": "last_so_to_date", "fieldtype": "Date", "width": 120},
-        {"label": "Grand Total", "fieldname": "grand_total", "fieldtype": "Currency", "width": 100},
-        {"label": "Received Amount", "fieldname": "received_amount", "fieldtype": "Currency", "width": 100},
-        
         {"label": "Total FollowUp Count", "fieldname": "total_followup_count", "fieldtype": "Int", "width": 120},
         {"label": "Last Followup Done Date", "fieldname": "last_followup_done_date", "fieldtype": "Date", "width": 120},
-        
-        
+        {"label": "Last Comment", "fieldname": "last_comment", "fieldtype": "Text", "width": 200},
+        {"label": "Next Followup Date", "fieldname": "next_followup_date", "fieldtype": "Date", "width": 120},
+        {"label": "Grand Total", "fieldname": "grand_total", "fieldtype": "Currency", "width": 100},
+        {"label": "Received Amount", "fieldname": "received_amount", "fieldtype": "Currency", "width": 100},
     ]
     
     # Get data for the report
@@ -62,32 +60,76 @@ def get_data(filters):
     
     customer_filter = filters.get("customer")
     status_filter = filters.get("status")
+    gst_type_filter = filters.get("custom_gst_type",[])  # Get the GST Type filter
     client_group_filter = filters.get("client_group", [])
     from_date = filters.get("from_date")
     to_date = filters.get("to_date")
-
+    # print('gst_type_filterrrrrrrrrrrrrrrrrrrrrrrrrr',gst_type_filter)
     # Build SQL conditions
-    customer_condition = "1=1" if not customer_filter else "c.name = %s"
-    status_condition = "1=1" if status_filter == "All" else "c.custom_customer_status_ = %s"
-
-    if client_group_filter:
-        client_group_placeholders = ', '.join(['%s'] * len(client_group_filter))
-        client_group_condition = f"c.custom_client_group IN ({client_group_placeholders})"
-    else:
-        client_group_condition = "1=1"  # No filter on client group
+    customer_condition = "" if not customer_filter else f'AND c.name = "{customer_filter}"'
+    status_condition = "" if status_filter == "All" else f'AND c.custom_customer_status_ = "{status_filter}"'
+    gst_type_condition = ""
+    # print('customer_conditionnnnnnnnnnnnnnnnnnn',customer_condition)
+    # Handle GST Type filter
+    # if gst_type_filter in ["Regular", "Composition", "QRMP"]:
+    #     gst_type_condition = f'AND c.custom_gst_type = "{gst_type_filter}"'
+    # elif gst_type_filter == "All":
+    #     gst_type_condition = ""
+    # elif not gst_type_filter:
+    #     gst_type_condition = "AND c.custom_gst_type IS NULL"
     
+
+    # Initialize the condition
+    gst_type_condition = ""
+
+    # Check if GST type filter is provided
+    if gst_type_filter:
+        # Remove duplicates and create a unique set
+        unique_gst_types = set(gst_type_filter)
+
+        # Check if all possible GST types are selected
+        if unique_gst_types == {"NULL", "Regular", "Composition", "QRMP"}:
+            # If all options are selected, do not filter
+            gst_type_condition = ""
+        elif "NULL" in unique_gst_types:
+            # If "NULL" is selected, check for NULLs as well
+            unique_gst_types.remove("NULL")  # Remove "NULL" for further processing
+            if unique_gst_types:
+                # If there are remaining valid GST types
+                gst_type_condition = f"AND (c.custom_gst_type IN ({', '.join(repr(gst) for gst in unique_gst_types)}) OR c.custom_gst_type IS NULL)"
+            else:
+                # If only "NULL" was selected, filter for NULL only
+                gst_type_condition = "AND c.custom_gst_type IS NULL"
+        elif unique_gst_types:
+            # Handle the case where only one or more GST types are selected
+            if len(unique_gst_types) == 1:
+                gst_type_condition = f"AND c.custom_gst_type = '{unique_gst_types.pop()}'"  # Use the single value directly
+            else:
+                # If there are multiple valid GST types
+                gst_type_condition = f"AND c.custom_gst_type IN ({', '.join(repr(gst) for gst in unique_gst_types)})"
+
+
+    # Handle client group filter
+    client_group_condition = ""
+    if client_group_filter:
+        # Convert list of client groups into tuple for SQL IN clause
+        client_group_condition = f"AND c.custom_client_group IN {tuple(client_group_filter)}" if len(client_group_filter) > 1 else f"AND c.custom_client_group = '{client_group_filter[0]}'"
+
+    # Handle date filter
     date_conditions = []
     if from_date:
-        date_conditions.append("so.custom_so_from_date >= %s")
+        date_conditions.append(f'AND so.custom_so_from_date >= "{str(from_date)}"')
     if to_date:
-        date_conditions.append("so.custom_so_to_date <= %s")
+        date_conditions.append(f'AND so.custom_so_to_date <= "{str(to_date)}"')
 
-    date_condition = " AND ".join(date_conditions) if date_conditions else "1=1"
+    date_condition = " ".join(date_conditions) if date_conditions else ""
 
+    # Construct SQL query
     sql_query = f"""
     SELECT 
         c.name AS `customer_id`,
         c.customer_name,
+        c.custom_gst_type,
         c.custom_client_group,
         cg.group_name AS `group_name`,  -- Fetch the group name
         c.custom_contact_person,
@@ -123,35 +165,22 @@ def get_data(filters):
                 customer_id
         ) AS f ON c.name = f.customer_id
     WHERE 
-        c.disabled = 0
-        AND {customer_condition}
-        AND so.docstatus IN (0, 1)
-        AND {status_condition}
-        AND {client_group_condition}
-        AND {date_condition}
+        so.status != 'Cancelled' AND
+        c.disabled != 1
+        {customer_condition}
+        {status_condition}
+        {gst_type_condition}
+        {client_group_condition}
+        {date_condition}
     GROUP BY 
         c.name, c.customer_name, c.custom_contact_person, c.mobile_no, c.custom_customer_status_, cg.group_name
     HAVING 
-        pending_amount > 0  -- Exclude records with pending_amount = 0
+        pending_amount != 0
     """
 
-    
-    # Prepare parameters
-    params = []
-    if customer_filter:
-        params.append(customer_filter)
-    if status_filter != "All":
-        params.append(status_filter)
-    if client_group_filter:
-        params.extend(client_group_filter)
-    if from_date:
-        params.append(from_date)
-    if to_date:
-        params.append(to_date)
-
     # Execute SQL query
-    data = frappe.db.sql(sql_query, tuple(params), as_dict=True)
-    
+    data = frappe.db.sql(sql_query, as_dict=True)
+    print(sql_query)
     # Format the 'so_count' column to be clickable
     for row in data:
         row['so_count'] = f'<a href="#" onclick="openSalesOrders(\'{row["customer_id"]}\')">{row["so_count"]}</a>'

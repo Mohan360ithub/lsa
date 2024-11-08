@@ -87,7 +87,12 @@
   "frequency",
   "annual_fees",
   "section_break_ripr",
-  "addon_services"
+  "addon_services",
+  "section_break_hecc",
+  "column_break_vaul",
+  "column_break_ghwv",
+  "column_break_sqjq",
+  "create_new_rsp"
  ],
  "fields": [
   {
@@ -145,7 +150,7 @@
    "label": "GST Details"
   },
   {
-   "default": "0",
+   "default": "1",
    "fieldname": "enabled",
    "fieldtype": "Check",
    "in_filter": 1,
@@ -439,8 +444,8 @@
    "permlevel": 2,
    "precision": "2",
    "print_hide": 1,
-   "report_hide": 1,
-   "reqd": 1
+   "read_only": 1,
+   "report_hide": 1
   },
   {
    "fieldname": "description",
@@ -602,12 +607,34 @@
    "fieldtype": "Table",
    "label": "Addon Services",
    "options": "Service Master Addon",
-   "read_only": 1
+   "permlevel": 2
+  },
+  {
+   "fieldname": "section_break_hecc",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_vaul",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_ghwv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_sqjq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "create_new_rsp",
+   "fieldtype": "Button",
+   "label": "Create New RSP",
+   "permlevel": 2
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-08-29 12:43:49.422059",
+ "modified": "2024-10-14 15:17:14.585544",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Gstfile",

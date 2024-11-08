@@ -34,6 +34,7 @@ def execute(filters=None):
         # {"label": "SO Balance Amount", "fieldname": "custom_so_balance_amount", "fieldtype": "Currency", "width": 100},
         {"label": "Customer Payment Agree", "fieldname": "custom_customer_tags", "fieldtype": "HTML", "width": 80},
         {"label": "Customer Status", "fieldname": "custom_customer_status_", "fieldtype": "Data", "width": 65},
+        {"label": "Customer Gst Type", "fieldname": "custom_gst_type", "fieldtype": "Data", "width": 65},
         {"label": "Customer Disabled", "fieldname": "custom_customer_disabled_", "fieldtype": "Data", "width": 50},
 
         {"label": "SO From Date", "fieldname": "custom_so_from_date", "fieldtype": "Date", "width": 110},
@@ -130,6 +131,30 @@ def get_data(filters):
     #         customer_filter["disabled"] = 0
     #     elif filters.get("customer_enabled")=="Customer Disabled":
     #         customer_filter["disabled"] = 1
+    customer_filter = {}
+
+    # print('filterrrrrrrrrrrrrrrrr', filters.get("custom_gst_type"))
+
+    # Check if the filter contains "custom_gst_type"
+    if filters.get("custom_gst_type"):
+        gst_type_list = filters.get("custom_gst_type")
+
+        # Replace 'NULL' with empty string and filter out duplicates
+        cleaned_gst_type_list = []
+        for gst in gst_type_list:
+            if gst == 'NULL':
+                cleaned_gst_type_list.append('')
+            else:
+                cleaned_gst_type_list.append(gst.strip())
+
+        # Remove duplicates (if you want)
+        cleaned_gst_type_list = list(set(cleaned_gst_type_list))
+
+        # Set the filter criteria based on the cleaned list
+        if '' in cleaned_gst_type_list:
+            customer_filter["custom_gst_type"] = ["in", cleaned_gst_type_list]
+        else:
+            customer_filter["custom_gst_type"] = ["in", cleaned_gst_type_list]
     
 
     so_s = frappe.get_all("Sales Order",
@@ -143,9 +168,9 @@ def get_data(filters):
             cu.append(cu_so.customer)
 
     cu_s = frappe.get_all("Customer",
-                        #   filters=customer_filter,
+                          filters=customer_filter,
                         fields=["name","custom_customer_tags","custom_customer_behaviour_","custom_behaviour_note",
-                                  "custom_customer_status_","custom_contact_person","custom_primary_mobile_no","custom_primary_email","disabled"])
+                                  "custom_customer_status_","custom_contact_person","custom_primary_mobile_no","custom_primary_email","disabled","custom_gst_type"])
     
     cu_l={}
     for cu in cu_s:
@@ -209,6 +234,7 @@ def get_data(filters):
                 "custom_customer_behaviour_":cu_s[so.customer]["custom_customer_behaviour_"],
                 "custom_behaviour_note": cu_s[so.customer]["custom_behaviour_note"],
                 "custom_customer_status_": cu_s[so.customer]["custom_customer_status_"],
+                "custom_gst_type": cu_s[so.customer]["custom_gst_type"],
                 "custom_customer_disabled_": cu_s[so.customer]["disabled"],
                 "custom_so_from_date": so.custom_so_from_date,
                 "custom_so_to_date": so.custom_so_to_date,

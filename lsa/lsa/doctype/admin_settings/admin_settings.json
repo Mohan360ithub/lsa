@@ -26,7 +26,9 @@
   "razorpay_api_key",
   "razorpay_secret",
   "service_masters_filing_settings_section",
-  "bulk_custom_wa_message_for_filing"
+  "bulk_custom_wa_message_for_filing",
+  "bluk_message_section",
+  "bulk_email_cc_for_customer_followup"
  ],
  "fields": [
   {
@@ -148,12 +150,22 @@
    "fieldtype": "Table MultiSelect",
    "label": "Bulk Custom WA Message for Filing",
    "options": "Multiselect User"
+  },
+  {
+   "fieldname": "bluk_message_section",
+   "fieldtype": "Section Break",
+   "label": "Bluk Message"
+  },
+  {
+   "fieldname": "bulk_email_cc_for_customer_followup",
+   "fieldtype": "Small Text",
+   "label": "Bulk Email CC For Customer FollowUp"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-07-18 16:08:04.810132",
+ "modified": "2024-09-23 13:49:50.010819",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Admin Settings",

@@ -367,8 +367,6 @@
 #     return {"status":False,"msg":f"No IT Assessee Filing Data record found for the filters set."}
 
 
-# Copyright (c) 2024, Mohan and contributors
-# For license information, please see license.txt
 
 import frappe
 from frappe import _
@@ -387,8 +385,53 @@ def execute(filters=None):
         {"fieldname": "filing_status", "label": _("Filing Status"), "fieldtype": "Data", "width": 170},
         {"fieldname": "filing_type", "label": _("Filing Type"), "fieldtype": "Data", "width": 150},
         {"fieldname": "executive", "label": _("Executive"), "fieldtype": "Data", "width": 150},
-        {"fieldname": "mobile_no", "label": _("Mobile No"), "fieldtype": "Data", "width": 100}
+        {"fieldname": "mobile_no", "label": _("Mobile No"), "fieldtype": "Data", "width": 100},
+        {"fieldname": "custom_custom_gst_category", "label": _("GST Category"), "fieldtype": "Data", "width": 150},
+
     ]
+##############################################################################
+# Old Code 
+    # additional_filters = {"it_enabled": 1}
+
+    # if filters.get("ay"):
+    #     additional_filters["ay"] = filters["ay"]
+    # else:
+    #     return columns, [], ""
+
+    # data = frappe.db.sql("""
+    #     SELECT
+    #         filing.name,
+    #         filing.can_be_filed,
+    #         filing.customer_id,
+    #         filing.customer_name,
+    #         filing.contact_person,
+    #         filing.assessee_full_name,
+    #         filing.customer_status,
+    #         filing.it_assessee_file,
+    #         filing.filing_status,
+    #         filing.filing_type,
+    #         filing.executive,
+    #         filing.mobile_no
+    #     FROM `tabIT Assessee Filing Data` AS filing
+    #     WHERE filing.ay = %s AND filing.it_enabled = 1
+    # """, additional_filters["ay"], as_dict=True)
+
+    # statuses = [
+    #     "PENDING INITIAL CONTACT", "DOCUMENTS REQUESTED", "DOCUMENTS PARTIALLY RECEIVED",
+    #     "DOCUMENTS FULLY COLLECTED", "REVIEWED AND VERIFIED", "RETURN PREPARED",
+    #     "SHARED TO CLIENT REVIEW", "FILED", "ACK AND VERIFIED", "DOCS SHARED WITH CLIENT"
+    # ]
+    # status_counts = {}
+    # for status in statuses:
+    #     count_query = """
+    #         SELECT COUNT(name) as count
+    #         FROM `tabIT Assessee Filing Data`
+    #         WHERE filing_status = %s AND ay = %s AND it_enabled = 1
+    #     """
+    #     count_result = frappe.db.sql(count_query, [status, additional_filters["ay"]], as_dict=True)
+    #     status_counts[status] = count_result[0].get("count", 0)
+##############################################################################################
+    # new code with gst category Filter BY Mohan
 
     additional_filters = {"it_enabled": 1}
 
@@ -396,8 +439,28 @@ def execute(filters=None):
         additional_filters["ay"] = filters["ay"]
     else:
         return columns, [], ""
+    # additional_filters = {}
+    params = []  # This will hold the parameters for the SQL query
 
-    data = frappe.db.sql("""
+    if "ay" in filters:
+        additional_filters["ay"] = filters["ay"]
+        params.append(additional_filters["ay"])
+
+    # If GST category is provided, append to filters and add the condition to the query
+    gst_category = filters.get("gst_category")
+    gst_category_filter = ""
+    if gst_category == "All":
+        # If "All" is selected, do not add a GST category filter
+        gst_category_filter = ""  # No filter for all categories
+    elif gst_category:
+        # If a specific category is provided, add it to the filters
+        additional_filters["gst_category"] = gst_category
+        gst_category_filter = "AND customer.custom_custom_gst_category = %s"
+        params.append(gst_category)  # Add GST category to params
+
+
+    # Construct the SQL query with the correct number of placeholders
+    query = f"""
         SELECT
             filing.name,
             filing.can_be_filed,
@@ -410,10 +473,17 @@ def execute(filters=None):
             filing.filing_status,
             filing.filing_type,
             filing.executive,
-            filing.mobile_no
+            filing.mobile_no,
+            customer.custom_custom_gst_category
         FROM `tabIT Assessee Filing Data` AS filing
-        WHERE filing.ay = %s AND filing.it_enabled = 1
-    """, additional_filters["ay"], as_dict=True)
+        JOIN `tabCustomer` AS customer ON filing.customer_id = customer.name
+        WHERE filing.ay = %s
+        AND filing.it_enabled = 1
+        {gst_category_filter}  -- Ensure this is properly formatted
+    """
+
+    # Execute the query with the collected parameters
+    data = frappe.db.sql(query, tuple(params), as_dict=True)
 
     statuses = [
         "PENDING INITIAL CONTACT", "DOCUMENTS REQUESTED", "DOCUMENTS PARTIALLY RECEIVED",
@@ -427,8 +497,12 @@ def execute(filters=None):
             FROM `tabIT Assessee Filing Data`
             WHERE filing_status = %s AND ay = %s AND it_enabled = 1
         """
+        
         count_result = frappe.db.sql(count_query, [status, additional_filters["ay"]], as_dict=True)
         status_counts[status] = count_result[0].get("count", 0)
+
+
+################################################################################
 
     total_records_count = sum(status_counts.values())
     doc_shared_with_client = status_counts.get("DOCS SHARED WITH CLIENT", 0)
@@ -618,7 +692,8 @@ def send_bulk_wa_for_filtered_it_customer(  message,
                                                                 "document_id": step_2.name,
                                                                 "mobile_number": step_2.mobile_no,
                                                                 "customer": step_2.customer_id,
-                                                                "message_id": None
+                                                                "message_id": None,
+                                                                
                                                             })
                         frappe.log_error(f"Stopped sending Bulk WhatsApp message for IT Assessee Filling Data {step_2.name} to {step_2.mobile_no}",f"Customer is disaled")
                         continue
@@ -639,7 +714,7 @@ def send_bulk_wa_for_filtered_it_customer(  message,
                                                                 "document_id": step_2.name,
                                                                 "mobile_number": step_2.mobile_no,
                                                                 "customer": step_2.customer_id,
-                                                                "message_id": message_id
+                                                                "message_id": message_id,
                                                             })
                         frappe.log_error(f"An error occurred while sending Bulk WhatsApp message. For IT Assessee Filling Data {step_2.name} to {step_2.mobile_no}",f"{resp_wa_send_message['msg']}")
                 
@@ -656,6 +731,7 @@ def send_bulk_wa_for_filtered_it_customer(  message,
             frappe.log_error(f"An Exception error occurred while sending Bulk WhatsApp messages for IT Assessee Filing Data.",f"{er}")
             return {"status":False,"msg":f"An Exception error occurred while sending bulk WhatsApp messages for IT Assessee Filing Data."}
     return {"status":False,"msg":f"No IT Assessee Filing Data record found for the filters set."}
+
 
 
 

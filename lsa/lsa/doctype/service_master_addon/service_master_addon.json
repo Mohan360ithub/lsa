@@ -21,7 +21,8 @@
    "fieldname": "addon_service_name",
    "fieldtype": "Link",
    "label": "Addon Service Name",
-   "options": "Item"
+   "options": "Item",
+   "reqd": 1
   },
   {
    "fieldname": "current_charges",
@@ -32,9 +33,10 @@
   {
    "fieldname": "frequency",
    "fieldtype": "Select",
+   "in_list_view": 1,
    "label": "Frequency",
-   "options": "M\nQ\nH\nY",
-   "read_only": 1
+   "options": "\nM\nQ\nH\nY",
+   "reqd": 1
   },
   {
    "fieldname": "filing_start_date",
@@ -59,17 +61,18 @@
    "label": "Cleared Upto"
   },
   {
+   "default": "Inactive",
    "fieldname": "status",
    "fieldtype": "Select",
-   "hidden": 1,
    "label": "Status",
-   "options": "Running\nStopped"
+   "options": "\nActive\nInactive",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-08-29 12:41:57.850993",
+ "modified": "2024-10-11 09:53:31.948258",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Service Master Addon",
