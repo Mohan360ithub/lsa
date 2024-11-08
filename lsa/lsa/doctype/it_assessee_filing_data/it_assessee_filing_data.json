@@ -27,6 +27,9 @@
   "it_enabled",
   "created_manually",
   "filing_notes",
+  "filing_notes_tab",
+  "add_filing_notes",
+  "filing_notes_html",
   "income_and_deduction_tab",
   "salary",
   "house_property",
@@ -405,12 +408,27 @@
    "fieldname": "attachment_html",
    "fieldtype": "HTML",
    "label": "Attachment HTML"
+  },
+  {
+   "fieldname": "filing_notes_tab",
+   "fieldtype": "Tab Break",
+   "label": "Filing Notes"
+  },
+  {
+   "fieldname": "add_filing_notes",
+   "fieldtype": "Button",
+   "label": "Add Filing Notes"
+  },
+  {
+   "fieldname": "filing_notes_html",
+   "fieldtype": "HTML",
+   "label": "Filing Notes HTML"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-07-26 17:48:09.352752",
+ "modified": "2024-11-08 16:39:59.089814",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "IT Assessee Filing Data",

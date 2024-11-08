@@ -52,7 +52,10 @@
   "gst_filling_report_id",
   "column_break_kogm",
   "filing_notes",
-  "amended_from"
+  "amended_from",
+  "filing_notes_tab",
+  "add_filing_notes",
+  "filing_notes_html"
  ],
  "fields": [
   {
@@ -356,12 +359,27 @@
    "label": "Customer ID",
    "options": "Customer",
    "reqd": 1
+  },
+  {
+   "fieldname": "filing_notes_tab",
+   "fieldtype": "Tab Break",
+   "label": "Filing Notes"
+  },
+  {
+   "fieldname": "add_filing_notes",
+   "fieldtype": "Button",
+   "label": "Add Filing Notes"
+  },
+  {
+   "fieldname": "filing_notes_html",
+   "fieldtype": "HTML",
+   "label": "Filing Notes HTML"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-08-03 12:34:50.418209",
+ "modified": "2024-11-08 15:32:21.746432",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Gst Filling Data",
