@@ -11,7 +11,9 @@ app_license = "mit"
 
 # include js, css files in header of desk.html
 # app_include_css = "/assets/lsa/css/lsa.css"
-# app_include_js = "/assets/lsa/js/lsa.js"
+app_include_js = [
+    "/assets/lsa/js/workflow.js",
+]
 
 # include js, css files in header of web template
 # web_include_css = "/assets/lsa/css/lsa.css"
@@ -170,6 +172,9 @@ doc_events = {
                 },
 }
 
+fixtures = ["Custom DocPerm"]
+
+
 
 # Scheduled Tasks
 # ---------------
@@ -288,6 +293,7 @@ scheduler_events = {
 # auth_hooks = [
 #	"lsa.auth.validate"
 # ]
+
 
 
 

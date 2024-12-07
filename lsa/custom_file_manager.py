@@ -6,6 +6,12 @@ import frappe
 from frappe import _
 from werkzeug.utils import secure_filename
 from frappe.exceptions import TimestampMismatchError
+import random
+import string
+import filetype
+import base64
+import magic,json
+import traceback
 
 
 def get_base_directory():
@@ -36,6 +42,9 @@ path_map={
 
             "Sales Order":("Core","/Customer/{customer}/Accounts/Signed_Copy/SO_{name}_"),
             "Recurring Service Pricing":("Custom","/Customer/{customer_id}/Accounts/RSP/{name}/"), 
+
+
+            "Expense Claim":("Core","/Employee/{employee}/Expense_Claim/{name}/"),
             
           }
 
@@ -105,7 +114,7 @@ def delayed_store_in_s3_cloud(doc_name, retries=3, backoff_factor=1):
     s3cloud_new_doc.doctype_name = attached_to_doctype
     s3cloud_new_doc.doctype_id = attached_to_doc_name
     s3cloud_new_doc.doctype_document_subtype = attached_to_doctype_field
-    # s3cloud_new_doc.s3_filename = s3_file_name
+    s3cloud_new_doc.s3_filename = s3_file_name
     s3cloud_new_doc.s3_filepath = s3_file_path
     s3cloud_new_doc.s3_filesize = file_size
     s3cloud_new_doc.s3_file_mime_type = file_mime_type
@@ -136,7 +145,7 @@ def delayed_store_in_s3_cloud(doc_name, retries=3, backoff_factor=1):
             if not file_uploaded:
                 response = store_in_s3(attached_to_doc, attached_to_doctype_field, s3_file_name,s3_file_path,local_file_content)
                 if not response["status"]:
-                    frappe.log_error(f"Failed to upload file to S3",f"Failed to upload file to S3: {response['msg']}")
+                    frappe.log_error(f"Failed to upload file to S3",f"Failed to upload file to S3: {response['msg']},{response['error']}")
                 else:
                     file_uploaded=True
                     s3cloud_new_doc.uploaded_to_s3=1
@@ -357,5 +366,666 @@ def update_document_fields(doc_type, docname, file_type, file_type_value, file_n
     except Exception as e:
         return {"status":False,"msg": "Failed to updated document fields."}
 
+
+################################### App S3 with multi files ####################################################################
+
+@frappe.whitelist()
+def s3_file_upload_for_app_muliple(doctype,file_dict,docname=None):
+    count = 1
+    success_count = 0
+    file_status = {"success":[], "failed":[]}
+
+
+    try:
+        file_dict_converted = json.loads(file_dict)  # Parse the JSON string into a Python object
+        # frappe.log_error(f"Post request areguments", f"post string: {file_dict} type{type(file_dict)},\n converted json: {file_dict_converted} type{type(file_dict_converted)}," )
+    except Exception as e:
+        return {"status": False, "msg": f"Error parsing file_dict: {str(e)}"}
+
+    s3_file_doc_ref = []
+    for file in file_dict_converted:
+
+        file_name = file["file_name"]
+        file_type = file["file_type"]
+        file_note = file["file_note"]
+
+
+        if doctype not in path_map:
+            return {"status":False,"msg": f"{doctype} is not configured for file upload"}
+        
+        attached_to_doctype = doctype
+        attached_to_doc_name = None
+        attached_to_doc = None
+        if docname:
+            attached_to_doc_name = docname
+            attached_to_doc = frappe.get_doc(attached_to_doctype, attached_to_doc_name)
+        
+        # frappe.log_error(f"Post request iteration {count}", f"file_name: {file_name} file_type{file_type}, file_note: {file_note}" )
+        file_content = frappe.request.files[f'file{count}'].read()
+        # if file_content:
+        #     frappe.log_error(f"Post request iteration {count}", f"File Content present" )
+        
+        if not (file_content and file_name and file_type):
+
+            return {"status": False, "msg": "File content or File Type or File Name not found"}
+        
+        file_sepcs = get_file_mime_size(file_content)
+
+        file_size = file_sepcs["file_size"]
+        file_mime_type = file_sepcs["mime_type"]
+
+        formatted_datetime = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+        base_dir=get_base_directory()
+        s3_file_path, s3_file_name = generate_dynamic_path_from_app(base_dir, path_map, file_mime_type,file_type, formatted_datetime,attached_to_doctype ,attached_to_doc )
+        # s3_file_path=f"{s3_folder_name}/{s3_file_name}"
+        
+        
+        s3cloud_new_doc = frappe.new_doc('S3 Cloud Documents')
+        s3cloud_new_doc.doctype_name = attached_to_doctype
+        s3cloud_new_doc.doctype_id = attached_to_doc_name
+        # s3cloud_new_doc.doctype_document_subtype = attached_to_doctype_field
+        s3cloud_new_doc.s3_filepath = s3_file_path
+        s3cloud_new_doc.s3_filename = s3_file_name
+        s3cloud_new_doc.s3_filesize = file_size
+        s3cloud_new_doc.s3_file_mime_type = file_mime_type
+        s3cloud_new_doc.uploaded_by = frappe.session.user
+        # s3cloud_new_doc.file_ref=doc.name
+
+        
+        s3cloud_new_doc.file_name=file_name
+        s3cloud_new_doc.file_type=file_type
+        s3cloud_new_doc.notes=file_note
+
+        
+        
+        s3cloud_new_doc.insert()
+        file_uploaded=False
+        attempt = 0
+        retries=3
+        backoff_factor=1
+        success_upload=False
+        while attempt < retries and not success_upload:
+            try:
+                if not file_uploaded:
+                    response = store_in_s3_from_app(s3_file_path,file_content)
+                    if not response["status"]:
+                        frappe.log_error(f"Failed to upload file to S3",f"Failed to upload file to S3: {response['msg']},{response['error']}")
+                    else:
+                        file_uploaded=True
+                        s3cloud_new_doc.uploaded_to_s3=1
+                        s3cloud_new_doc.save()
+                        s3cloud_new_doc.reload()
+                        frappe.db.commit()
+                        success_count+=1
+                        success_upload=True
+                        file_status["success"]+=[file]
+                        s3_file_doc_ref += [s3cloud_new_doc.name]
+                        break
+                        
+
+                        
+                        
+            except frappe.exceptions.TimestampMismatchError:
+                # Retry on TimestampMismatchError
+                attempt += 1
+                wait_time = backoff_factor * (2 ** (attempt - 1))  # Exponential backoff
+                frappe.log_error(f"Timestamp mismatch for document: {s3cloud_new_doc.name}", f"Timestamp mismatch for document: {attached_to_doc_name}. Retrying {attempt}/{retries} after {wait_time} seconds. Summary: file_uploaded={file_uploaded}", )
+                time.sleep(wait_time)  # Wait before retrying
+
+            except Exception as e:
+                frappe.log_error(f"Error in delayed_store_in_s3_cloud for doc_name {s3cloud_new_doc.name}", f"Error in delayed_store_in_s3_cloud for doc_name {s3cloud_new_doc.name}: {str(e)} Summary:  file_uploaded={file_uploaded}", )
+
+        # If all retries failed
+        if success_upload==False:
+            frappe.log_error(f"Failed to process file after {retries} attempts", f"Failed to process file after {retries} attempts: {s3cloud_new_doc.name} Summary:  file_uploaded={file_uploaded}", )
+            file_status["failed"]+=[file]
+        count+=1
+        
+    return {"status":True,"msg":f"{success_count} Files Uploaded Successfully","s3_file_doc_ref":s3_file_doc_ref,"file_upload_status":file_status,"file_dict":file_dict}
+
+
+
+######################################  App S3 with single file ####################################################################
+
+
+
+@frappe.whitelist()
+def s3_file_upload_for_app(doctype,file_name,file_type,file_note,docname=None):
+
+
+    if doctype not in path_map:
+        return {"status":False,"msg": f"{doctype} is not configured for file upload"}
+    
+    # try:
+    #     # If file_array is a string, convert it into a dictionary (JSON parsing)
+    #     if isinstance(file_details, str):
+    #         file_details = json.loads(file_details)
+    # except json.JSONDecodeError as e:
+    #     return {"status": False, "msg": f"Invalid JSON format in file_array: {str(e)}"}
+
+    
+    
+        
+    attached_to_doctype = doctype
+    attached_to_doc_name = None
+    attached_to_doc = None
+    if docname:
+        attached_to_doc_name = docname
+        attached_to_doc = frappe.get_doc(attached_to_doctype, attached_to_doc_name)
+
+    # for file in file_array:
+        
+    # file_content = file["file_content"]
+    
+    # If the file is uploaded through Postman (multipart/form-data)
+    file_content = frappe.request.files[f'file'].read()
+
+    # if isinstance(file_content, str) and file_content.startswith("data:"):
+    #     # This is a Base64 encoded string (e.g., 'data:image/png;base64,...')
+    #     try:
+    #         # Remove the base64 prefix (if present) and decode
+    #         file_content = file_content.split(",")[1]
+    #         file_content = base64.b64decode(file_content)
+    #     except Exception as e:
+    #         frappe.throw(f"Failed to decode filedata: {str(e)}")
+    # else:
+    #     frappe.throw("Invalid filedata format. Expected Base64 string.")
+
+
+    # file_name=file_details["file_name"]
+    # file_type=file_details["file_type"]
+    if not (file_content and file_name and file_type):
+
+        return {"status": False, "msg": "File content or File Type or File Name not found"}
+    
+    file_sepcs = get_file_mime_size(file_content)
+
+    file_size = file_sepcs["file_size"]
+    file_mime_type = file_sepcs["mime_type"]
+
+    formatted_datetime = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+    base_dir=get_base_directory()
+    s3_file_path, s3_file_name = generate_dynamic_path_from_app(base_dir, path_map, file_mime_type,file_type, formatted_datetime,attached_to_doctype ,attached_to_doc )
+    # s3_file_path=f"{s3_folder_name}/{s3_file_name}"
+    
+    
+    s3cloud_new_doc = frappe.new_doc('S3 Cloud Documents')
+    s3cloud_new_doc.doctype_name = attached_to_doctype
+    s3cloud_new_doc.doctype_id = attached_to_doc_name
+    # s3cloud_new_doc.doctype_document_subtype = attached_to_doctype_field
+    s3cloud_new_doc.s3_filepath = s3_file_path
+    s3cloud_new_doc.s3_filename = s3_file_name
+    s3cloud_new_doc.s3_filesize = file_size
+    s3cloud_new_doc.s3_file_mime_type = file_mime_type
+    s3cloud_new_doc.uploaded_by = frappe.session.user
+    # s3cloud_new_doc.file_ref=doc.name
+
+    
+    s3cloud_new_doc.file_name=file_name
+    s3cloud_new_doc.file_type=file_type
+    s3cloud_new_doc.notes=file_note
+
+    
+    
+    s3cloud_new_doc.insert()
+    file_uploaded=False
+    local_file_deleted=False
+    # attached_to_doc_updated=False
+    attempt = 0
+    # if (file_size/1024)>30:
+    #     frappe.log_error(f"Can't upload attachent of {attached_to_doc.doctype} {attached_to_doc.name} to s3", \
+    #                     f"Can't upload attachment of {attached_to_doc.doctype} {attached_to_doc.name} to s3 as size limit exceeded {file_size}kb, S3 Cloud Documents Ref: {doc_name}, File Ref: {doc.name}" )
+    #     s3cloud_new_doc.notes=f"Can't upload attachment of {attached_to_doc.doctype} {attached_to_doc.name} to s3 as size limit exceeded {file_size}kb, S3 Cloud Documents Ref: {doc_name}, File Ref: {doc.name}"
+    #     s3cloud_new_doc.save()
+    #     return {"status": False, "message": f"Can't upload attachent of {attached_to_doc.doctype} {attached_to_doc.name} to s3 due to file size limit exceeded"}
+    retries=3
+    backoff_factor=1
+    while attempt < retries :
+        try:
+            if not file_uploaded:
+                response = store_in_s3_from_app(s3_file_path,file_content)
+                if not response["status"]:
+                    frappe.log_error(f"Failed to upload file to S3",f"Failed to upload file to S3: {response['msg']},{response['error']}")
+                else:
+                    file_uploaded=True
+                    s3cloud_new_doc.uploaded_to_s3=1
+                    s3cloud_new_doc.save()
+                    s3cloud_new_doc.reload()
+                    frappe.db.commit()
+                    return {"status":True,"msg":"File Uploaded Successfully","file_id":s3cloud_new_doc.name}
+                    
+        except frappe.exceptions.TimestampMismatchError:
+            # Retry on TimestampMismatchError
+            attempt += 1
+            wait_time = backoff_factor * (2 ** (attempt - 1))  # Exponential backoff
+            frappe.log_error(f"Timestamp mismatch for document: {s3cloud_new_doc.name}", f"Timestamp mismatch for document: {attached_to_doc_name}. Retrying {attempt}/{retries} after {wait_time} seconds. Summary: file_uploaded={file_uploaded}", )
+            time.sleep(wait_time)  # Wait before retrying
+
+        except Exception as e:
+            frappe.log_error(f"Error in delayed_store_in_s3_cloud for doc_name {s3cloud_new_doc.name}", f"Error in delayed_store_in_s3_cloud for doc_name {s3cloud_new_doc.name}: {str(e)} Summary:  file_uploaded={file_uploaded}", )
+
+    # If all retries failed
+    frappe.log_error(f"Failed to process file after {retries} attempts", f"Failed to process file after {retries} attempts: {s3cloud_new_doc.name} Summary:  file_uploaded={file_uploaded}", )
+    return {"status": False, "message": "Failed to process file after multiple attempts"}
+
+
+@frappe.whitelist()
+def store_in_s3_from_app(s3_file_path,file_content):
+
+
+    s3_doc = frappe.get_doc("S3 360 Dev Test")
+    s3_client = boto3.client(
+        's3',
+        aws_access_key_id=s3_doc.access_key,
+        aws_secret_access_key=s3_doc.secret_key,
+        region_name=s3_doc.region_name,
+    )
+    bucket_name = s3_doc.bucket
+    
+    try:
+        response = s3_client.put_object(Bucket=bucket_name, Key=s3_file_path, Body=file_content)
+        if response['ResponseMetadata']['HTTPStatusCode'] == 200:
+            try:
+                s3_client.head_object(Bucket=bucket_name, Key=s3_file_path)
+                return {"status": True,
+                        "msg": "File Uploaded Successfully",
+                        }
+            except Exception as er1:
+                return {"status": False, "msg": "Verification of the file upload Failed", "error": str(er1)}
+        else:
+            return {"status": False, "msg": f"Failed to upload file to S3: {response['ResponseMetadata']['HTTPStatusCode']}"}
+    except Exception as e:
+        return {"status": False, "msg": f"Error uploading file to S3: {e}", "file_content": str(file_content)}
+    
+   
+
+def generate_dynamic_path_from_app(base_dir, path_map, file_mime_type,file_type, formatted_datetime,attached_to_doctype ,attached_to_doc):
+    if attached_to_doc and attached_to_doc.doctype in path_map:
+        random_str = generate_random_string(3)
+        folder_name = base_dir + path_map[attached_to_doc.doctype][1]
+        fields = re.findall(r'\{(\w+)\}', folder_name)
+        for field in fields:
+            field_expression = '{' + str(field) + '}'
+            folder_name = folder_name.replace(field_expression, str(getattr(attached_to_doc, field)))
+        
+
+        file_name_prefix= "_".join([fnw.lower() for fnw in file_type.split(" ")])
+
+        file_name_suffix = f"{file_name_prefix}_{formatted_datetime}_{random_str}.{file_mime_type.split('/')[1]}"
+        file_path = folder_name+file_name_suffix
+        file_name = file_path.split("/")[-1]
+        return file_path, file_name
+    elif not attached_to_doc:
+        random_str = generate_random_string(3)
+
+        # folder_name = base_dir + "/"+ attached_to_doctype +"/"+f"{random_str}"
+        folder_name = base_dir + "/"+ attached_to_doctype +"/Unassigned"
+        
+        file_name_prefix= "_".join([fnw.lower() for fnw in file_type.split(" ")])
+
+        file_name_suffix = f"{file_name_prefix}_{formatted_datetime}_{random_str}.{file_mime_type.split('/')[1]}"
+        file_path = folder_name+file_name_suffix
+        file_name = file_path.split("/")[-1]
+        return file_path, file_name
+    
+
+
+
+
+def generate_random_string(length=12):
+    # Define the character pool (uppercase and lowercase letters)
+    characters = string.ascii_letters  # 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
+    
+    # Generate a random string of the specified length
+    random_string = ''.join(random.choice(characters) for _ in range(length))
+    
+    return random_string
+
+
+
+
+def get_file_mime_size(file_content):
+    # Decode the base64 string to binary data
+    file_data = base64.b64decode(file_content)
+    
+    # Get MIME type using python-magic
+    mime = magic.Magic(mime=True)
+    mime_type = mime.from_buffer(file_data)
+
+    # Get file size
+    file_size = len(file_data)
+
+    file_sepcs={}
+    file_sepcs["file_size"]=file_size
+    file_sepcs["mime_type"]=mime_type
+
+    return file_sepcs
+
+# def get_file_mime_size(file_content):
+#     file_data = base64.b64decode(file_content)
+#     mime = magic.Magic(mime=True)
+#     mime_type = mime.from_buffer(file_data[:4096])  # Use a larger buffer size
+
+#     if mime_type == "application/octet-stream":
+#         mime_type, _ = mimetypes.guess_type("file.name")  # Replace with actual filename if available
+
+#     file_size = len(file_data)
+#     return {"file_size": file_size, "mime_type": mime_type}
+
+@frappe.whitelist()
+def update_reference_doc_in_attachment(attachment_ids,reference_id):
+    try:
+        attachment_ids_converted = json.loads(attachment_ids)  # Parse the JSON string into a Python object
+        # frappe.log_error(f"Post request areguments", f"post string: {file_dict} type{type(file_dict)},\n converted json: {file_dict_converted} type{type(file_dict_converted)}," )
+    except Exception as e:
+        return {"status": False, "msg": f"Error parsing attachment_ids: {str(e)}"}
+    updation_status = {"success":[],"failed":[]}
+    for attachment_id in attachment_ids_converted:
+        try:
+            attachment_doc = frappe.get_doc("S3 Cloud Documents", attachment_id)
+            attachment_doc.doctype_id = reference_id
+            
+            old_path = attachment_doc.s3_filepath
+            old_path_component=old_path.split("/")
+
+
+            pattern = r'(\d{8}_\d{6})'
+            match = re.search(pattern, old_path)
+            formatted_datetime=""
+            if match:
+                formatted_datetime = match.group(1)
+            else:
+                formatted_datetime = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+
+            attached_to_doc = frappe.get_doc(attachment_doc.doctype_name, reference_id)
+
+            file_path, file_name = generate_dynamic_path_from_app(old_path_component[0], path_map, attachment_doc.s3_file_mime_type,attachment_doc.file_type, formatted_datetime,attachment_doc.doctype_name ,attached_to_doc)
+
+            resp = modify_s3_file_path_and_name( attachment_doc.s3_filepath, file_path)
+
+            if resp["status"]:
+                attachment_doc.s3_filepath = file_path
+                attachment_doc.s3_filename = file_name
+                attachment_doc.save()
+                frappe.db.commit()
+                updation_status["success"] += [attachment_id]
+            else:
+                updation_status["failed"] += [attachment_id]
+                
+            
+        except Exception as e:
+            updation_status["failed"] += [attachment_id]
+            traceback_str = traceback.format_exc()
+            frappe.log_error(f"Error updating file path", f"Error updating file path for {attachment_id} for {attachment_doc.doctype_name} doctype reference {reference_id} {attachment_doc.s3_filepath} to {file_path}: {str(e)} {traceback_str}", )
+            
+    return {"status": True, "msg": "Reference Doc updated","updation_status":updation_status}
+    
+
+def modify_s3_file_path_and_name( old_key, new_key):
+
+    s3_doc = frappe.get_doc("S3 360 Dev Test")
+    s3_client = boto3.client(
+        's3',
+        aws_access_key_id=s3_doc.access_key,
+        aws_secret_access_key=s3_doc.secret_key,
+        region_name=s3_doc.region_name,
+    )
+    bucket_name = s3_doc.bucket
+
+    try:
+        # Step 1: Copy the file to the new path with the new filename
+        s3_client.copy_object(
+            Bucket=bucket_name,
+            CopySource={'Bucket': bucket_name, 'Key': old_key},
+            Key=new_key
+        )
+        
+
+        # Step 2: Delete the original file
+        s3_client.delete_object(Bucket=bucket_name, Key=old_key)
+        return {"status":True,"msg":"File path updated successfully"}
+
+    except Exception as e:
+        frappe.log_error(f"Error updating file path in s3", f"Error updating file path in s3 {old_key} to {new_key}: {str(e)}", )
+        return{"status":False,"msg":"File path updated failed"}
+    
+######################################  App S3 with file in base64 ####################################################################
+
+# @frappe.whitelist()
+# def s3_file_upload_for_app(doctype,file_array,docname=None):
+
+#     if doctype not in path_map:
+#         return {"status":False,"msg": f"{doctype} is not configured for file upload"}
+    
+#     try:
+#         # If file_array is a string, convert it into a dictionary (JSON parsing)
+#         if isinstance(file_array, str):
+#             file_array = json.loads(file_array)
+#     except json.JSONDecodeError as e:
+#         return {"status": False, "msg": f"Invalid JSON format in file_array: {str(e)}"}
+
+    
+    
+        
+#     attached_to_doctype = doctype
+#     attached_to_doc_name = None
+#     attached_to_doc = None
+#     if docname:
+#         attached_to_doc_name = docname
+#         attached_to_doc = frappe.get_doc(attached_to_doctype, attached_to_doc_name)
+#     count = 1
+#     for file in file_array:
+        
+#         # file_content = file["file_content"]
+        
+#         # If the file is uploaded through Postman (multipart/form-data)
+#         file_content = frappe.request.files[f'file{count}'].read()
+#         file_content = frappe.request.files[f'file{count}'].read()
+
+#         # if isinstance(file_content, str) and file_content.startswith("data:"):
+#         #     # This is a Base64 encoded string (e.g., 'data:image/png;base64,...')
+#         #     try:
+#         #         # Remove the base64 prefix (if present) and decode
+#         #         file_content = file_content.split(",")[1]
+#         #         file_content = base64.b64decode(file_content)
+#         #     except Exception as e:
+#         #         frappe.throw(f"Failed to decode filedata: {str(e)}")
+#         # else:
+#         #     frappe.throw("Invalid filedata format. Expected Base64 string.")
+
+
+#         file_name=file["file_name"]
+#         file_type=file["file_type"]
+#         if not (file_content and file_name and file_type):
+
+#             return {"status": False, "msg": "File content or File Type or File Name not found"}
+        
+#         file_sepcs = get_file_mime_size(file_content)
+
+#         file_size = file_sepcs["file_size"]
+#         file_mime_type = file_sepcs["mime_type"]
+
+#         formatted_datetime = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+#         base_dir=get_base_directory()
+#         s3_file_path, s3_file_name = generate_dynamic_path_from_app(base_dir, path_map, file_mime_type,file_type, formatted_datetime,attached_to_doctype ,attached_to_doc )
+#         # s3_file_path=f"{s3_folder_name}/{s3_file_name}"
+        
+        
+#         s3cloud_new_doc = frappe.new_doc('S3 Cloud Documents')
+#         s3cloud_new_doc.doctype_name = attached_to_doctype
+#         s3cloud_new_doc.doctype_id = attached_to_doc_name
+#         # s3cloud_new_doc.doctype_document_subtype = attached_to_doctype_field
+#         # s3cloud_new_doc.s3_filename = s3_file_name
+#         s3cloud_new_doc.s3_filepath = s3_file_path
+#         s3cloud_new_doc.s3_filesize = file_size
+#         s3cloud_new_doc.s3_file_mime_type = file_mime_type
+#         s3cloud_new_doc.uploaded_by = frappe.session.user
+#         # s3cloud_new_doc.file_ref=doc.name
+
+        
+#         s3cloud_new_doc.file_name=file["file_name"]
+#         s3cloud_new_doc.file_type=file["file_type"]
+#         s3cloud_new_doc.notes=file["file_note"]
+        
+        
+#         s3cloud_new_doc.insert()
+#         file_uploaded=False
+#         local_file_deleted=False
+#         # attached_to_doc_updated=False
+#         attempt = 0
+#         # if (file_size/1024)>30:
+#         #     frappe.log_error(f"Can't upload attachent of {attached_to_doc.doctype} {attached_to_doc.name} to s3", \
+#         #                     f"Can't upload attachment of {attached_to_doc.doctype} {attached_to_doc.name} to s3 as size limit exceeded {file_size}kb, S3 Cloud Documents Ref: {doc_name}, File Ref: {doc.name}" )
+#         #     s3cloud_new_doc.notes=f"Can't upload attachment of {attached_to_doc.doctype} {attached_to_doc.name} to s3 as size limit exceeded {file_size}kb, S3 Cloud Documents Ref: {doc_name}, File Ref: {doc.name}"
+#         #     s3cloud_new_doc.save()
+#         #     return {"status": False, "message": f"Can't upload attachent of {attached_to_doc.doctype} {attached_to_doc.name} to s3 due to file size limit exceeded"}
+#         retries=3
+#         backoff_factor=1
+#         while attempt < retries :
+#             try:
+#                 if not file_uploaded:
+#                     response = store_in_s3_from_app(s3_file_path,file_content)
+#                     if not response["status"]:
+#                         frappe.log_error(f"Failed to upload file to S3",f"Failed to upload file to S3: {response['msg']},{response['error']}")
+#                     else:
+#                         file_uploaded=True
+#                         s3cloud_new_doc.uploaded_to_s3=1
+#                         s3cloud_new_doc.save()
+#                         frappe.db.commit()
+                        
+#             except frappe.exceptions.TimestampMismatchError:
+#                 # Retry on TimestampMismatchError
+#                 attempt += 1
+#                 wait_time = backoff_factor * (2 ** (attempt - 1))  # Exponential backoff
+#                 frappe.log_error(f"Timestamp mismatch for document: {s3cloud_new_doc.name}", f"Timestamp mismatch for document: {attached_to_doc_name}. Retrying {attempt}/{retries} after {wait_time} seconds. Summary: file_uploaded={file_uploaded}", )
+#                 time.sleep(wait_time)  # Wait before retrying
+
+#             except Exception as e:
+#                 frappe.log_error(f"Error in delayed_store_in_s3_cloud for doc_name {s3cloud_new_doc.name}", f"Error in delayed_store_in_s3_cloud for doc_name {s3cloud_new_doc.name}: {str(e)} Summary:  file_uploaded={file_uploaded}", )
+
+#         count+=1
+#         # If all retries failed
+#         frappe.log_error(f"Failed to process file after {retries} attempts", f"Failed to process file after {retries} attempts: {s3cloud_new_doc.name} Summary:  file_uploaded={file_uploaded}", )
+#         return {"status": False, "message": "Failed to process file after multiple attempts"}
+
+
+# @frappe.whitelist()
+# def store_in_s3_from_app(s3_file_path,file_content):
+
+
+#     s3_doc = frappe.get_doc("S3 360 Dev Test")
+#     s3_client = boto3.client(
+#         's3',
+#         aws_access_key_id=s3_doc.access_key,
+#         aws_secret_access_key=s3_doc.secret_key,
+#         region_name=s3_doc.region_name,
+#     )
+#     bucket_name = s3_doc.bucket
+    
+#     try:
+#         response = s3_client.put_object(Bucket=bucket_name, Key=s3_file_path, Body=file_content)
+#         if response['ResponseMetadata']['HTTPStatusCode'] == 200:
+#             try:
+#                 s3_client.head_object(Bucket=bucket_name, Key=s3_file_path)
+#                 return {"status": True,
+#                         "msg": "File Uploaded Successfully",
+#                         }
+#             except Exception as er1:
+#                 return {"status": False, "msg": "Verification of the file upload Failed", "error": str(er1)}
+#         else:
+#             return {"status": False, "msg": f"Failed to upload file to S3: {response['ResponseMetadata']['HTTPStatusCode']}"}
+#     except Exception as e:
+#         return {"status": False, "msg": f"Error uploading file to S3: {e}", "file_content": str(file_content)}
+    
+   
+
+# def generate_dynamic_path_from_app(base_dir, path_map, file_mime_type,file_type, formatted_datetime,attached_to_doctype ,attached_to_doc):
+#     if attached_to_doc and attached_to_doc.doctype in path_map:
+#         folder_name = base_dir + path_map[attached_to_doc.doctype][1]
+#         fields = re.findall(r'\{(\w+)\}', folder_name)
+#         for field in fields:
+#             field_expression = '{' + str(field) + '}'
+#             folder_name = folder_name.replace(field_expression, str(getattr(attached_to_doc, field)))
+        
+
+#         file_name_prefix= "_".join([fnw.lower() for fnw in file_type.split(" ")])
+
+#         file_name_suffix = f"{file_name_prefix}_{formatted_datetime}.{file_mime_type.split('/')[1]}"
+#         file_path = folder_name+file_name_suffix
+#         file_name = file_path.split("/")[-1]
+#         return file_path, file_name
+#     elif not attached_to_doc:
+#         # random_str = generate_random_string(12)
+
+#         # folder_name = base_dir + "/"+ attached_to_doctype +"/"+f"{random_str}"
+#         folder_name = base_dir + "/"+ attached_to_doctype +"/Unassigned"
+        
+#         file_name_prefix= "_".join([fnw.lower() for fnw in file_type.split(" ")])
+
+#         file_name_suffix = f"{file_name_prefix}_{formatted_datetime}.{file_mime_type.split('/')[1]}"
+#         file_path = folder_name+file_name_suffix
+#         file_name = file_path.split("/")[-1]
+#         return file_path, file_name
+    
+
+
+
+
+# def generate_random_string(length=12):
+#     # Define the character pool (uppercase and lowercase letters)
+#     characters = string.ascii_letters  # 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
+    
+#     # Generate a random string of the specified length
+#     random_string = ''.join(random.choice(characters) for _ in range(length))
+    
+#     return random_string
+
+
+
+
+
+
+
+
+# # def get_file_mime_size(file_content):
+# #     try:
+# #         # Get file size
+# #         file_size = len(file_content)  # Size in bytes
+        
+# #         # Get MIME type using filetype library
+# #         kind = filetype.guess(file_content)
+        
+# #         if kind:
+# #             mime_type = kind.mime  # Extract MIME type (e.g., 'image/png')
+# #         else:
+# #             mime_type = "unknown/unknown"  # Fallback if type can't be determined
+
+# #         return {
+# #             'file_content': file_content,
+# #             'file_size': file_size,  # Size in bytes
+# #             'mime_type': mime_type
+# #         }
+# #     except Exception as e:
+# #         frappe.log_error("Error in geting file from URL", f"Error fetching file from link: {e}")
+# #         return None
+
+
+
+# def get_file_mime_size(file_content):
+#     # Decode the base64 string to binary data
+#     file_data = base64.b64decode(file_content)
+    
+#     # Get MIME type using python-magic
+#     mime = magic.Magic(mime=True)
+#     mime_type = mime.from_buffer(file_data)
+
+#     # Get file size
+#     file_size = len(file_data)
+
+#     file_sepcs={}
+#     file_sepcs["file_size"]=file_size
+#     file_sepcs["mime_type"]=mime_type
+
+    # return file_sepcs
 
 

@@ -55,7 +55,9 @@
   "amended_from",
   "filing_notes_tab",
   "add_filing_notes",
-  "filing_notes_html"
+  "filing_notes_html",
+  "status_history_tab",
+  "status_change_history"
  ],
  "fields": [
   {
@@ -374,12 +376,24 @@
    "fieldname": "filing_notes_html",
    "fieldtype": "HTML",
    "label": "Filing Notes HTML"
+  },
+  {
+   "fieldname": "status_history_tab",
+   "fieldtype": "Tab Break",
+   "label": "Status History"
+  },
+  {
+   "fieldname": "status_change_history",
+   "fieldtype": "Table",
+   "label": "Status Change History",
+   "options": "Status History",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-11-08 15:32:21.746432",
+ "modified": "2024-11-28 16:41:23.597503",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Gst Filling Data",

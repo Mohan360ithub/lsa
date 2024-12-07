@@ -528,7 +528,7 @@
    "_liked_by": null,
    "_user_tags": null,
    "amend": 0,
-   "cancel": 0,
+   "cancel": 1,
    "create": 1,
    "creation": "2024-07-20 15:11:09.142566",
    "delete": 0,
@@ -550,7 +550,7 @@
    "role": "Lsa Front Desk CRM Executive(A,B)",
    "select": 1,
    "share": 0,
-   "submit": 0,
+   "submit": 1,
    "write": 1
   }
  ],

@@ -1,0 +1,48 @@
+{
+ "add_total_row": 1,
+ "columns": [],
+ "creation": "2024-12-03 11:30:27.685534",
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "filters": [],
+ "idx": 0,
+ "is_standard": "Yes",
+ "letter_head": "LSA",
+ "letterhead": null,
+ "modified": "2024-12-03 11:30:27.685534",
+ "modified_by": "Administrator",
+ "module": "Lsa",
+ "name": "Employee Efficiency Report",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "ref_doctype": "Gst Filling Data",
+ "report_name": "Employee Efficiency Report",
+ "report_type": "Script Report",
+ "roles": [
+  {
+   "role": "System Manager"
+  },
+  {
+   "role": "LSA OPS SENIOR MANAGER"
+  },
+  {
+   "role": "LSA CEO Admin"
+  },
+  {
+   "role": "LSA GST Executive(A,B)"
+  },
+  {
+   "role": "LSA GST Ops Manager(A,Sernior)"
+  },
+  {
+   "role": "LSA GST Basic(A,B,C)"
+  },
+  {
+   "role": "Lsa Ops Export"
+  },
+  {
+   "role": "Lsa Front Desk CRM Executive(A,B)"
+  }
+ ]
+}

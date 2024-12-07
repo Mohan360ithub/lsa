@@ -160,10 +160,12 @@ def get_notapproved_leave_applications():
     
 
     for app in leave_applications:
-        user=frappe.get_doc("User",app.leave_approver)
-        app["leave_approver_name"]=user.full_name
+        if app.leave_approver:
+            user=frappe.get_doc("User",app.leave_approver)
+            app["leave_approver_name"]=user.full_name
     return leave_applications
 ######################################Vatsal Modified srikanth Code End###########################################################
+
 
 
 

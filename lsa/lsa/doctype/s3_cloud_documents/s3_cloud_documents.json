@@ -96,8 +96,7 @@
   {
    "fieldname": "s3_filepath",
    "fieldtype": "Data",
-   "label": "S3 Filepath",
-   "read_only": 1
+   "label": "S3 Filepath"
   },
   {
    "fieldname": "s3_filesize",
@@ -141,7 +140,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-09-03 12:24:39.540941",
+ "modified": "2024-12-02 18:13:37.419399",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "S3 Cloud Documents",
@@ -163,5 +162,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "track_changes": 1
 }

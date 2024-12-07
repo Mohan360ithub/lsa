@@ -1,7 +1,7 @@
 // Copyright (c) 2024, Mohan and contributors
 // For license information, please see license.txt
 
-// frappe.ui.form.on("Filing Working Note", {
+// frappe.ui.form.on("Tax Payments Entry", {
 // 	refresh(frm) {
 
 // 	},

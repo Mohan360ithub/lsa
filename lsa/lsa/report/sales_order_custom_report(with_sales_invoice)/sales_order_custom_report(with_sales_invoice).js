@@ -87,8 +87,16 @@ frappe.query_reports["Sales Order Custom Report(With Sales Invoice)"] = {
                 return options.filter(option => option.toLowerCase().includes(txt.toLowerCase()));
             }
         },
+		{
+			fieldname: "so_creation_range",
+			label: __("Sales Order Creation"),
+			fieldtype: "Date Range",
+			// reqd: true,
+			// default: "2025-03-31",
+		},
 	]
 };
+
 
 
 

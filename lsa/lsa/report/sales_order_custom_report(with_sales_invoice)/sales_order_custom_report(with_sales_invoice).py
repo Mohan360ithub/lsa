@@ -17,7 +17,7 @@ def execute(filters=None):
         {"label": "Mobile No.", "fieldname": "mobile number", "fieldtype": "Data", "width": 110},
         {"label": "Shared with Client", "fieldname": "shared_with_client", "fieldtype": "Data", "width": 50},
 
-        # {"label": "Total Amount", "fieldname": "rounded_total", "fieldtype": "Currency", "width": 100},
+        {"label": "Total Amount", "fieldname": "rounded_total", "fieldtype": "Currency", "width": 100},
         # {"label": "Advance Paid", "fieldname": "advance_paid", "fieldtype": "Currency", "width": 100},
 
         {"label": "SO Balance Amount", "fieldname": "custom_so_balance_amount", "fieldtype": "Currency", "width": 100},
@@ -32,6 +32,7 @@ def execute(filters=None):
 
         {"label": "FollowUp Count", "fieldname": "followup_count", "fieldtype": "Int", "width": 30},
         {"label": "FollowUp", "fieldname": "followup_button", "fieldtype": "HTML", "width": 30},
+        {"label": "SO Created On", "fieldname": "transaction_date", "fieldtype": "Date", "width": 110},
         {"label": "SO From Date", "fieldname": "custom_so_from_date", "fieldtype": "Date", "width": 110},
         {"label": "SO To Date", "fieldname": "custom_so_to_date", "fieldtype": "Date", "width": 110},
         # {"label": "Status SI", "fieldname": "custom_payment_status_si", "fieldtype": "Data", "width": 100},
@@ -168,6 +169,10 @@ def get_data(filters):
         if filters.get("followup_range"):
             followup_range=filters.get("followup_range")
             followup_range = [datetime.strptime(date_str, '%Y-%m-%d').date() for date_str in followup_range]
+        if filters.get("so_creation_range"):
+            creation_from_date, creation_to_date = filters.get("so_creation_range")  
+            additional_filters["transaction_date"] = ["between", [creation_from_date, creation_to_date]]
+        
 
 
     # customer_filter={}
@@ -477,6 +482,8 @@ def get_latest_sales_order_ids():
     sales_order_ids = [row['document_id'] for row in result]
     
     return sales_order_ids
+
+
 
 
 

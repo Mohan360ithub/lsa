@@ -15,7 +15,7 @@ from email import encoders
 def whatsapp_so_template(docname,transaction_date,valid_till,new_mobile):
     #new_mobile="9098543046"
 
-    whatsapp_demo = frappe.get_all('WhatsApp Instance',filters={'module':'Accounts','connection_status':1,'active':1})
+    whatsapp_demo = frappe.get_all('WhatsApp Instance',filters={'module':'Operations','connection_status':1,'active':1})
     if whatsapp_demo:
         sales_invoice_whatsapp_log = frappe.new_doc('WhatsApp Message Log')
         whatsapp_items = []

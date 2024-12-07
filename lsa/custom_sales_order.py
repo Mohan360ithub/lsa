@@ -93,7 +93,7 @@ def whatsapp_button(user_email=None,so_id=None):
 
         # Extract roles from the result
         roles = [role.get('role') for role in user_roles]
-        doc_perm_roles = ["LSA Accounts Manager","LSA Account Executive"]
+        doc_perm_roles = ["LSA Accounts Manager","LSA Account Executive","Lsa Front Desk CRM Executive(A,B)"]
         doc_wa_perm_roles=["GST Front Desk Team","Lsa Front Desk CRM Executive(A,B)"]
 
         for role in roles:
