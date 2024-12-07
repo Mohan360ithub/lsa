@@ -684,22 +684,45 @@ def generate_random_string(length=12):
 
 
 
-def get_file_mime_size(file_content):
-    # Decode the base64 string to binary data
-    file_data = base64.b64decode(file_content)
+# def get_file_mime_size(file_content):
+#     # Decode the base64 string to binary data
+#     file_data = base64.b64decode(file_content)
     
-    # Get MIME type using python-magic
+#     # Get MIME type using python-magic
+#     mime = magic.Magic(mime=True)
+#     mime_type = mime.from_buffer(file_data)
+
+#     # Get file size
+#     file_size = len(file_data)
+
+#     file_sepcs={}
+#     file_sepcs["file_size"]=file_size
+#     file_sepcs["mime_type"]=mime_type
+
+#     return file_sepcs
+def get_file_mime_size(file_content):
+    # Use python-magic to detect MIME type directly from the binary data
     mime = magic.Magic(mime=True)
-    mime_type = mime.from_buffer(file_data)
+    mime_type = mime.from_buffer(file_content)  # Directly use the binary content
 
     # Get file size
-    file_size = len(file_data)
+    size_in_bytes = len(file_content)
+    file_size = human_readable_file_size(size_in_bytes)
 
-    file_sepcs={}
-    file_sepcs["file_size"]=file_size
-    file_sepcs["mime_type"]=mime_type
 
-    return file_sepcs
+    return {
+        "file_size": file_size,
+        "mime_type": mime_type
+    }
+
+
+def human_readable_file_size(size_in_bytes):
+        if size_in_bytes < 1024:
+            return f"{size_in_bytes} bytes"
+        elif size_in_bytes < 1024**2:
+            return f"{size_in_bytes / 1024:.1f} kB"
+        else:
+            return f"{size_in_bytes / 1024**2:.1f} MB"
 
 # def get_file_mime_size(file_content):
 #     file_data = base64.b64decode(file_content)
@@ -1027,5 +1050,6 @@ def modify_s3_file_path_and_name( old_key, new_key):
 #     file_sepcs["mime_type"]=mime_type
 
     # return file_sepcs
+
 
 
