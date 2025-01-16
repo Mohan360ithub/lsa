@@ -22,7 +22,7 @@
   "followup_type",
   "client_person",
   "next_followup_date",
-  "dummy_field",
+  "calendar_field",
   "send_mail",
   "send_whatapp",
   "section_break_nals",
@@ -165,12 +165,6 @@
    "label": "Mobile Number"
   },
   {
-   "fieldname": "dummy_field",
-   "fieldtype": "Small Text",
-   "hidden": 1,
-   "label": "Dummy Field"
-  },
-  {
    "fetch_from": "customer_id.custom_primary_email",
    "fetch_if_empty": 1,
    "fieldname": "email_id",
@@ -197,12 +191,19 @@
    "fieldname": "customer_disabled",
    "fieldtype": "Check",
    "label": "Customer Disabled"
+  },
+  {
+   "fieldname": "calendar_field",
+   "fieldtype": "Small Text",
+   "hidden": 1,
+   "label": "Calendar Field",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_calendar_and_gantt": 1,
  "links": [],
- "modified": "2024-09-26 11:41:54.630722",
+ "modified": "2024-12-27 11:04:23.295501",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "Customer Followup",

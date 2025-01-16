@@ -534,7 +534,7 @@ def execute(filters=None):
             FROM `tabIT Assessee Filing Data`
             WHERE it_assessee_file IN (
                 SELECT name FROM `tabIT Assessee File` WHERE executive_name = %s
-            ) AND filing_status = 'DOCS SHARED WITH CLIENT' AND ay = %s AND it_enabled = 1
+            ) AND filing_status = 'FILED' AND ay = %s AND it_enabled = 1
         """
         filed_summery_shared_count_result = frappe.db.sql(filed_summery_shared_query, [executive, additional_filters["ay"]], as_dict=True)
         filed_summery_shared_count = filed_summery_shared_count_result[0].get("count", 0)
@@ -544,7 +544,7 @@ def execute(filters=None):
             FROM `tabIT Assessee Filing Data`
             WHERE it_assessee_file IN (
                 SELECT name FROM `tabIT Assessee File` WHERE executive_name = %s
-            ) AND filing_status != 'DOCS SHARED WITH CLIENT' AND ay = %s AND it_enabled = 1
+            ) AND filing_status != 'FILED' AND ay = %s AND it_enabled = 1
         """
         not_doc_shared_with_client_result = frappe.db.sql(not_doc_shared_with_client_query, [executive, additional_filters["ay"]], as_dict=True)
         not_doc_shared_with_client_count = not_doc_shared_with_client_result[0].get("count", 0)
@@ -603,8 +603,8 @@ def execute(filters=None):
                     <tr>
                         <th>Executive</th>
                         <th>Total Count</th>
-                        <th>Filed Summary Shared</th>
-                        <th>Not Doc Shared With Client</th>
+                        <th>Filed Summary</th>
+                        <th>Not Filed Summary</th>
                         <th>Percentage Achieved</th>
                     </tr>
                 </thead>

@@ -146,6 +146,13 @@ def storing_the_instance_data(name):
 
 #         return {"message": "Data stored successfully."}
 
+
 #     except requests.RequestException as e:
 #         frappe.log_error(f"Error in storing data: {e}")
 #         return {"message": "Failed to store data."}
+
+
+
+######################### Whatsapp credits card in frontdesk ############
+
+

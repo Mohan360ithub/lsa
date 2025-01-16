@@ -317,6 +317,7 @@
   {
    "fieldname": "current_recurring_fees",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Current Recurring Fees",
    "non_negative": 1,
    "permlevel": 2,
@@ -377,6 +378,7 @@
    "default": "Y",
    "fieldname": "frequency",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Frequency",
    "options": "M\nQ\nH\nY",
    "permlevel": 2,
@@ -386,6 +388,7 @@
   {
    "fieldname": "annual_fees",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Annual Fees",
    "non_negative": 1,
    "permlevel": 2,
@@ -517,7 +520,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-11-07 10:23:33.287944",
+ "modified": "2025-01-07 15:53:59.783653",
  "modified_by": "Administrator",
  "module": "Lsa",
  "name": "IT Assessee File",

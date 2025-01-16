@@ -9,6 +9,7 @@ from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
 from lsa.custom_sales_order import so_payment_status
+from copy import deepcopy
 
 
 @frappe.whitelist()
@@ -49,57 +50,268 @@ def sync_turnover_gst(customer_id):
     
     return gst_filing_list[:5]
 
-def sync_services_customer(customer_id=None):
+# def sync_services_customer(customer_id=None):
 
+#     master_service_fields = {
+#         "Gstfile": ["gst_file", ["name", "company_name", "gst_number", "gst_user_name", "gst_password","current_recurring_fees","frequency","annual_fees","executive_name","last_filed"]],
+#         "IT Assessee File": ["it_assessee_file", ["name", "assessee_name", "pan", "pan", "it_password","current_recurring_fees","frequency","annual_fees","executive_name","last_filed"]],
+#         "MCA ROC File": ["mca_roc_file", ["name", "company_name", "cin", "trace_user_id", "trace_password","current_recurring_fees","frequency","annual_fees","executive_name","last_filed"]],
+#         "Professional Tax File": ["professional_tax_file", ["name", "assessee_name", "registration_no", "user_id", "trace_password","current_recurring_fees","frequency","annual_fees","executive_name","last_filed"]],
+#         "TDS File": ["tds_file", ["name", "deductor_name", "tan_no", "trace_user_id", "trace_password","current_recurring_fees","frequency","annual_fees","executive_name","last_filed"]],
+#         "ESI File": ["esi_file", ["name", "assessee_name", "registartion_no", "trace_user_id", "trace_password","current_recurring_fees","frequency","annual_fees","executive_name","last_filed"]],
+#         "Provident Fund File": ["provident_fund_file", ["name", "assessee_name", "registartion_no", "trace_user_id", "trace_password","current_recurring_fees","frequency","annual_fees","executive_name","last_filed"]],
+#     }
+
+#     services_values=[]
+#     chargeable_services=frappe.get_all("Customer Chargeable Doctypes")
+#     for chargeable_service in chargeable_services:
+#         # print(chargeable_service)
+#         chargeable_service_values=frappe.get_all(chargeable_service.name,
+#                                            filters={"customer_id":customer_id,
+#                                                    "enabled":1},
+#                                             fields=master_service_fields[chargeable_service.name][1]
+#                                             )
+#         # print(chargeable_service_values)
+#         for chargeable_service_value in chargeable_service_values:
+#             chargeable_service_value=[chargeable_service_value[i] for i in master_service_fields[chargeable_service.name][1] ]
+#             # print(chargeable_service_value)
+#             service_slug="-".join([i.lower() for i in ((chargeable_service.name).split(" "))])
+#             chargeable_service_value.append(service_slug)
+#             chargeable_service_value.append(chargeable_service.name)
+#             services_values.append(chargeable_service_value)
+#     # print(services_values)
+            
+#     Client_Notices=["client-notices",["name","assessee_name", "notices_type","registration_number", "financial_year","executive_name"]]
+#     chargeable_service_values_n=frappe.get_all("Client Notices",
+#                                            filters={"cid":customer_id,
+#                                                    "status":"Open",
+#                                                    },
+#                                             fields=Client_Notices[1],
+#                                             )
+#     for chargeable_service_value_n in chargeable_service_values_n:
+#             chargeable_service_value_n=[chargeable_service_value_n[i] for i in Client_Notices[1] ]
+#             # print(chargeable_service_value)
+#             chargeable_service_value_n.insert(5, 1.00)
+#             chargeable_service_value_n.insert(5, "Y")
+#             chargeable_service_value_n.insert(5, 1.00)
+#             chargeable_service_value_n.append(None)
+            
+            
+#             service_slug=Client_Notices[0]
+#             chargeable_service_value_n.append(service_slug)
+#             chargeable_service_value_n.append("Client Notices")
+#             services_values.append(chargeable_service_value_n)
+#     return services_values
+
+
+def sync_services_customer(customer_id=None):
     master_service_fields = {
-        "Gstfile": ["gst_file", ["name", "company_name", "gst_number", "gst_user_name", "gst_password","current_recurring_fees","frequency","annual_fees","executive_name","last_filed"]],
-        "IT Assessee File": ["it_assessee_file", ["name", "assessee_name", "pan", "pan", "it_password","current_recurring_fees","frequency","annual_fees","executive_name","last_filed"]],
-        "MCA ROC File": ["mca_roc_file", ["name", "company_name", "cin", "trace_user_id", "trace_password","current_recurring_fees","frequency","annual_fees","executive_name","last_filed"]],
-        "Professional Tax File": ["professional_tax_file", ["name", "assessee_name", "registration_no", "user_id", "trace_password","current_recurring_fees","frequency","annual_fees","executive_name","last_filed"]],
-        "TDS File": ["tds_file", ["name", "deductor_name", "tan_no", "trace_user_id", "trace_password","current_recurring_fees","frequency","annual_fees","executive_name","last_filed"]],
-        "ESI File": ["esi_file", ["name", "assessee_name", "registartion_no", "trace_user_id", "trace_password","current_recurring_fees","frequency","annual_fees","executive_name","last_filed"]],
-        "Provident Fund File": ["provident_fund_file", ["name", "assessee_name", "registartion_no", "trace_user_id", "trace_password","current_recurring_fees","frequency","annual_fees","executive_name","last_filed"]],
+        "Gstfile": [
+            "gst_file",
+            [
+                "name",
+                "company_name",
+                "gst_number",
+                "gst_user_name",
+                "gst_password",
+                "executive_name",
+                "last_filed",
+            ],
+        ],
+        "IT Assessee File": [
+            "it_assessee_file",
+            [
+                "name",
+                "assessee_name",
+                "pan",
+                "pan",
+                "it_password",
+                "executive_name",
+                "last_filed",
+            ],
+        ],
+        "MCA ROC File": [
+            "mca_roc_file",
+            [
+                "name",
+                "company_name",
+                "cin",
+                "trace_user_id",
+                "trace_password",
+                "executive_name",
+                "last_filed",
+            ],
+        ],
+        "Professional Tax File": [
+            "professional_tax_file",
+            [
+                "name",
+                "assessee_name",
+                "registration_no",
+                "user_id",
+                "trace_password",
+                "executive_name",
+                "last_filed",
+            ],
+        ],
+        "TDS File": [
+            "tds_file",
+            [
+                "name",
+                "deductor_name",
+                "tan_no",
+                "trace_user_id",
+                "trace_password",
+                "executive_name",
+                "last_filed",
+            ],
+        ],
+        "ESI File": [
+            "esi_file",
+            [
+                "name",
+                "assessee_name",
+                "registartion_no",
+                "trace_user_id",
+                "trace_password",
+                "executive_name",
+                "last_filed",
+            ],
+        ],
+        "Provident Fund File": [
+            "provident_fund_file",
+            [
+                "name",
+                "assessee_name",
+                "registartion_no",
+                "trace_user_id",
+                "trace_password",
+                "executive_name",
+                "last_filed",
+            ],
+        ],
     }
 
-    services_values=[]
-    chargeable_services=frappe.get_all("Customer Chargeable Doctypes")
+    services_values = []
+    chargeable_services = frappe.get_all("Customer Chargeable Doctypes")
+
+    # Define frequency factors for annual fee calculation
+    frequency_factors = {
+        "Y": 1,    # Yearly
+        "H": 2,    # Half-yearly
+        "Q": 4,    # Quarterly
+        "M": 12,   # Monthly
+        # Add more if necessary
+    }
+
     for chargeable_service in chargeable_services:
-        # print(chargeable_service)
-        chargeable_service_values=frappe.get_all(chargeable_service.name,
-                                           filters={"customer_id":customer_id,
-                                                   "enabled":1},
-                                            fields=master_service_fields[chargeable_service.name][1]
-                                            )
-        # print(chargeable_service_values)
-        for chargeable_service_value in chargeable_service_values:
-            chargeable_service_value=[chargeable_service_value[i] for i in master_service_fields[chargeable_service.name][1] ]
-            # print(chargeable_service_value)
-            service_slug="-".join([i.lower() for i in ((chargeable_service.name).split(" "))])
-            chargeable_service_value.append(service_slug)
-            chargeable_service_value.append(chargeable_service.name)
-            services_values.append(chargeable_service_value)
-    # print(services_values)
+        service_slug = master_service_fields.get(chargeable_service.name, [None, None])[0]
+        doctype_name = chargeable_service.name
+        fields = master_service_fields.get(chargeable_service.name, [None, None])[1]
+
+        if not doctype_name or not fields:
+            frappe.log_error(
+                f"Doctype mapping not found for service: {chargeable_service.name}",
+                "sync_services_customer Error",
+            )
+            continue  # Skip if mapping is not found
+        # print(doctype_name)
+        # Fetch main service records
+        main_service_records = frappe.get_all(
+            doctype_name,
+            filters={"customer_id": customer_id, "enabled": 1},
+            fields=fields,
+        )
+
+        for record in main_service_records:
+            # Extract main service fields in order
+            main_service_data = [record.get(field) for field in fields]
+
+            # Append slug and service name
+            service_slug = "-".join(doctype_name.lower().split(" "))
+            main_service_data.append(service_slug)
+            main_service_data.append(chargeable_service.name)
+            # services_values.append(main_service_data)
+
+            # Fetch and process addon services
+            addon_services = frappe.get_all(
+                "Service Master Addon",
+                filters={"parent": record.name, "status": "Active"},
+                fields=["addon_service_name", "current_charges", "frequency"],
+            )
+
+            for addon in addon_services:
+                service_addon_data = deepcopy(main_service_data)
+                addon_type = addon.get("addon_service_name")
+                fees = addon.get("current_charges", 0)
+                frequency = addon.get("frequency", "Y").upper()
+                frequency_factor = frequency_factors.get(frequency, 1)
+                annual_fee = fees * frequency_factor
+
+                
+                service_addon_data.append(fees)
+                service_addon_data.append(frequency)
+                service_addon_data.append(annual_fee)
+                service_addon_data.append(addon_type)
+
+                # Prepare addon service data
+                # addon_service_data = [
+                #     record.get("name"),            # Parent service name
+                #     addon_type,                    # Addon type
+                #     fees,                          # Fees
+                #     frequency,                     # Frequency
+                #     annual_fee,                    # Calculated Annual Fee
+                #     record.get("executive_name"),  # Executive Name
+                # ]
+
+                # Append slug and service name
+                # addon_service_slug = "-".join(addon_type.lower().split(" "))
+                # addon_service_data.append(addon_service_slug)
+                # addon_service_data.append(f"Addon: {addon_type}")
+                # services_values.append(addon_service_data)
+                services_values.append(service_addon_data)
+                
+                
+
+    # Process Client Notices as before
+    Client_Notices = [
+        "client-notices",
+        [
+            "name",
+            "assessee_name",
+            "notices_type",
+            "registration_number",
+            "financial_year",
+            "executive_name",
             
-    Client_Notices=["client-notices",["name","assessee_name", "notices_type","registration_number", "financial_year","executive_name"]]
-    chargeable_service_values_n=frappe.get_all("Client Notices",
-                                           filters={"cid":customer_id,
-                                                   "status":"Open",
-                                                   },
-                                            fields=Client_Notices[1],
-                                            )
-    for chargeable_service_value_n in chargeable_service_values_n:
-            chargeable_service_value_n=[chargeable_service_value_n[i] for i in Client_Notices[1] ]
-            # print(chargeable_service_value)
-            chargeable_service_value_n.insert(5, 1.00)
-            chargeable_service_value_n.insert(5, "Y")
-            chargeable_service_value_n.insert(5, 1.00)
-            chargeable_service_value_n.append(None)
             
-            
-            service_slug=Client_Notices[0]
-            chargeable_service_value_n.append(service_slug)
-            chargeable_service_value_n.append("Client Notices")
-            services_values.append(chargeable_service_value_n)
+        ],
+    ]
+    chargeable_service_values_n = frappe.get_all(
+        "Client Notices",
+        filters={"cid": customer_id, "status": "Open"},
+        fields=Client_Notices[1],
+    )
+    for notice in chargeable_service_values_n:
+        notice_data = [notice.get(field) for field in Client_Notices[1]]
+
+        service_slug = Client_Notices[0]
+        notice_data.append(None)
+        notice_data.append(service_slug)
+        notice_data.append("Client Notices")
+        services_values.append(notice_data)
+
+        # Insert additional fields as per original logic
+        # notice_data.insert(5, 1.00)  # Example value, adjust as needed
+        # notice_data.insert(5, "Y")    # Example value, adjust as needed
+        # notice_data.insert(5, 1.00)  # Example value, adjust as needed
+        notice_data.append(1.00)  # Example value, adjust as needed
+        notice_data.append("Y")    # Example value, adjust as needed
+        notice_data.append(1.00)  # Example value, adjust as needed
+        notice_data.append(None)
+
+
+    
     return services_values
 
 
@@ -107,43 +319,256 @@ def sync_services_customer(customer_id=None):
 
 
 
-def sync_disabled_services_customer(customer_id=None):
+# def sync_disabled_services_customer(customer_id=None):
 
-    master_service_fields = {
-        "Gstfile": ["gst_file", ["name", "company_name", "gst_number", "gst_user_name", "gst_password","current_recurring_fees","frequency","annual_fees","executive_name","last_filed"]],
-        "IT Assessee File": ["it_assessee_file", ["name", "assessee_name", "pan", "pan", "it_password","current_recurring_fees","frequency","annual_fees","executive_name","last_filed"]],
-        "MCA ROC File": ["mca_roc_file", ["name", "company_name", "cin", "trace_user_id", "trace_password","current_recurring_fees","frequency","annual_fees","executive_name","last_filed"]],
-        "Professional Tax File": ["professional_tax_file", ["name", "assessee_name", "registration_no", "user_id", "trace_password","current_recurring_fees","frequency","annual_fees","executive_name","last_filed"]],
-        "TDS File": ["tds_file", ["name", "deductor_name", "tan_no", "trace_user_id", "trace_password","current_recurring_fees","frequency","annual_fees","executive_name","last_filed"]],
-        "ESI File": ["esi_file", ["name", "assessee_name", "registartion_no", "trace_user_id", "trace_password","current_recurring_fees","frequency","annual_fees","executive_name","last_filed"]],
-        "Provident Fund File": ["provident_fund_file", ["name", "assessee_name", "registartion_no", "trace_user_id", "trace_password","current_recurring_fees","frequency","annual_fees","executive_name","last_filed"]],
-    }
+#     master_service_fields = {
+#         "Gstfile": ["gst_file", ["name", "company_name", "gst_number", "gst_user_name", "gst_password","current_recurring_fees","frequency","annual_fees","executive_name","last_filed"]],
+#         "IT Assessee File": ["it_assessee_file", ["name", "assessee_name", "pan", "pan", "it_password","current_recurring_fees","frequency","annual_fees","executive_name","last_filed"]],
+#         "MCA ROC File": ["mca_roc_file", ["name", "company_name", "cin", "trace_user_id", "trace_password","current_recurring_fees","frequency","annual_fees","executive_name","last_filed"]],
+#         "Professional Tax File": ["professional_tax_file", ["name", "assessee_name", "registration_no", "user_id", "trace_password","current_recurring_fees","frequency","annual_fees","executive_name","last_filed"]],
+#         "TDS File": ["tds_file", ["name", "deductor_name", "tan_no", "trace_user_id", "trace_password","current_recurring_fees","frequency","annual_fees","executive_name","last_filed"]],
+#         "ESI File": ["esi_file", ["name", "assessee_name", "registartion_no", "trace_user_id", "trace_password","current_recurring_fees","frequency","annual_fees","executive_name","last_filed"]],
+#         "Provident Fund File": ["provident_fund_file", ["name", "assessee_name", "registartion_no", "trace_user_id", "trace_password","current_recurring_fees","frequency","annual_fees","executive_name","last_filed"]],
+#     }
 
-    services_values=[]
-    chargeable_services=frappe.get_all("Customer Chargeable Doctypes")
-    for chargeable_service in chargeable_services:
-        # print(chargeable_service)
-        chargeable_service_values=frappe.get_all(chargeable_service.name,
-                                           filters={"customer_id":customer_id,
-                                                   "enabled":0},
-                                            fields=master_service_fields[chargeable_service.name][1]
-                                            )
-        # print(chargeable_service_values)
-        for chargeable_service_value in chargeable_service_values:
-            chargeable_service_value=[chargeable_service_value[i] for i in master_service_fields[chargeable_service.name][1] ]
-            # print(chargeable_service_value)
-            service_slug="-".join([i.lower() for i in ((chargeable_service.name).split(" "))])
-            chargeable_service_value.append(service_slug)
-            chargeable_service_value.append(chargeable_service.name)
-            services_values.append(chargeable_service_value)
-    # print(services_values)
+#     services_values=[]
+#     chargeable_services=frappe.get_all("Customer Chargeable Doctypes")
+#     for chargeable_service in chargeable_services:
+#         # print(chargeable_service)
+#         chargeable_service_values=frappe.get_all(chargeable_service.name,
+#                                            filters={"customer_id":customer_id,
+#                                                    "enabled":0},
+#                                             fields=master_service_fields[chargeable_service.name][1]
+#                                             )
+#         # print(chargeable_service_values)
+#         for chargeable_service_value in chargeable_service_values:
+#             chargeable_service_value=[chargeable_service_value[i] for i in master_service_fields[chargeable_service.name][1] ]
+#             # print(chargeable_service_value)
+#             service_slug="-".join([i.lower() for i in ((chargeable_service.name).split(" "))])
+#             chargeable_service_value.append(service_slug)
+#             chargeable_service_value.append(chargeable_service.name)
+#             services_values.append(chargeable_service_value)
+#     # print(services_values)
             
     
-    return services_values
+#     return services_values
 
 
 ##################Srikanth's Code End#########################################################################################
 
+
+
+def sync_disabled_services_customer(customer_id=None):
+    master_service_fields = {
+        "Gstfile": [
+            "gst_file",
+            [
+                "name",
+                "company_name",
+                "gst_number",
+                "gst_user_name",
+                "gst_password",
+                "executive_name",
+                "last_filed",
+            ],
+        ],
+        "IT Assessee File": [
+            "it_assessee_file",
+            [
+                "name",
+                "assessee_name",
+                "pan",
+                "pan",
+                "it_password",
+                "executive_name",
+                "last_filed",
+            ],
+        ],
+        "MCA ROC File": [
+            "mca_roc_file",
+            [
+                "name",
+                "company_name",
+                "cin",
+                "trace_user_id",
+                "trace_password",
+                "executive_name",
+                "last_filed",
+            ],
+        ],
+        "Professional Tax File": [
+            "professional_tax_file",
+            [
+                "name",
+                "assessee_name",
+                "registration_no",
+                "user_id",
+                "trace_password",
+                "executive_name",
+                "last_filed",
+            ],
+        ],
+        "TDS File": [
+            "tds_file",
+            [
+                "name",
+                "deductor_name",
+                "tan_no",
+                "trace_user_id",
+                "trace_password",
+                "executive_name",
+                "last_filed",
+            ],
+        ],
+        "ESI File": [
+            "esi_file",
+            [
+                "name",
+                "assessee_name",
+                "registartion_no",
+                "trace_user_id",
+                "trace_password",
+                "executive_name",
+                "last_filed",
+            ],
+        ],
+        "Provident Fund File": [
+            "provident_fund_file",
+            [
+                "name",
+                "assessee_name",
+                "registartion_no",
+                "trace_user_id",
+                "trace_password",
+                "executive_name",
+                "last_filed",
+            ],
+        ],
+    }
+
+    services_values = []
+    chargeable_services = frappe.get_all("Customer Chargeable Doctypes")
+
+    # Define frequency factors for annual fee calculation
+    frequency_factors = {
+        "Y": 1,    # Yearly
+        "H": 2,    # Half-yearly
+        "Q": 4,    # Quarterly
+        "M": 12,   # Monthly
+        # Add more if necessary
+    }
+
+    for chargeable_service in chargeable_services:
+        service_slug = master_service_fields.get(chargeable_service.name, [None, None])[0]
+        doctype_name = chargeable_service.name
+        fields = master_service_fields.get(chargeable_service.name, [None, None])[1]
+
+        if not doctype_name or not fields:
+            frappe.log_error(
+                f"Doctype mapping not found for service: {chargeable_service.name}",
+                "sync_services_customer Error",
+            )
+            continue  # Skip if mapping is not found
+        # print(doctype_name)
+        # Fetch main service records
+        main_service_records = frappe.get_all(
+            doctype_name,
+            filters={"customer_id": customer_id, "enabled": 0},
+            fields=fields,
+        )
+
+        for record in main_service_records:
+            # Extract main service fields in order
+            main_service_data = [record.get(field) for field in fields]
+
+            # Append slug and service name
+            service_slug = "-".join(doctype_name.lower().split(" "))
+            main_service_data.append(service_slug)
+            main_service_data.append(chargeable_service.name)
+            # services_values.append(main_service_data)
+
+            # Fetch and process addon services
+            addon_services = frappe.get_all(
+                "Service Master Addon",
+                filters={"parent": record.name, "status": "Active"},
+                fields=["addon_service_name", "current_charges", "frequency"],
+            )
+
+            for addon in addon_services:
+                service_addon_data = deepcopy(main_service_data)
+                addon_type = addon.get("addon_service_name")
+                fees = addon.get("current_charges", 0)
+                frequency = addon.get("frequency", "Y").upper()
+                frequency_factor = frequency_factors.get(frequency, 1)
+                annual_fee = fees * frequency_factor
+
+                
+                service_addon_data.append(fees)
+                service_addon_data.append(frequency)
+                service_addon_data.append(annual_fee)
+                service_addon_data.append(addon_type)
+
+                # Prepare addon service data
+                # addon_service_data = [
+                #     record.get("name"),            # Parent service name
+                #     addon_type,                    # Addon type
+                #     fees,                          # Fees
+                #     frequency,                     # Frequency
+                #     annual_fee,                    # Calculated Annual Fee
+                #     record.get("executive_name"),  # Executive Name
+                # ]
+
+                # Append slug and service name
+                # addon_service_slug = "-".join(addon_type.lower().split(" "))
+                # addon_service_data.append(addon_service_slug)
+                # addon_service_data.append(f"Addon: {addon_type}")
+                # services_values.append(addon_service_data)
+                services_values.append(service_addon_data)
+                
+                
+
+    # # Process Client Notices as before
+    # Client_Notices = [
+    #     "client-notices",
+    #     [
+    #         "name",
+    #         "assessee_name",
+    #         "notices_type",
+    #         "registration_number",
+    #         "financial_year",
+    #         "executive_name",
+            
+            
+    #     ],
+    # ]
+    # chargeable_service_values_n = frappe.get_all(
+    #     "Client Notices",
+    #     filters={"cid": customer_id, "status": "Open"},
+    #     fields=Client_Notices[1],
+    # )
+    # for notice in chargeable_service_values_n:
+    #     notice_data = [notice.get(field) for field in Client_Notices[1]]
+
+    #     service_slug = Client_Notices[0]
+    #     notice_data.append(None)
+    #     notice_data.append(service_slug)
+    #     notice_data.append("Client Notices")
+    #     services_values.append(notice_data)
+
+    #     # Insert additional fields as per original logic
+    #     # notice_data.insert(5, 1.00)  # Example value, adjust as needed
+    #     # notice_data.insert(5, "Y")    # Example value, adjust as needed
+    #     # notice_data.insert(5, 1.00)  # Example value, adjust as needed
+    #     notice_data.append(1.00)  # Example value, adjust as needed
+    #     notice_data.append("Y")    # Example value, adjust as needed
+    #     notice_data.append(1.00)  # Example value, adjust as needed
+    #     notice_data.append(None)
+
+    # for serv_addon in services_values:
+    #     print(len(serv_addon))
+    #     print(serv_addon)
+    
+    return services_values
 
 def sync_sales_orders_customer(customer_id):
     ############################Sales Order############################################################################
@@ -2166,3 +2591,4 @@ def update_gst_category():
 
     frappe.db.commit()
     return f'{updated_count} customers updated'
+

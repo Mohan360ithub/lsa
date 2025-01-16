@@ -53,6 +53,7 @@ class TeamTicket(Document):
                     f"An attendance regularization request for {self.regularization_date} already exists."
                 )
     ################################### Srikanth Code End #################################################################
+    
 
     def after_insert(self):
         user = frappe.session.user
@@ -74,6 +75,7 @@ class TeamTicket(Document):
             ticket_manager_list.add(i.user)
         ticket_manager_list = list(ticket_manager_list)
 
+        
         ticket_notification(self, ticket_executive_list, ticket_manager_list, sub_category_doc.sub_category)
 
 
@@ -169,5 +171,6 @@ def check_details_already_existing_date_or_not():
         frappe.log_error(frappe.get_traceback(), 'Error in check_details_already_existing_date_or_not')
         return {"error": str(e)}
 ################################### Srikanth Code End #################################################################
+
 
 

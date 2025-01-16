@@ -1,11 +1,11 @@
 # Copyright (c) 2024, Mohan and contributors
 # For license information, please see license.txt
 
-import frappe,json,datetime,calendar
-from datetime import timedelta,date
+import frappe,json,calendar
+from datetime import datetime,timedelta,date
 from lsa.custom_employee import get_employee_leave_data
-from datetime import datetime
-import datetime
+
+import datetime as dt
 
 def execute(filters=None):
     columns, data = [], []
@@ -57,8 +57,9 @@ def execute(filters=None):
         
     ]
      
-    data,absent_data = employee_data(filters)
-    html_card=str(absent_data)
+    data,leave_emp_map, leave_data_to_view,holidays_in_month = employee_data(filters)
+    # html_card  = f"{holidays_in_month}"
+    # html_card  += " <br>   ".join(leave_data_to_view)
     html_card = """
     <div style="display: flex; justify-content: flex-end; ">
         <button id="attendance_report_btn" class="btn btn-primary">
@@ -113,12 +114,12 @@ def employee_data(filters):
     # print(first_date, last_date)
     mon_num=first_date.month
     year_num=first_date.year
-    from_leave_date = datetime.datetime(year_num, 1, 1)
+    from_leave_date = datetime(year_num, 1, 1)
     absent_list = frappe.get_all("Attendance",
                                  filters={"status": "Absent","docstatus":1, "attendance_date": ("between", [first_date, last_date])},
                                  fields=["name", "employee_name","employee"])
 
-                        
+    holidays_in_month  = get_holidays_in_month(first_date, last_date)
     # print("absent_listttttttttttttttttttt",absent_list)
     ab_emp = {}
     if absent_list:
@@ -177,21 +178,25 @@ def employee_data(filters):
                                                 "from_date": ("<=", last_date),
                                                 "to_date": (">=", first_date)
                                             },
-                                            fields=["name","leave_type", "employee", "total_leave_days", "from_date", "to_date","half_day"])
+                                            fields=["name","leave_type", "employee", "total_leave_days", "from_date", "to_date","half_day","half_day_date"])
     
    
     leave_emp_map = {}
     emp_leave_summary={}
+    leave_data_to_view = []
     for leave in leave_application_list:
         if leave.leave_type =="Leave Without Pay":
+            
+            total_leave_days_for_current_month = get_leave_days_of_current_month(leave,first_date,last_date,holidays_in_month)
+            leave_data_to_view.append(str(leave)+str(total_leave_days_for_current_month)+"\n")
             if leave.employee not in leave_emp_map:
                 # leave_for_month=leave_days_for_current_month(leave,first_date,last_date)
                 # leave_emp_map[leave.employee] = leave_for_month
-                leave_emp_map[leave.employee] = leave.total_leave_days
+                leave_emp_map[leave.employee] = total_leave_days_for_current_month
             else:
                 # leave_for_month=leave_days_for_current_month(leave,first_date,last_date)
                 # leave_emp_map[leave.employee] += leave_for_month
-                leave_emp_map[leave.employee] += leave.total_leave_days
+                leave_emp_map[leave.employee] += total_leave_days_for_current_month
 
         leave_date_range=[" to ".join(set([str(leave.from_date.strftime("%d-%m-%Y")),str(leave.to_date.strftime("%d-%m-%Y"))]))]
         if leave.employee not in emp_leave_summary:
@@ -344,8 +349,8 @@ def employee_data(filters):
         data_row["net_payable_salary"] = net_payable_salary
         # print("data_row_complete",data_row)
         data.append(data_row)
-
-    return data,absent_data
+    holidays_in_month = "\n".join([f"{str(i)}<br>" for i in holidays_in_month])
+    return data,leave_emp_map, leave_data_to_view,holidays_in_month
 
 
 def get_first_and_last_date_of_month(fy, mon):
@@ -380,11 +385,112 @@ def get_first_and_last_date_of_month(fy, mon):
 
 
 
+def get_holidays_in_month(start_of_month, end_of_month):
+    """
+    Return a set of holiday date objects from the relevant Holiday List(s)
+    whose from_date <= start_of_month and to_date >= end_of_month.
+
+    :param start_of_month: A datetime.date object for the 1st day of the month
+    :param end_of_month:   A datetime.date object for the last day of the month
+    :return: A set of Python date objects (the holiday dates in that month range).
+    """
+    # Step 1: Find matching Holiday List(s)
+    # We'll filter on from_date <= start_of_month AND to_date >= end_of_month
+    holiday_list_records = frappe.get_all(
+        "Holiday List",
+        filters={
+            "from_date": ("<=", start_of_month),
+            "to_date": (">=", end_of_month),
+        },
+        fields=["name", "from_date", "to_date"]
+    )
+
+    # If no matching holiday list, return an empty set
+    if not holiday_list_records:
+        return set()
+
+    # Step 2: Collect holidays from each matching Holiday List
+    holiday_dates = set()
+
+    for hl_rec in holiday_list_records:
+        holiday_list_doc = frappe.get_doc("Holiday List", hl_rec["name"])
+
+        # Step 3: Loop over child holiday rows in the doc
+        for h in holiday_list_doc.holidays:
+            # If it's a string like "2024-01-07", parse it, else use the date
+            holiday_date = h.holiday_date
+            if isinstance(holiday_date, str):
+                holiday_date = datetime.strptime(holiday_date, "%Y-%m-%d").date()
+
+            # Include only if it's within [start_of_month..end_of_month]
+            if start_of_month <= holiday_date <= end_of_month:
+                holiday_dates.add(holiday_date)
+
+    return holiday_dates
 
 
 
+def get_leave_days_of_current_month(leave_application, first_date, last_date, holidays_in_month):
+    """
+    Calculate how many days from 'leave_application' fall within [first_date..last_date],
+    excluding any holidays in 'holidays_in_month'.
 
+    :param leave_application: dict with keys:
+        - "from_date" (str or date) in DD-MM-YYYY,
+        - "to_date"   (str or date) in DD-MM-YYYY,
+        - "half_day"  (bool),
+        - "half_day_date" (str or date) in DD-MM-YYYY.
+    :param first_date: A date object for the first day of the month.
+    :param last_date:  A date object for the last day of the month.
+    :param holidays_in_month: A set (or list) of date objects representing holidays in this month.
+    :return: float (the number of leave days in the current month, after excluding holidays).
+    """
+    # 1) Parse from_date, to_date, half_day_date from strings if needed
+    from_date = leave_application.get("from_date")  # e.g. "06-01-2025"
+    to_date = leave_application.get("to_date")      # e.g. "10-01-2025"
+    half_day_date = leave_application.get("half_day_date")  # e.g. "10-01-2025"
 
+    if isinstance(from_date, str):
+        from_date = datetime.strptime(from_date, "%d-%m-%Y").date()
+    if isinstance(to_date, str):
+        to_date = datetime.strptime(to_date, "%d-%m-%Y").date()
+
+    # 2) Determine overlap window
+    overlap_start = max(from_date, first_date)
+    overlap_end = min(to_date, last_date)
+
+    # If no overlap, zero days
+    if overlap_start > overlap_end:
+        return 0
+
+    # 3) Create a list (or set) of all dates in the overlap
+    overlap_length = (overlap_end - overlap_start).days + 1
+    overlap_dates = [
+        overlap_start + timedelta(days=i)
+        for i in range(overlap_length)
+    ]
+
+    # 4) Exclude holidays
+    #    'holidays_in_month' should be a set of date objects
+    working_overlap_dates = [
+        d for d in overlap_dates if d not in holidays_in_month
+    ]
+
+    leave_days_current_month = float(len(working_overlap_dates))
+
+    # 5) If half-day is indicated, only subtract 0.5 if the half-day date is within 'working_overlap_dates'
+    if leave_application.get("half_day") and leave_days_current_month > 0:
+        if half_day_date:
+            if isinstance(half_day_date, str):
+                half_day_date = datetime.strptime(half_day_date, "%d-%m-%Y").date()
+            if half_day_date in working_overlap_dates:
+                leave_days_current_month -= 0.5
+
+    # 6) Safety net
+    if leave_days_current_month < 0:
+        leave_days_current_month = 0
+
+    return leave_days_current_month
 
 
 
@@ -758,32 +864,33 @@ def get_first_and_last_date_of_month(fy, mon):
 # #     return leave_days_current_month
 
 
-# # def leave_days_for_current_month(leave_application, first_date, last_date):
-# #     from_date = leave_application.get("from_date")
-# #     to_date = leave_application.get("to_date")
+# def leave_days_for_current_month(leave_application, first_date, last_date):
+#     from_date = leave_application.get("from_date")
+#     to_date = leave_application.get("to_date")
     
-# #     # Ensure from_date and to_date are datetime objects
-# #     if isinstance(from_date, str):
-# #         from_date = datetime.strptime(from_date, '%Y-%m-%d')
-# #     if isinstance(to_date, str):
-# #         to_date = datetime.strptime(to_date, '%Y-%m-%d')
+#     # Ensure from_date and to_date are datetime objects
+#     if isinstance(from_date, str):
+#         from_date = datetime.strptime(from_date, '%Y-%m-%d')
+#     if isinstance(to_date, str):
+#         to_date = datetime.strptime(to_date, '%Y-%m-%d')
     
-# #     # Calculate the overlap period
-# #     overlap_start = max(from_date, first_date)
-# #     overlap_end = min(to_date, last_date)
+#     # Calculate the overlap period
+#     overlap_start = max(from_date, first_date)
+#     overlap_end = min(to_date, last_date)
     
-# #     if overlap_start > overlap_end:
-# #         leave_days_current_month = 0
-# #     else:
-# #         leave_days_current_month = (overlap_end - overlap_start).days + 1
+#     if overlap_start > overlap_end:
+#         leave_days_current_month = 0
+#     else:
+#         leave_days_current_month = (overlap_end - overlap_start).days + 1
     
-# #     if leave_application.get("half_day") and leave_days_current_month > 0:
-# #         leave_days_current_month -= 0.5
+#     if leave_application.get("half_day") and leave_days_current_month > 0:
+#         leave_days_current_month -= 0.5
 
-# #     if leave_days_current_month < 0:
-# #         leave_days_current_month = 0
+#     if leave_days_current_month < 0:
+#         leave_days_current_month = 0
     
-# #     return leave_days_current_month
+#     return leave_days_current_month
+
 
 
 

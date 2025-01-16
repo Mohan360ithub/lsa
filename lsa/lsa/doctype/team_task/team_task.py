@@ -3,9 +3,40 @@ from frappe.model.document import Document
 from frappe.utils import now_datetime
  
 class TeamTask(Document):
+    def after_insert(self):
+        if self.assigned_to:
+            # Add permissions for the new user
+            frappe.log_error( title=f"Assigned to shared {self.assigned_to}")
+            frappe.share.add("Team Ticket", self.name, self.assigned_to, read=1, write=0, share=0)
+            
+            
+    def before_save(self):
+        frappe.throw("Hooks working!!!")
+        # Check if assigned_to has been updated
+        if self.is_new():
+            return
+
+        previous_assigned_user = frappe.db.get_value("Team Ticket", self.name, "assigned_to")
+        if previous_assigned_user and previous_assigned_user != self.assigned_to:
+            frappe.log_error( title=f"Unassigned to shared {previous_assigned_user}")
+            # Remove permissions from the previous user
+            frappe.share.remove("Team Ticket", self.name, previous_assigned_user)
+            if  self.assigned_to:
+                frappe.share.add("Team Ticket", self.name, self.assigned_to, read=1, write=0, share=0)
+                frappe.log_error( title=f"Assigned after unassigning to shared {self.assigned_to}")
+
+
+        
+        if not previous_assigned_user and self.assigned_to:
+            # Add permissions for the new user
+            frappe.log_error( title=f"Assigned freshly to shared {self.assigned_to}")
+            frappe.share.add("Team Ticket", self.name, self.assigned_to, read=1, write=0, share=0)
+
+        frappe.db.commit()
+        
     def validate(self):
         self.update_task_due_status()
- 
+    
     def update_task_due_status(self):
         if self.task_status == 'Completed':
             # if not self.completion_date_time:
@@ -38,4 +69,6 @@ def check_overdue_tasks():
         # if doc.task_due_status != 'Over Due':
         doc.task_due_status = 'Over Due'
         doc.save()
+
+
 
